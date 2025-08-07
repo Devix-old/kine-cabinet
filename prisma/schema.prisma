@@ -1,0 +1,347 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://odoo:odoo@localhost:5432/kine_cabinet"
+}
+
+model User {
+  id                    String                @id @default(cuid())
+  email                 String                @unique
+  name                  String
+  role                  UserRole              @default(SECRETAIRE)
+  password              String
+  isActive              Boolean               @default(true)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  lastLogin             DateTime?
+  appointmentsCreated   Appointment[]         @relation("AppointmentCreator")
+  appointmentsAssigned  Appointment[]         @relation("AppointmentKine")
+  medicalRecordsCreated MedicalRecord[]       @relation("MedicalRecordCreator")
+  notesCreated          Note[]                @relation("NoteCreator")
+  notificationSettings  NotificationSettings?
+  treatmentsCreated     Treatment[]           @relation("TreatmentCreator")
+
+  @@map("users")
+}
+
+model Patient {
+  id              String          @id @default(cuid())
+  numeroDossier   String          @unique
+  nom             String
+  prenom          String
+  dateNaissance   DateTime
+  sexe            Sexe
+  telephone       String?
+  email           String?
+  adresse         String?
+  ville           String?
+  codePostal      String?
+  pays            String          @default("France")
+  profession      String?
+  medecinTraitant String?
+  antecedents     String?
+  allergies       String?
+  notesGenerales  String?
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  appointments    Appointment[]
+  documents       Document[]
+  medicalRecords  MedicalRecord[]
+  notes           Note[]
+  treatments      Treatment[]
+
+  @@map("patients")
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  date        DateTime
+  duree       Int               @default(30)
+  statut      AppointmentStatus @default(PLANIFIE)
+  type        AppointmentType   @default(CONSULTATION)
+  notes       String?
+  motif       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  patientId   String
+  kineId      String?
+  createdById String
+  salleId     String?
+  tarifId     String?
+  createdBy   User              @relation("AppointmentCreator", fields: [createdById], references: [id])
+  kine        User?             @relation("AppointmentKine", fields: [kineId], references: [id])
+  patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  salle       Room?             @relation(fields: [salleId], references: [id])
+  tarif       Tarif?            @relation(fields: [tarifId], references: [id])
+  sessions    Session[]
+
+  @@map("appointments")
+}
+
+model Room {
+  id           String        @id @default(cuid())
+  nom          String        @unique
+  description  String?
+  capacite     Int           @default(1)
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+
+  @@map("rooms")
+}
+
+model Treatment {
+  id          String          @id @default(cuid())
+  nom         String
+  description String?
+  objectifs   String?
+  duree       Int?
+  statut      TreatmentStatus @default(ACTIF)
+  dateDebut   DateTime        @default(now())
+  dateFin     DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  patientId   String
+  createdById String
+  notes       Note[]
+  sessions    Session[]
+  createdBy   User            @relation("TreatmentCreator", fields: [createdById], references: [id])
+  patient     Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("treatments")
+}
+
+model Session {
+  id            String       @id @default(cuid())
+  date          DateTime
+  duree         Int          @default(30)
+  type          SessionType  @default(SEANCE)
+  description   String?
+  techniques    String?
+  observations  String?
+  douleur       Int?
+  progression   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  treatmentId   String
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  treatment     Treatment    @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model MedicalRecord {
+  id          String            @id @default(cuid())
+  titre       String
+  description String?
+  date        DateTime          @default(now())
+  type        MedicalRecordType
+  contenu     String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  patientId   String
+  createdById String
+  documents   Document[]
+  createdBy   User              @relation("MedicalRecordCreator", fields: [createdById], references: [id])
+  patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("medical_records")
+}
+
+model Document {
+  id              String         @id @default(cuid())
+  nom             String
+  type            DocumentType
+  url             String
+  taille          Int?
+  extension       String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  patientId       String?
+  medicalRecordId String?
+  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  patient         Patient?       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model Note {
+  id          String     @id @default(cuid())
+  titre       String?
+  contenu     String
+  type        NoteType   @default(GENERALE)
+  isPrivee    Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  patientId   String?
+  treatmentId String?
+  createdById String
+  createdBy   User       @relation("NoteCreator", fields: [createdById], references: [id])
+  patient     Patient?   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  treatment   Treatment? @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
+
+model Tarif {
+  id           String        @id @default(cuid())
+  nom          String        @unique
+  description  String?
+  montant      Float
+  duree        Int?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+
+  @@map("tarifs")
+}
+
+model Statistic {
+  id       String   @id @default(cuid())
+  type     String
+  periode  String
+  valeur   Float
+  date     DateTime @default(now())
+  metadata Json?
+
+  @@unique([type, periode, date])
+  @@map("statistics")
+}
+
+model Settings {
+  id          String      @id @default(cuid())
+  key         String      @unique
+  value       String
+  type        SettingType @default(STRING)
+  description String?
+  category    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("settings")
+}
+
+model WorkingHours {
+  id             String   @id @default(cuid())
+  dayOfWeek      Int      @unique
+  startTime      String
+  endTime        String
+  isActive       Boolean  @default(true)
+  breakStartTime String?
+  breakEndTime   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("working_hours")
+}
+
+model NotificationSettings {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  appointmentReminders Boolean  @default(true)
+  emailNotifications   Boolean  @default(true)
+  pushNotifications    Boolean  @default(false)
+  reminderTime         Int      @default(24)
+  weeklyReports        Boolean  @default(true)
+  monthlyReports       Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_settings")
+}
+
+enum UserRole {
+  KINE
+  SECRETAIRE
+  ADMIN
+}
+
+enum Sexe {
+  HOMME
+  FEMME
+  AUTRE
+}
+
+enum AppointmentStatus {
+  PLANIFIE
+  CONFIRME
+  EN_COURS
+  TERMINE
+  ANNULE
+  ABSENT
+}
+
+enum AppointmentType {
+  CONSULTATION
+  SEANCE
+  SUIVI
+  URGENCE
+}
+
+enum TreatmentStatus {
+  ACTIF
+  TERMINE
+  INTERROMPU
+  EN_PAUSE
+}
+
+enum SessionType {
+  SEANCE
+  EVALUATION
+  SUIVI
+  REEDUCATION
+}
+
+enum MedicalRecordType {
+  DIAGNOSTIC
+  PRESCRIPTION
+  BILAN
+  COMPTE_RENDU
+  SUIVI
+  AUTRE
+}
+
+enum DocumentType {
+  PDF
+  IMAGE
+  SCAN
+  RADIO
+  ANALYSE
+  AUTRE
+}
+
+enum NoteType {
+  GENERALE
+  CLINIQUE
+  ADMINISTRATIVE
+  SUIVI
+  URGENCE
+}
+
+enum SettingType {
+  STRING
+  INTEGER
+  BOOLEAN
+  JSON
+}
+
+// Modèle de test pour comprendre les connexions Prisma
+model Test {
+  id          String   @id @default(cuid())
+  nom         String
+  description String
+  statut      String   @default("ACTIF")
+  valeur      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tests")
+}
