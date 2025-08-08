@@ -6,8 +6,12 @@ import { authOptions } from '@/lib/auth'
 // GET /api/appointments - Récupérer tous les rendez-vous
 export async function GET(request) {
   try {
-    // Force fresh database connection
-    await prisma.$connect()
+    console.log('🔍 Appointments API: GET request - Connexion automatique Prisma')
+    
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page')) || 1
@@ -23,6 +27,14 @@ export async function GET(request) {
 
     // Construire la requête de filtrage
     const where = {}
+
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role === 'SUPER_ADMIN') {
+      // Le super admin peut voir tous les rendez-vous
+    } else {
+      // Les autres utilisateurs ne voient que les rendez-vous de leur cabinet
+      where.cabinetId = session.user.cabinetId
+    }
 
     if (startDate && endDate) {
       // Filtrage par plage de dates (pour la vue semaine)
@@ -104,8 +116,7 @@ export async function GET(request) {
 
     const totalPages = Math.ceil(total / limit)
 
-    // Disconnect from database
-    await prisma.$disconnect()
+    console.log('✅ Appointments API: Données récupérées, count:', appointments.length)
 
     return NextResponse.json({
       appointments,
@@ -120,25 +131,18 @@ export async function GET(request) {
     })
 
   } catch (error) {
-    console.error('Erreur lors de la récupération des rendez-vous:', error)
+    console.error('❌ Appointments API: Erreur GET:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des rendez-vous' },
       { status: 500 }
     )
-  } finally {
-    try {
-      await prisma.$disconnect()
-    } catch (disconnectError) {
-      console.error('Error disconnecting from database:', disconnectError)
-    }
   }
 }
 
 // POST /api/appointments - Créer un nouveau rendez-vous
 export async function POST(request) {
   try {
-    // Force fresh database connection
-    await prisma.$connect()
+    console.log('🔍 Appointments API: POST request - Connexion automatique Prisma')
     
     const body = await request.json()
     
@@ -215,7 +219,8 @@ export async function POST(request) {
         kineId: body.kineId || null,
         salleId: body.salleId || null,
         tarifId: body.tarifId || null,
-        createdById: createdById
+        createdById: createdById,
+        cabinetId: session.user.cabinetId // Assigner au cabinet de l'utilisateur
       },
       include: {
         patient: {
@@ -241,22 +246,14 @@ export async function POST(request) {
       }
     })
 
-    // Disconnect from database
-    await prisma.$disconnect()
-
+    console.log('✅ Appointments API: Rendez-vous créé avec succès, ID:', appointment.id)
     return NextResponse.json(appointment, { status: 201 })
 
   } catch (error) {
-    console.error('Erreur lors de la création du rendez-vous:', error)
+    console.error('❌ Appointments API: Erreur POST:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la création du rendez-vous' },
       { status: 500 }
     )
-  } finally {
-    try {
-      await prisma.$disconnect()
-    } catch (disconnectError) {
-      console.error('Error disconnecting from database:', disconnectError)
-    }
   }
 }

@@ -73,7 +73,8 @@ export default function MedicalRecordsPage() {
       const params = new URLSearchParams({
         page: currentPage,
         limit: 10,
-        search: searchTerm
+        search: searchTerm,
+        _t: Date.now() // Ajout du paramètre anti-cache
       })
 
       const response = await get(`/api/medical-records?${params}`)
@@ -94,7 +95,7 @@ export default function MedicalRecordsPage() {
 
   const loadPatients = async () => {
     try {
-      const response = await get('/api/patients?limit=100')
+      const response = await get(`/api/patients?limit=100&_t=${Date.now()}`) // Ajout du paramètre anti-cache
       setPatients(response.patients)
     } catch (err) {
       showError('Erreur lors du chargement des patients')
@@ -103,7 +104,7 @@ export default function MedicalRecordsPage() {
 
   const loadNotes = async () => {
     try {
-      const response = await get('/api/notes?limit=20')
+      const response = await get(`/api/notes?limit=20&_t=${Date.now()}`) // Ajout du paramètre anti-cache
       setNotes(response.notes)
       setStats(prev => ({
         ...prev,
@@ -149,7 +150,12 @@ export default function MedicalRecordsPage() {
       success('Dossier médical créé avec succès')
       setShowCreateModal(false)
       resetRecordForm()
-      loadMedicalRecords()
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadMedicalRecords()
     } catch (err) {
       showError('Erreur lors de la création du dossier médical')
     }
@@ -164,7 +170,12 @@ export default function MedicalRecordsPage() {
       success('Dossier médical mis à jour avec succès')
       setShowEditModal(false)
       resetRecordForm()
-      loadMedicalRecords()
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadMedicalRecords()
     } catch (err) {
       showError('Erreur lors de la mise à jour du dossier médical')
     }
@@ -179,7 +190,12 @@ export default function MedicalRecordsPage() {
     try {
       await del(`/api/medical-records/${recordId}`)
       success('Dossier médical supprimé avec succès')
-      loadMedicalRecords()
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadMedicalRecords()
     } catch (err) {
       showError('Erreur lors de la suppression du dossier médical')
     }
@@ -194,9 +210,14 @@ export default function MedicalRecordsPage() {
       success('Note ajoutée avec succès')
       setShowNoteModal(false)
       resetNoteForm()
-      loadNotes()
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadNotes()
       if (selectedRecord) {
-        loadRecordDetails(selectedRecord.id)
+        await loadRecordDetails(selectedRecord.id)
       }
     } catch (err) {
       showError('Erreur lors de l\'ajout de la note')
@@ -212,7 +233,12 @@ export default function MedicalRecordsPage() {
     try {
       await del(`/api/notes/${noteId}`)
       success('Note supprimée avec succès')
-      loadNotes()
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadNotes()
       if (selectedRecord) {
         loadRecordDetails(selectedRecord.id)
       }
@@ -224,8 +250,8 @@ export default function MedicalRecordsPage() {
   // Load record details with notes
   const loadRecordDetails = async (recordId) => {
     try {
-      const record = await get(`/api/medical-records/${recordId}`)
-      const recordNotes = await get(`/api/notes?patientId=${record.patient.id}`)
+      const record = await get(`/api/medical-records/${recordId}?_t=${Date.now()}`) // Ajout du paramètre anti-cache
+      const recordNotes = await get(`/api/notes?patientId=${record.patient.id}&_t=${Date.now()}`) // Ajout du paramètre anti-cache
       setSelectedRecord({
         ...record,
         treatmentNotes: recordNotes.notes

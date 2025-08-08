@@ -1,13 +1,30 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 // GET /api/appointments/[id] - Récupérer un rendez-vous spécifique
 export async function GET(request, { params }) {
   try {
+    console.log(' Appointment Detail API: GET request - Connexion automatique Prisma')
+    
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+    
     const { id } = await params
 
-    const appointment = await prisma.appointment.findUnique({
-      where: { id },
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
+    const appointment = await prisma.appointment.findFirst({
+      where,
       include: {
         patient: {
           select: {
@@ -60,10 +77,11 @@ export async function GET(request, { params }) {
       )
     }
 
+    console.log('✅ Appointment Detail API: Rendez-vous récupéré, ID:', appointment.id)
     return NextResponse.json(appointment)
 
   } catch (error) {
-    console.error('Erreur lors de la récupération du rendez-vous:', error)
+    console.error('❌ Appointment Detail API: Erreur GET:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération du rendez-vous' },
       { status: 500 }
@@ -74,12 +92,27 @@ export async function GET(request, { params }) {
 // PUT /api/appointments/[id] - Mettre à jour un rendez-vous
 export async function PUT(request, { params }) {
   try {
+    console.log(' Appointment Detail API: PUT request - Connexion automatique Prisma')
+    
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+    
     const { id } = await params
     const body = await request.json()
 
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
     // Vérifier que le rendez-vous existe
-    const existingAppointment = await prisma.appointment.findUnique({
-      where: { id }
+    const existingAppointment = await prisma.appointment.findFirst({
+      where
     })
 
     if (!existingAppointment) {
@@ -121,6 +154,41 @@ export async function PUT(request, { params }) {
       }
     }
 
+    // Si le statut passe à TERMINE, créer automatiquement une facture
+    if (body.statut === 'TERMINE') {
+      try {
+        const appointment = await prisma.appointment.findUnique({
+          where: { id },
+          include: { tarif: true }
+        })
+        
+        if (appointment && appointment.tarif) {
+          // Vérifier si une facture existe déjà pour ce rendez-vous
+          const existingInvoice = await prisma.invoice.findFirst({
+            where: { appointmentId: id }
+          })
+          
+          if (!existingInvoice) {
+            // Créer automatiquement la facture
+            await prisma.invoice.create({
+              data: {
+                appointmentId: id,
+                patientId: appointment.patientId,
+                montant: appointment.tarif.montant,
+                statut: 'EN_ATTENTE',
+                dateEmission: new Date(),
+                dateEcheance: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // +30 jours
+              }
+            })
+            console.log('✅ Facture créée automatiquement pour le RDV:', id)
+          }
+        }
+      } catch (invoiceError) {
+        console.error('⚠️ Erreur lors de la création automatique de facture:', invoiceError)
+        // Ne pas faire échouer la mise à jour du RDV si la facture échoue
+      }
+    }
+
     // Mettre à jour le rendez-vous
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
@@ -157,14 +225,22 @@ export async function PUT(request, { params }) {
             id: true,
             nom: true
           }
+        },
+        tarif: {
+          select: {
+            id: true,
+            nom: true,
+            montant: true
+          }
         }
       }
     })
 
+    console.log('✅ Appointment Detail API: Rendez-vous mis à jour, ID:', updatedAppointment.id)
     return NextResponse.json(updatedAppointment)
 
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du rendez-vous:', error)
+    console.error('❌ Appointment Detail API: Erreur PUT:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour du rendez-vous' },
       { status: 500 }
@@ -175,11 +251,26 @@ export async function PUT(request, { params }) {
 // DELETE /api/appointments/[id] - Supprimer un rendez-vous
 export async function DELETE(request, { params }) {
   try {
+    console.log(' Appointment Detail API: DELETE request - Connexion automatique Prisma')
+    
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+    
     const { id } = await params
 
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
     // Vérifier que le rendez-vous existe
-    const existingAppointment = await prisma.appointment.findUnique({
-      where: { id }
+    const existingAppointment = await prisma.appointment.findFirst({
+      where
     })
 
     if (!existingAppointment) {
@@ -194,10 +285,11 @@ export async function DELETE(request, { params }) {
       where: { id }
     })
 
+    console.log('✅ Appointment Detail API: Rendez-vous supprimé, ID:', id)
     return NextResponse.json({ message: 'Rendez-vous supprimé avec succès' })
 
   } catch (error) {
-    console.error('Erreur lors de la suppression du rendez-vous:', error)
+    console.error('❌ Appointment Detail API: Erreur DELETE:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la suppression du rendez-vous' },
       { status: 500 }

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { signIn, useSession } from 'next-auth/react'
+import { signIn, useSession, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useToastContext } from '@/contexts/ToastContext'
-import { Eye, EyeOff, Loader2, LogIn } from 'lucide-react'
+import { Eye, EyeOff, Loader2, LogIn, User, LogOut } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -18,9 +18,10 @@ export default function LoginPage() {
   // Rediriger si déjà connecté
   useEffect(() => {
     if (status === 'authenticated') {
-      router.push('/')
+      // Forcer le refresh complet pour éviter les problèmes de cache
+      window.location.href = '/'
     }
-  }, [status, router])
+  }, [status])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -30,14 +31,15 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false
+        redirect: false,
+        callbackUrl: '/'
       })
 
       if (result?.error) {
         showError('Email ou mot de passe incorrect')
       } else {
-        router.push('/')
-        router.refresh()
+        // Forcer le refresh complet pour éviter les problèmes de cache
+        window.location.href = '/'
       }
     } catch (error) {
       showError('Erreur lors de la connexion')

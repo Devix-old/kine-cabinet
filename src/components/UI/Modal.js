@@ -9,7 +9,8 @@ const Modal = ({
   title, 
   children, 
   size = 'md',
-  showCloseButton = true 
+  showCloseButton = true,
+  closeOnBackdropClick = false // Nouvelle option pour empêcher la fermeture en cliquant à l'extérieur
 }) => {
   // Handle escape key
   useEffect(() => {
@@ -25,7 +26,7 @@ const Modal = ({
 
   // Handle backdrop click
   const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
+    if (closeOnBackdropClick && e.target === e.currentTarget) {
       onClose()
     }
   }

@@ -55,18 +55,12 @@ export async function GET(request, { params }) {
   }
 }
 
-// PUT - Modifier un utilisateur
+// PUT /api/users/[id] - Modifier un utilisateur
 export async function PUT(request, { params }) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
-
     const { id } = params
     const body = await request.json()
-    const { email, name, role, password, isActive } = body
-
+    
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findUnique({
       where: { id }
@@ -79,49 +73,58 @@ export async function PUT(request, { params }) {
       )
     }
 
-    // Empêcher la modification de son propre compte par sécurité
-    if (id === session.user.id) {
+    // Validation des données
+    if (!body.name || !body.email) {
       return NextResponse.json(
-        { error: 'Vous ne pouvez pas modifier votre propre compte' },
+        { error: 'Nom et email requis' },
         { status: 400 }
       )
     }
 
-    // Vérifier l'unicité de l'email si modifié
-    if (email && email !== existingUser.email) {
-      const emailExists = await prisma.user.findUnique({
-        where: { email }
+    // Vérifier si l'email est déjà utilisé par un autre utilisateur
+    if (body.email !== existingUser.email) {
+      const emailExists = await prisma.user.findFirst({
+        where: { 
+          email: body.email,
+          id: { not: id }
+        }
       })
 
       if (emailExists) {
         return NextResponse.json(
-          { error: 'Cet email est déjà utilisé' },
-          { status: 400 }
+          { error: 'Cet email est déjà utilisé par un autre utilisateur' },
+          { status: 409 }
         )
       }
     }
 
     // Préparer les données de mise à jour
     const updateData = {
-      ...(email && { email }),
-      ...(name && { name }),
-      ...(role && { role }),
-      ...(typeof isActive === 'boolean' && { isActive })
+      name: body.name,
+      email: body.email,
+      role: body.role || existingUser.role,
+      isActive: body.isActive !== undefined ? body.isActive : existingUser.isActive
     }
 
-    // Hasher le nouveau mot de passe si fourni
-    if (password) {
-      updateData.password = await bcrypt.hash(password, 10)
+    // Hasher le mot de passe seulement s'il est fourni
+    if (body.password && body.password.trim() !== '') {
+      if (body.password.length < 6) {
+        return NextResponse.json(
+          { error: 'Le mot de passe doit contenir au moins 6 caractères' },
+          { status: 400 }
+        )
+      }
+      updateData.password = await bcrypt.hash(body.password, 10)
     }
 
     // Mettre à jour l'utilisateur
-    const user = await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id },
       data: updateData,
       select: {
         id: true,
-        email: true,
         name: true,
+        email: true,
         role: true,
         isActive: true,
         createdAt: true,
@@ -129,12 +132,12 @@ export async function PUT(request, { params }) {
       }
     })
 
-    return NextResponse.json({ user })
+    return NextResponse.json(updatedUser)
 
   } catch (error) {
     console.error('Erreur lors de la modification de l\'utilisateur:', error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: 'Erreur lors de la modification de l\'utilisateur' },
       { status: 500 }
     )
   }

@@ -4,7 +4,7 @@ import { canAccessPage, canPerformAction } from '@/lib/utils'
 import { useMemo, useCallback } from 'react'
 
 export function useAuth() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -13,99 +13,48 @@ export function useAuth() {
 
   const user = session?.user
 
-  // Memoize role permissions to avoid recalculating on every render
-  const rolePermissions = useMemo(() => ({
-    ADMIN: ['/', '/rendez-vous', '/patients', '/dossiers', '/traitements', '/statistiques', '/parametres', '/utilisateurs'],
-    KINE: ['/', '/rendez-vous', '/patients', '/dossiers', '/traitements', '/statistiques'],
-    SECRETAIRE: ['/', '/rendez-vous', '/patients', '/dossiers']
-  }), [])
+  // Forcer le refresh de la session à chaque changement de page
+  const refreshSession = useCallback(async () => {
+    if (isAuthenticated) {
+      await update()
+    }
+  }, [isAuthenticated, update])
 
-  const hasRole = useCallback((role) => {
-    return user?.role === role
-  }, [user?.role])
-
-  const hasAnyRole = useCallback((roles) => {
-    return roles.includes(user?.role)
-  }, [user?.role])
-
-  const isAdmin = useCallback(() => hasRole('ADMIN'), [hasRole])
-  const isKine = useCallback(() => hasRole('KINE'), [hasRole])
-  const isSecretaire = useCallback(() => hasRole('SECRETAIRE'), [hasRole])
-
-  // Memoize canAccess function
-  const canAccess = useCallback((page) => {
-    if (!user?.role) return false
-    
-    const allowedPages = rolePermissions[user.role] || []
-    return allowedPages.includes(page)
-  }, [user?.role, rolePermissions])
+  // Vérifier les permissions
+  const canAccess = useMemo(() => {
+    if (!user) return false
+    return canAccessPage(user.role, pathname)
+  }, [user, pathname])
 
   const canPerform = useCallback((resource, action) => {
-    return canPerformAction(user?.role, resource, action)
-  }, [user?.role])
+    if (!user) return false
+    return canPerformAction(user.role, resource, action)
+  }, [user])
 
-  const requirePageAccess = useCallback((page, callback) => {
-    if (!requireAuth()) return false
-    
-    if (!canAccess(page)) {
-      router.push('/')
-      return false
-    }
-    
-    return callback ? callback() : true
-  }, [canAccess, router])
+  // Vérifier si l'utilisateur a un rôle spécifique
+  const hasRole = useCallback((requiredRole) => {
+    if (!user) return false
+    return user.role === requiredRole
+  }, [user])
 
-  const requireAction = useCallback((resource, action, callback) => {
-    if (!requireAuth()) return false
-    
-    if (!canPerform(resource, action)) {
-      router.push('/')
-      return false
-    }
-    
-    return callback ? callback() : true
-  }, [canPerform, router])
-
+  // Logout avec nettoyage complet
   const logout = useCallback(async () => {
-    await signOut({ redirect: false })
-    router.push('/auth/login')
-  }, [router])
-
-  const requireAuth = useCallback((callback) => {
-    if (!isAuthenticated && !isLoading) {
-      router.push('/auth/login')
-      return false
-    }
-    return callback ? callback() : true
-  }, [isAuthenticated, isLoading, router])
-
-  const requireRole = useCallback((role, callback) => {
-    if (!requireAuth()) return false
-    
-    if (!hasRole(role)) {
-      router.push('/')
-      return false
-    }
-    
-    return callback ? callback() : true
-  }, [hasRole, requireAuth, router])
+    await signOut({ 
+      redirect: false,
+      callbackUrl: '/auth/login'
+    })
+    // Forcer le refresh de la page
+    window.location.href = '/auth/login'
+  }, [])
 
   return {
     user,
-    session,
     isAuthenticated,
     isLoading,
-    hasRole,
-    hasAnyRole,
-    isAdmin,
-    isKine,
-    isSecretaire,
     canAccess,
     canPerform,
-    requirePageAccess,
-    requireAction,
+    hasRole,
     logout,
-    requireAuth,
-    requireRole
+    refreshSession
   }
 }

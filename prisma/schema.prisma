@@ -7,9 +7,40 @@ datasource db {
   url      = "postgresql://odoo:odoo@localhost:5432/kine_cabinet"
 }
 
+model Cabinet {
+  id              String   @id @default(cuid())
+  nom             String   @unique
+  adresse         String?
+  telephone       String?
+  email           String?
+  siret           String?  @unique
+  logo            String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  users           User[]
+  patients        Patient[]
+  appointments    Appointment[]
+  rooms           Room[]
+  treatments      Treatment[]
+  sessions        Session[]
+  medicalRecords  MedicalRecord[]
+  documents       Document[]
+  notes           Note[]
+  tarifs          Tarif[]
+  invoices        Invoice[]
+  settings        Settings[]
+  workingHours    WorkingHours[]
+  notificationSettings NotificationSettings[]
+
+  @@map("cabinets")
+}
+
 model User {
   id                    String                @id @default(cuid())
-  email                 String                @unique
+  email                 String
   name                  String
   role                  UserRole              @default(SECRETAIRE)
   password              String
@@ -17,6 +48,12 @@ model User {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   lastLogin             DateTime?
+  
+  // Multi-tenant (null pour SUPER_ADMIN)
+  cabinetId             String?
+  cabinet               Cabinet?              @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   appointmentsCreated   Appointment[]         @relation("AppointmentCreator")
   appointmentsAssigned  Appointment[]         @relation("AppointmentKine")
   medicalRecordsCreated MedicalRecord[]       @relation("MedicalRecordCreator")
@@ -24,12 +61,13 @@ model User {
   notificationSettings  NotificationSettings?
   treatmentsCreated     Treatment[]           @relation("TreatmentCreator")
 
+  @@unique([email, cabinetId])
   @@map("users")
 }
 
 model Patient {
   id              String          @id @default(cuid())
-  numeroDossier   String          @unique
+  numeroDossier   String
   nom             String
   prenom          String
   dateNaissance   DateTime
@@ -48,12 +86,20 @@ model Patient {
   isActive        Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  
+  // Multi-tenant
+  cabinetId       String
+  cabinet         Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   appointments    Appointment[]
   documents       Document[]
   medicalRecords  MedicalRecord[]
   notes           Note[]
   treatments      Treatment[]
+  invoices        Invoice[]
 
+  @@unique([numeroDossier, cabinetId])
   @@map("patients")
 }
 
@@ -72,26 +118,40 @@ model Appointment {
   createdById String
   salleId     String?
   tarifId     String?
+  
+  // Multi-tenant
+  cabinetId   String
+  cabinet     Cabinet           @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   createdBy   User              @relation("AppointmentCreator", fields: [createdById], references: [id])
   kine        User?             @relation("AppointmentKine", fields: [kineId], references: [id])
   patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
   salle       Room?             @relation(fields: [salleId], references: [id])
   tarif       Tarif?            @relation(fields: [tarifId], references: [id])
   sessions    Session[]
+  invoice     Invoice?
 
   @@map("appointments")
 }
 
 model Room {
   id           String        @id @default(cuid())
-  nom          String        @unique
+  nom          String
   description  String?
   capacite     Int           @default(1)
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  
+  // Multi-tenant
+  cabinetId    String
+  cabinet      Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   appointments Appointment[]
 
+  @@unique([nom, cabinetId])
   @@map("rooms")
 }
 
@@ -108,6 +168,12 @@ model Treatment {
   updatedAt   DateTime        @updatedAt
   patientId   String
   createdById String
+  
+  // Multi-tenant
+  cabinetId   String
+  cabinet     Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   notes       Note[]
   sessions    Session[]
   createdBy   User            @relation("TreatmentCreator", fields: [createdById], references: [id])
@@ -130,6 +196,12 @@ model Session {
   updatedAt     DateTime     @updatedAt
   treatmentId   String
   appointmentId String?
+  
+  // Multi-tenant
+  cabinetId     String
+  cabinet       Cabinet      @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   appointment   Appointment? @relation(fields: [appointmentId], references: [id])
   treatment     Treatment    @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
 
@@ -147,6 +219,12 @@ model MedicalRecord {
   updatedAt   DateTime          @updatedAt
   patientId   String
   createdById String
+  
+  // Multi-tenant
+  cabinetId   String
+  cabinet     Cabinet           @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   documents   Document[]
   createdBy   User              @relation("MedicalRecordCreator", fields: [createdById], references: [id])
   patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
@@ -165,6 +243,12 @@ model Document {
   updatedAt       DateTime       @updatedAt
   patientId       String?
   medicalRecordId String?
+  
+  // Multi-tenant
+  cabinetId       String
+  cabinet         Cabinet        @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
   patient         Patient?       @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
@@ -182,6 +266,12 @@ model Note {
   patientId   String?
   treatmentId String?
   createdById String
+  
+  // Multi-tenant
+  cabinetId   String
+  cabinet     Cabinet    @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   createdBy   User       @relation("NoteCreator", fields: [createdById], references: [id])
   patient     Patient?   @relation(fields: [patientId], references: [id], onDelete: Cascade)
   treatment   Treatment? @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
@@ -191,15 +281,22 @@ model Note {
 
 model Tarif {
   id           String        @id @default(cuid())
-  nom          String        @unique
+  nom          String
   description  String?
   montant      Float
   duree        Int?
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  
+  // Multi-tenant
+  cabinetId    String
+  cabinet      Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   appointments Appointment[]
 
+  @@unique([nom, cabinetId])
   @@map("tarifs")
 }
 
@@ -217,20 +314,25 @@ model Statistic {
 
 model Settings {
   id          String      @id @default(cuid())
-  key         String      @unique
+  key         String
   value       String
   type        SettingType @default(STRING)
   description String?
   category    String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  
+  // Multi-tenant
+  cabinetId   String
+  cabinet     Cabinet     @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
 
+  @@unique([key, cabinetId])
   @@map("settings")
 }
 
 model WorkingHours {
   id             String   @id @default(cuid())
-  dayOfWeek      Int      @unique
+  dayOfWeek      Int
   startTime      String
   endTime        String
   isActive       Boolean  @default(true)
@@ -238,7 +340,12 @@ model WorkingHours {
   breakEndTime   String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  
+  // Multi-tenant
+  cabinetId      String
+  cabinet        Cabinet  @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
 
+  @@unique([dayOfWeek, cabinetId])
   @@map("working_hours")
 }
 
@@ -253,15 +360,22 @@ model NotificationSettings {
   monthlyReports       Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+  
+  // Multi-tenant
+  cabinetId            String
+  cabinet              Cabinet  @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_settings")
 }
 
 enum UserRole {
+  SUPER_ADMIN
+  ADMIN
   KINE
   SECRETAIRE
-  ADMIN
 }
 
 enum Sexe {
@@ -344,4 +458,38 @@ model Test {
   updatedAt   DateTime @updatedAt
 
   @@map("tests")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  numero        String
+  montant       Float
+  statut        InvoiceStatus @default(EN_ATTENTE)
+  dateEmission  DateTime      @default(now())
+  dateEcheance  DateTime
+  datePaiement  DateTime?
+  modePaiement  String?
+  notes         String?
+  appointmentId String        @unique
+  patientId     String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Multi-tenant
+  cabinetId     String
+  cabinet       Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  appointment   Appointment   @relation(fields: [appointmentId], references: [id])
+  patient       Patient       @relation(fields: [patientId], references: [id])
+
+  @@unique([numero, cabinetId])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  EN_ATTENTE
+  PAYEE
+  EN_RETARD
+  ANNULEE
 }

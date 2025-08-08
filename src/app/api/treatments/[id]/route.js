@@ -16,8 +16,16 @@ export async function GET(request, { params }) {
 
     const { id } = params
 
-    const treatment = await prisma.treatment.findUnique({
-      where: { id },
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
+    const treatment = await prisma.treatment.findFirst({
+      where,
       include: {
         patient: {
           select: {
@@ -100,9 +108,17 @@ export async function PUT(request, { params }) {
     const body = await request.json()
     const { nom, description, objectifs, duree, statut, dateDebut, dateFin } = body
 
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
     // Vérifier que le traitement existe
-    const existingTreatment = await prisma.treatment.findUnique({
-      where: { id }
+    const existingTreatment = await prisma.treatment.findFirst({
+      where
     })
 
     if (!existingTreatment) {
@@ -176,9 +192,17 @@ export async function DELETE(request, { params }) {
 
     const { id } = params
 
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
     // Vérifier que le traitement existe
-    const existingTreatment = await prisma.treatment.findUnique({
-      where: { id },
+    const existingTreatment = await prisma.treatment.findFirst({
+      where,
       include: {
         _count: {
           select: {

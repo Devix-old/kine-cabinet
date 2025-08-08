@@ -114,7 +114,7 @@ export default function TreatmentsPage() {
   const loadData = async () => {
     try {
       const statusParam = selectedStatus !== 'all' ? `&status=${selectedStatus}` : ''
-      const response = await get(`/api/treatments?limit=100${statusParam}`)
+      const response = await get(`/api/treatments?limit=100${statusParam}&_t=${Date.now()}`) // Ajout du paramètre anti-cache
       setTreatments(response.treatments || [])
       setStats(response.stats || {})
     } catch (error) {
@@ -125,7 +125,7 @@ export default function TreatmentsPage() {
 
   const loadPatients = async () => {
     try {
-      const response = await get('/api/patients?limit=100&status=active')
+      const response = await get(`/api/patients?limit=100&status=active&_t=${Date.now()}`) // Ajout du paramètre anti-cache
       setPatients(response.patients || [])
     } catch (error) {
       console.error('Erreur lors du chargement des patients:', error)
@@ -208,7 +208,12 @@ export default function TreatmentsPage() {
       success('Traitement créé avec succès')
       setShowNewTreatmentModal(false)
       treatmentForm.reset()
-      loadData()
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadData()
     } catch (error) {
       console.error('Erreur lors de la création du traitement:', error)
       showError('Erreur lors de la création du traitement')
@@ -222,7 +227,12 @@ export default function TreatmentsPage() {
       setShowSessionModal(false)
       sessionForm.reset()
       setSelectedTreatmentForSession(null)
-      loadData()
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadData()
     } catch (error) {
       console.error('Erreur lors de la création de la séance:', error)
       showError('Erreur lors de la création de la séance')

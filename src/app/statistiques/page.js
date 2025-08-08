@@ -39,7 +39,7 @@ export default function StatisticsPage() {
 
   const loadStatistics = async () => {
     try {
-      const response = await get(`/api/statistics?period=${selectedPeriod}`)
+      const response = await get(`/api/statistics?period=${selectedPeriod}&_t=${Date.now()}`) // Ajout du paramètre anti-cache
       setStatistics(response)
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error)

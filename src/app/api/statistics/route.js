@@ -80,7 +80,8 @@ export async function GET(request) {
       prisma.appointment.findMany({
         where: {
           date: { gte: startDate, lte: endDate },
-          statut: { in: ['TERMINE', 'CONFIRME', 'PLANIFIE'] }
+          statut: { in: ['TERMINE', 'CONFIRME', 'PLANIFIE'] },
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
         },
         include: {
           patient: { select: { id: true } },
@@ -92,7 +93,8 @@ export async function GET(request) {
       prisma.appointment.findMany({
         where: {
           date: { gte: previousStartDate, lte: previousEndDate },
-          statut: { in: ['TERMINE', 'CONFIRME', 'PLANIFIE'] }
+          statut: { in: ['TERMINE', 'CONFIRME', 'PLANIFIE'] },
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
         },
         include: {
           patient: { select: { id: true } },
@@ -103,7 +105,8 @@ export async function GET(request) {
       // FIXED: Current period sessions WITH appointment and tarif data
       prisma.session.findMany({
         where: {
-          date: { gte: startDate, lte: endDate }
+          date: { gte: startDate, lte: endDate },
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
         },
         include: {
           treatment: {
@@ -122,7 +125,8 @@ export async function GET(request) {
       // FIXED: Previous period sessions WITH appointment and tarif data
       prisma.session.findMany({
         where: {
-          date: { gte: previousStartDate, lte: previousEndDate }
+          date: { gte: previousStartDate, lte: previousEndDate },
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
         },
         include: {
           appointment: {
@@ -135,6 +139,9 @@ export async function GET(request) {
 
       // All treatments for success rate calculation
       prisma.treatment.findMany({
+        where: {
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
+        },
         include: {
           sessions: { select: { id: true } },
           _count: { select: { sessions: true } }
@@ -148,7 +155,8 @@ export async function GET(request) {
             gte: new Date(now.getFullYear() - 1, now.getMonth(), 1),
             lte: endDate
           },
-          statut: 'TERMINE'
+          statut: 'TERMINE',
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
         },
         include: {
           patient: { select: { id: true } },
@@ -162,7 +170,8 @@ export async function GET(request) {
           date: { 
             gte: new Date(now.getFullYear() - 1, now.getMonth(), 1),
             lte: endDate
-          }
+          },
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
         },
         include: {
           treatment: {
@@ -184,7 +193,8 @@ export async function GET(request) {
           date: { 
             gte: new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()),
             lte: new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() + 6, 23, 59, 59)
-          }
+          },
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
         },
         include: {
           patient: { select: { id: true } }
@@ -194,6 +204,9 @@ export async function GET(request) {
       // Treatment type distribution
       prisma.treatment.groupBy({
         by: ['nom'],
+        where: {
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
+        },
         _count: { nom: true },
         orderBy: { _count: { nom: 'desc' } },
         take: 10
@@ -201,6 +214,9 @@ export async function GET(request) {
 
       // All patients for new patients calculation
       prisma.patient.findMany({
+        where: {
+          ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
+        },
         select: { id: true, createdAt: true }
       })
     ])

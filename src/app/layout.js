@@ -1,7 +1,7 @@
 import './globals.css'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { Providers } from './providers'
-import PerformanceMonitor from '@/components/UI/PerformanceMonitor'
+// import PerformanceMonitor from '@/components/UI/PerformanceMonitor' // Temporairement désactivé
 
 export const metadata = {
   title: 'Cabinet de Kinésithérapie',
@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <ToastProvider>
             {children}
-            <PerformanceMonitor />
+            {/* <PerformanceMonitor /> */} {/* Temporairement désactivé */}
           </ToastProvider>
         </Providers>
       </body>

@@ -89,6 +89,7 @@ export const PERMISSIONS = {
       '/dossiers',
       '/traitements',
       '/statistiques',
+      '/utilisateurs',
       '/parametres'
     ],
     KINE: [
@@ -114,6 +115,7 @@ export const PERMISSIONS = {
       patients: ['create', 'read', 'update', 'delete'],
       treatments: ['create', 'read', 'update', 'delete'],
       medicalRecords: ['create', 'read', 'update', 'delete'],
+      users: ['create', 'read', 'update', 'delete'],
       settings: ['read', 'update']
     },
     KINE: {

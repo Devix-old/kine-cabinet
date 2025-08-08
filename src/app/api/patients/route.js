@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateNumeroDossier } from '@/lib/utils'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 // GET /api/patients - Récupérer tous les patients
 export async function GET(request) {
   try {
     console.log('🔍 Patients API: GET request - Connexion automatique Prisma')
+    
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page')) || 1
@@ -29,6 +36,14 @@ export async function GET(request) {
     // Construire la requête de recherche
     const where = {
       isActive: status === 'all' ? undefined : status === 'active'
+    }
+
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role === 'SUPER_ADMIN') {
+      // Le super admin peut voir tous les patients
+    } else {
+      // Les autres utilisateurs ne voient que les patients de leur cabinet
+      where.cabinetId = session.user.cabinetId
     }
 
     // Search in multiple fields
@@ -228,6 +243,11 @@ export async function POST(request) {
   try {
     console.log(' Patients API: POST request - Connexion automatique Prisma')
     
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
     const body = await request.json()
     
     // Validation des données requises
@@ -238,13 +258,24 @@ export async function POST(request) {
       )
     }
 
-    // Générer un numéro de dossier unique
+    // Vérifier que l'utilisateur a un cabinetId (sauf pour SUPER_ADMIN)
+    if (session.user.role !== 'SUPER_ADMIN' && !session.user.cabinetId) {
+      return NextResponse.json(
+        { error: 'Utilisateur non associé à un cabinet' },
+        { status: 400 }
+      )
+    }
+
+    // Générer un numéro de dossier unique dans le cabinet
     let numeroDossier
     let isUnique = false
     while (!isUnique) {
       numeroDossier = generateNumeroDossier()
-      const existing = await prisma.patient.findUnique({
-        where: { numeroDossier }
+      const existing = await prisma.patient.findFirst({
+        where: { 
+          numeroDossier,
+          cabinetId: session.user.cabinetId
+        }
       })
       if (!existing) {
         isUnique = true
@@ -269,7 +300,8 @@ export async function POST(request) {
         medecinTraitant: body.medecinTraitant,
         antecedents: body.antecedents,
         allergies: body.allergies,
-        notesGenerales: body.notesGenerales
+        notesGenerales: body.notesGenerales,
+        cabinetId: session.user.cabinetId // Assigner au cabinet de l'utilisateur
       }
     })
 

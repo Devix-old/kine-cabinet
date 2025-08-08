@@ -74,16 +74,20 @@ export default function UsersPage() {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '10',
+        _t: Date.now(), // Ajout du paramètre anti-cache
         ...(searchTerm && { search: searchTerm }),
         ...(selectedStatus !== 'all' && { status: selectedStatus })
       })
 
       const response = await get(`/api/users?${params}`)
-      setUsers(response.users)
-      setPagination(response.pagination)
+      setUsers(response.users || [])
+      setPagination(response.pagination || {})
       setCurrentPage(page)
     } catch (error) {
+      console.error('Erreur lors du chargement des utilisateurs:', error)
       showError('Erreur lors du chargement des utilisateurs')
+      setUsers([])
+      setPagination({})
     }
   }
 
@@ -156,9 +160,26 @@ export default function UsersPage() {
       success('Utilisateur créé avec succès')
       setShowAddModal(false)
       resetForm()
-      loadUsers(currentPage)
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadUsers(currentPage)
     } catch (error) {
-      showError(error.response?.data?.error || 'Erreur lors de la création')
+      // Gestion spécifique des erreurs de doublon
+      if (error.response?.data?.error) {
+        const errorMessage = error.response.data.error
+        if (errorMessage.includes('email') || errorMessage.includes('Email')) {
+          showError('Cette adresse email est déjà utilisée par un autre utilisateur')
+        } else if (errorMessage.includes('name') || errorMessage.includes('nom')) {
+          showError('Ce nom d\'utilisateur est déjà utilisé par un autre utilisateur')
+        } else {
+          showError(errorMessage)
+        }
+      } else {
+        showError('Erreur lors de la création de l\'utilisateur')
+      }
     }
   }
 
@@ -195,9 +216,26 @@ export default function UsersPage() {
       setShowEditModal(false)
       resetForm()
       setSelectedUser(null)
-      loadUsers(currentPage)
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadUsers(currentPage)
     } catch (error) {
-      showError(error.response?.data?.error || 'Erreur lors de la modification')
+      // Gestion spécifique des erreurs de doublon
+      if (error.response?.data?.error) {
+        const errorMessage = error.response.data.error
+        if (errorMessage.includes('email') || errorMessage.includes('Email')) {
+          showError('Cette adresse email est déjà utilisée par un autre utilisateur')
+        } else if (errorMessage.includes('name') || errorMessage.includes('nom')) {
+          showError('Ce nom d\'utilisateur est déjà utilisé par un autre utilisateur')
+        } else {
+          showError(errorMessage)
+        }
+      } else {
+        showError('Erreur lors de la modification de l\'utilisateur')
+      }
     }
   }
 
@@ -210,7 +248,12 @@ export default function UsersPage() {
     try {
       await del(`/api/users/${user.id}`)
       success('Utilisateur désactivé avec succès')
-      loadUsers(currentPage)
+      
+      // Small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Reload data
+      await loadUsers(currentPage)
     } catch (error) {
       showError(error.response?.data?.error || 'Erreur lors de la suppression')
     }
@@ -697,6 +740,7 @@ export default function UsersPage() {
           }}
           title="Créer un nouvel utilisateur"
           size="md"
+          closeOnBackdropClick={false}
         >
           <form onSubmit={handleCreateUser} className="space-y-4">
             <div>
@@ -842,6 +886,7 @@ export default function UsersPage() {
           }}
           title={`Modifier l'utilisateur: ${selectedUser?.name}`}
           size="md"
+          closeOnBackdropClick={false}
         >
           <form onSubmit={handleEditUser} className="space-y-4">
             <div>
@@ -983,6 +1028,7 @@ export default function UsersPage() {
           onClose={() => setShowStatsDashboard(false)}
           title="Statistiques des Utilisateurs"
           size="xl"
+          closeOnBackdropClick={false}
         >
           {statsLoading ? (
             <div className="p-8 text-center">

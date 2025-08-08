@@ -16,8 +16,16 @@ export async function GET(request, { params }) {
 
     const { id } = params
 
-    const sessionData = await prisma.session.findUnique({
-      where: { id },
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
+    const sessionData = await prisma.session.findFirst({
+      where,
       include: {
         treatment: {
           include: {
@@ -83,9 +91,17 @@ export async function PUT(request, { params }) {
       progression 
     } = body
 
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
     // Vérifier que la session existe
-    const existingSession = await prisma.session.findUnique({
-      where: { id }
+    const existingSession = await prisma.session.findFirst({
+      where
     })
 
     if (!existingSession) {
@@ -155,9 +171,17 @@ export async function DELETE(request, { params }) {
 
     const { id } = params
 
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
     // Vérifier que la session existe
-    const existingSession = await prisma.session.findUnique({
-      where: { id }
+    const existingSession = await prisma.session.findFirst({
+      where
     })
 
     if (!existingSession) {

@@ -55,7 +55,8 @@ export async function GET(request) {
       const [appointments, sessions] = await Promise.all([
         prisma.appointment.findMany({
           where: {
-            date: { gte: startDate, lte: endDate }
+            date: { gte: startDate, lte: endDate },
+            ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
           },
           include: {
             patient: {
@@ -76,7 +77,8 @@ export async function GET(request) {
 
         prisma.session.findMany({
           where: {
-            date: { gte: startDate, lte: endDate }
+            date: { gte: startDate, lte: endDate },
+            ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
           },
           include: {
             treatment: {
@@ -141,7 +143,8 @@ export async function GET(request) {
         prisma.appointment.findMany({
           where: {
             date: { gte: startDate, lte: endDate },
-            statut: { in: ['TERMINE', 'CONFIRME', 'PLANIFIE'] }
+            statut: { in: ['TERMINE', 'CONFIRME', 'PLANIFIE'] },
+            ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
           },
           include: {
             patient: { select: { id: true } },
@@ -151,11 +154,15 @@ export async function GET(request) {
 
         prisma.session.findMany({
           where: {
-            date: { gte: startDate, lte: endDate }
+            date: { gte: startDate, lte: endDate },
+            ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
           }
         }),
 
         prisma.treatment.findMany({
+          where: {
+            ...(session.user.role !== 'SUPER_ADMIN' && { cabinetId: session.user.cabinetId })
+          },
           include: {
             _count: { select: { sessions: true } }
           }

@@ -20,6 +20,15 @@ export async function GET(request) {
     const patientId = searchParams.get('patientId')
 
     const where = {}
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role === 'SUPER_ADMIN') {
+      // Le super admin peut voir toutes les sessions
+    } else {
+      // Les autres utilisateurs ne voient que les sessions de leur cabinet
+      where.cabinetId = session.user.cabinetId
+    }
+    
     if (treatmentId) {
       where.treatmentId = treatmentId
     }
@@ -136,7 +145,8 @@ export async function POST(request) {
         observations,
         douleur: douleur ? parseInt(douleur) : null,
         progression,
-        appointmentId: appointmentId || null
+        appointmentId: appointmentId || null,
+        cabinetId: session.user.cabinetId // Assigner au cabinet de l'utilisateur
       },
       include: {
         treatment: {

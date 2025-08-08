@@ -16,8 +16,16 @@ export async function GET(request, { params }) {
 
     const { id } = params
 
-    const note = await prisma.note.findUnique({
-      where: { id },
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
+    const note = await prisma.note.findFirst({
+      where,
       include: {
         patient: {
           select: {
@@ -80,9 +88,17 @@ export async function PUT(request, { params }) {
     const body = await request.json()
     const { titre, contenu, type, isPrivee } = body
 
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
     // Vérifier que la note existe
-    const existingNote = await prisma.note.findUnique({
-      where: { id },
+    const existingNote = await prisma.note.findFirst({
+      where,
       include: {
         createdBy: {
           select: { id: true }
@@ -164,9 +180,17 @@ export async function DELETE(request, { params }) {
 
     const { id } = params
 
+    // Construire la requête selon le rôle de l'utilisateur
+    let where = { id }
+    
+    // Filtrage par cabinet selon le rôle de l'utilisateur
+    if (session.user.role !== 'SUPER_ADMIN') {
+      where.cabinetId = session.user.cabinetId
+    }
+
     // Vérifier que la note existe
-    const existingNote = await prisma.note.findUnique({
-      where: { id },
+    const existingNote = await prisma.note.findFirst({
+      where,
       include: {
         createdBy: {
           select: { id: true }

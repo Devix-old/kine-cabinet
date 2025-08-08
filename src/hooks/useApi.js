@@ -92,9 +92,21 @@ export function useApi() {
       body: JSON.stringify(data)
     })
     
-    // Auto-invalidate cache for appointments
+    // Auto-invalidate cache for specific endpoints
     if (url.includes('/api/appointments')) {
       invalidateCache('/api/appointments')
+    }
+    if (url.includes('/api/rooms')) {
+      invalidateCache('/api/rooms')
+    }
+    if (url.includes('/api/tarifs')) {
+      invalidateCache('/api/tarifs')
+    }
+    if (url.includes('/api/users')) {
+      invalidateCache('/api/users')
+    }
+    if (url.includes('/api/admin/cabinets')) {
+      invalidateCache('/api/admin/cabinets')
     }
     
     return result
@@ -107,9 +119,21 @@ export function useApi() {
       body: JSON.stringify(data)
     })
     
-    // Auto-invalidate cache for appointments
+    // Auto-invalidate cache for specific endpoints
     if (url.includes('/api/appointments')) {
       invalidateCache('/api/appointments')
+    }
+    if (url.includes('/api/rooms')) {
+      invalidateCache('/api/rooms')
+    }
+    if (url.includes('/api/tarifs')) {
+      invalidateCache('/api/tarifs')
+    }
+    if (url.includes('/api/users')) {
+      invalidateCache('/api/users')
+    }
+    if (url.includes('/api/admin/cabinets')) {
+      invalidateCache('/api/admin/cabinets')
     }
     
     return result
@@ -121,9 +145,21 @@ export function useApi() {
       method: 'DELETE'
     })
     
-    // Auto-invalidate cache for appointments
+    // Auto-invalidate cache for specific endpoints
     if (url.includes('/api/appointments')) {
       invalidateCache('/api/appointments')
+    }
+    if (url.includes('/api/rooms')) {
+      invalidateCache('/api/rooms')
+    }
+    if (url.includes('/api/tarifs')) {
+      invalidateCache('/api/tarifs')
+    }
+    if (url.includes('/api/users')) {
+      invalidateCache('/api/users')
+    }
+    if (url.includes('/api/admin/cabinets')) {
+      invalidateCache('/api/admin/cabinets')
     }
     
     return result

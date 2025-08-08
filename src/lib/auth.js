@@ -16,28 +16,54 @@ export const authOptions = {
         }
 
         try {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email }
+          // Pour le multi-tenant, on cherche l'utilisateur par email
+          // Le super admin n'a pas de cabinetId, les autres en ont un
+          const user = await prisma.user.findFirst({
+            where: { 
+              email: credentials.email,
+              isActive: true
+            },
+            include: {
+              cabinet: {
+                select: {
+                  id: true,
+                  nom: true,
+                  isActive: true
+                }
+              }
+            }
           })
 
-          if (!user || !user.isActive) {
+          if (!user) {
+            console.log('❌ Utilisateur non trouvé:', credentials.email)
+            return null
+          }
+
+          // Vérifier si le cabinet est actif (sauf pour le super admin)
+          if (user.cabinetId && user.cabinet && !user.cabinet.isActive) {
+            console.log('❌ Cabinet inactif pour:', credentials.email)
             return null
           }
 
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
 
           if (!isPasswordValid) {
+            console.log('❌ Mot de passe incorrect pour:', credentials.email)
             return null
           }
+
+          console.log('✅ Authentification réussie pour:', credentials.email, 'Rôle:', user.role)
 
           return {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role
+            role: user.role,
+            cabinetId: user.cabinetId,
+            cabinetName: user.cabinet?.nom || null
           }
         } catch (error) {
-          console.error('Erreur d\'authentification:', error)
+          console.error('❌ Erreur lors de l\'authentification:', error)
           return null
         }
       }
@@ -45,13 +71,17 @@ export const authOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 heures
+    maxAge: 60 * 60, // 1 heure seulement
+    updateAge: 0, // Mettre à jour à chaque requête
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role
         token.id = user.id
+        token.name = user.name
+        token.cabinetId = user.cabinetId
+        token.cabinetName = user.cabinetName
       }
       return token
     },
@@ -59,6 +89,9 @@ export const authOptions = {
       if (token) {
         session.user.role = token.role
         session.user.id = token.id
+        session.user.name = token.name
+        session.user.cabinetId = token.cabinetId
+        session.user.cabinetName = token.cabinetName
       }
       return session
     }
@@ -67,5 +100,19 @@ export const authOptions = {
     signIn: '/auth/login',
     error: '/auth/login'
   },
-  secret: 'f397711554f5050d1eb316d23da2059d4b81fb7914842d0b8570104f8841d3c0'
+  secret: 'f397711554f5050d1eb316d23da2059d4b81fb7914842d0b8570104f8841d3c0',
+  // Activer les logs pour le debug
+  debug: true,
+  // Logger pour le debug
+  logger: {
+    error(code, ...message) {
+      console.error('Auth Error:', code, ...message)
+    },
+    warn(code, ...message) {
+      console.warn('Auth Warning:', code, ...message)
+    },
+    debug(code, ...message) {
+      console.log('Auth Debug:', code, ...message)
+    }
+  }
 } 

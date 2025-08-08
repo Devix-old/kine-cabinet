@@ -9,49 +9,31 @@ import { useToastContext } from '@/contexts/ToastContext'
 import { 
   Settings, 
   Users, 
-  Clock, 
   MapPin, 
-  Globe,
-  Bell,
-  Shield,
   Save,
   Edit,
   Plus,
   Trash2,
-  Eye,
-  EyeOff,
-  Calendar,
-  Building,
   Loader2,
   DollarSign,
-  FileText,
-  Download,
-  Upload,
-  RefreshCw,
   CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Monitor,
-  Palette,
-  Database
+  XCircle
 } from 'lucide-react'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general')
   const [showUserModal, setShowUserModal] = useState(false)
   const [showRoomModal, setShowRoomModal] = useState(false)
-  const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [showTariffModal, setShowTariffModal] = useState(false)
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [passwordStrength, setPasswordStrength] = useState(null)
+  
+  // États pour l'édition
+  const [editingUser, setEditingUser] = useState(null)
+  const [editingRoom, setEditingRoom] = useState(null)
+  const [editingTariff, setEditingTariff] = useState(null)
+  const [isEditing, setIsEditing] = useState(false)
 
   // States pour les données
   const [settings, setSettings] = useState({})
-  const [workingHours, setWorkingHours] = useState({})
-  const [notificationSettings, setNotificationSettings] = useState({})
   const [rooms, setRooms] = useState([])
   const [tariffs, setTariffs] = useState([])
   const [users, setUsers] = useState([])
@@ -91,24 +73,19 @@ export default function SettingsPage() {
     description: ''
   })
 
-  const { get, post, put, delete: del, loading: apiLoading } = useApi()
+  const { get, post, put, delete: del, loading: apiLoading, invalidateCache, forceRefresh } = useApi()
   const { success, error: showError } = useToastContext()
 
   const tabs = [
     { id: 'general', name: 'Général', icon: Settings },
     { id: 'users', name: 'Utilisateurs', icon: Users },
-    { id: 'schedule', name: 'Planning', icon: Clock },
     { id: 'rooms', name: 'Salles', icon: MapPin },
     { id: 'tariffs', name: 'Tarifs', icon: DollarSign },
-    { id: 'notifications', name: 'Notifications', icon: Bell },
-    { id: 'security', name: 'Sécurité', icon: Shield },
-    { id: 'appearance', name: 'Apparence', icon: Palette },
-    { id: 'backup', name: 'Sauvegarde', icon: Database },
   ]
 
   // Charger toutes les données au montage
   useEffect(() => {
-    loadAllData()
+    loadAllData(true) // Force refresh au montage pour éviter le cache
   }, [])
 
   // Handle ESC key to close modals
@@ -117,7 +94,6 @@ export default function SettingsPage() {
       if (event.key === 'Escape') {
         setShowUserModal(false)
         setShowRoomModal(false)
-        setShowPasswordModal(false)
         setShowTariffModal(false)
         resetForms()
       }
@@ -127,33 +103,30 @@ export default function SettingsPage() {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [])
 
-  const loadAllData = async () => {
+  const loadAllData = async (forceRefresh = false) => {
     try {
       setLoading(true)
+      
+      // Ajouter un timestamp pour éviter le cache si forceRefresh est true
+      const timestamp = forceRefresh ? `?_t=${Date.now()}` : ''
       
       // Charger en parallèle
       const [
         settingsResponse,
-        workingHoursResponse,
-        notificationsResponse,
         roomsResponse,
         tariffsResponse,
         usersResponse
       ] = await Promise.all([
-        get('/api/settings').catch(() => ({ settings: {} })),
-        get('/api/settings/working-hours').catch(() => ({ workingHours: {} })),
-        get('/api/settings/notifications').catch(() => ({ notificationSettings: {} })),
-        get('/api/rooms').catch(() => ({ rooms: [] })),
-        get('/api/tarifs').catch(() => ({ tarifs: [] })),
-        get('/api/users?limit=50').catch(() => ({ users: [] }))
+        get(`/api/settings${timestamp}`).catch(() => ({ settings: {} })),
+        get(`/api/rooms${timestamp}`).catch(() => []),
+        get(`/api/tarifs${timestamp}`).catch(() => []),
+        get(`/api/users?limit=50${timestamp ? '&' + timestamp.substring(1) : ''}`).catch(() => ({ users: [] }))
       ])
 
       // Traiter les réponses
       setSettings(settingsResponse.settings || {})
-      setWorkingHours(workingHoursResponse.workingHours || {})
-      setNotificationSettings(notificationsResponse.notificationSettings || {})
-      setRooms(roomsResponse.rooms || [])
-      setTariffs(tariffsResponse.tarifs || [])
+      setRooms(roomsResponse || [])
+      setTariffs(tariffsResponse || [])
       setUsers(usersResponse.users || [])
 
       // Remplir le formulaire cabinet avec les paramètres
@@ -202,72 +175,6 @@ export default function SettingsPage() {
     }
   }
 
-  const saveWorkingHours = async () => {
-    try {
-      setSaving(true)
-      await post('/api/settings/working-hours', { workingHours })
-      success('Horaires de travail sauvegardés avec succès')
-    } catch (error) {
-      showError('Erreur lors de la sauvegarde des horaires')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const saveNotificationSettings = async () => {
-    try {
-      setSaving(true)
-      await post('/api/settings/notifications', notificationSettings)
-      success('Paramètres de notification sauvegardés avec succès')
-    } catch (error) {
-      showError('Erreur lors de la sauvegarde des notifications')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handlePasswordChange = async () => {
-    try {
-      if (newPassword !== confirmPassword) {
-        showError('Les mots de passe ne correspondent pas')
-        return
-      }
-
-      setSaving(true)
-      await post('/api/settings/password', {
-        currentPassword,
-        newPassword,
-        confirmPassword
-      })
-      
-      success('Mot de passe changé avec succès')
-      setShowPasswordModal(false)
-      resetPasswordForm()
-      
-    } catch (error) {
-      showError(error.response?.data?.error || 'Erreur lors du changement de mot de passe')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const validatePassword = async (password) => {
-    try {
-      const response = await fetch('/api/settings/password', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        setPasswordStrength(data)
-      }
-    } catch (error) {
-      console.error('Erreur validation mot de passe:', error)
-    }
-  }
-
   const handleCreateUser = async () => {
     try {
       setSaving(true)
@@ -275,7 +182,8 @@ export default function SettingsPage() {
       success('Utilisateur créé avec succès')
       setShowUserModal(false)
       setNewUser({ name: '', email: '', role: 'SECRETAIRE', password: '', isActive: true })
-      loadAllData()
+      invalidateCache('/api/users')
+      loadAllData(true) // Force refresh sans cache
     } catch (error) {
       showError(error.response?.data?.error || 'Erreur lors de la création')
     } finally {
@@ -294,9 +202,11 @@ export default function SettingsPage() {
       success('Salle créée avec succès')
       setShowRoomModal(false)
       setNewRoom({ nom: '', capacite: 1, equipement: '', isActive: true })
-      loadAllData()
+      invalidateCache('/api/rooms')
+      loadAllData(true) // Force refresh sans cache
     } catch (error) {
-      showError(error.response?.data?.error || 'Erreur lors de la création')
+      const errorMessage = error.response?.data?.error || error.message || 'Erreur lors de la création de la salle'
+      showError(errorMessage)
     } finally {
       setSaving(false)
     }
@@ -313,9 +223,11 @@ export default function SettingsPage() {
       success('Tarif créé avec succès')
       setShowTariffModal(false)
       setNewTariff({ nom: '', montant: '', duree: 30, description: '' })
-      loadAllData()
+      invalidateCache('/api/tarifs')
+      loadAllData(true) // Force refresh sans cache
     } catch (error) {
-      showError(error.response?.data?.error || 'Erreur lors de la création')
+      const errorMessage = error.response?.data?.error || error.message || 'Erreur lors de la création du tarif'
+      showError(errorMessage)
     } finally {
       setSaving(false)
     }
@@ -327,7 +239,8 @@ export default function SettingsPage() {
     try {
       await del(`/api/rooms/${roomId}`)
       success('Salle supprimée avec succès')
-      loadAllData()
+      invalidateCache('/api/rooms')
+      loadAllData(true) // Force refresh sans cache
     } catch (error) {
       showError('Erreur lors de la suppression')
     }
@@ -339,30 +252,118 @@ export default function SettingsPage() {
     try {
       await del(`/api/tarifs/${tariffId}`)
       success('Tarif supprimé avec succès')
-      loadAllData()
+      invalidateCache('/api/tarifs')
+      loadAllData(true) // Force refresh sans cache
     } catch (error) {
       showError('Erreur lors de la suppression')
     }
   }
 
-  const exportData = async () => {
+  // Fonctions d'édition
+  const handleEditUser = (user) => {
+    setEditingUser(user)
+    setNewUser({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      password: '',
+      isActive: user.isActive
+    })
+    setIsEditing(true)
+    setShowUserModal(true)
+  }
+
+  const handleEditRoom = (room) => {
+    setEditingRoom(room)
+    setNewRoom({
+      nom: room.nom,
+      capacite: room.capacite,
+      equipement: room.equipement ? room.equipement.join(', ') : '',
+      isActive: room.isActive
+    })
+    setIsEditing(true)
+    setShowRoomModal(true)
+  }
+
+  const handleEditTariff = (tariff) => {
+    setEditingTariff(tariff)
+    setNewTariff({
+      nom: tariff.nom,
+      montant: tariff.montant.toString(),
+      duree: tariff.duree,
+      description: tariff.description || ''
+    })
+    setIsEditing(true)
+    setShowTariffModal(true)
+  }
+
+  const handleUpdateUser = async () => {
     try {
-      const response = await fetch('/api/statistics/export?format=csv&type=detailed')
-      if (!response.ok) throw new Error('Erreur export')
+      setSaving(true)
+      const userData = { ...newUser }
+      if (!userData.password) {
+        delete userData.password // Ne pas envoyer le mot de passe s'il est vide
+      }
       
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `backup-cabinet-${new Date().toISOString().split('T')[0]}.csv`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      
-      success('Export réalisé avec succès')
+      await put(`/api/users/${editingUser.id}`, userData)
+      success('Utilisateur modifié avec succès')
+      setShowUserModal(false)
+      setEditingUser(null)
+      setIsEditing(false)
+      setNewUser({ name: '', email: '', role: 'SECRETAIRE', password: '', isActive: true })
+      invalidateCache('/api/users')
+      loadAllData(true)
     } catch (error) {
-      showError('Erreur lors de l\'export')
+      const errorMessage = error.response?.data?.error || error.message || 'Erreur lors de la modification'
+      showError(errorMessage)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleUpdateRoom = async () => {
+    try {
+      setSaving(true)
+      const roomData = {
+        ...newRoom,
+        equipement: newRoom.equipement ? newRoom.equipement.split(',').map(e => e.trim()) : []
+      }
+      await put(`/api/rooms/${editingRoom.id}`, roomData)
+      success('Salle modifiée avec succès')
+      setShowRoomModal(false)
+      setEditingRoom(null)
+      setIsEditing(false)
+      setNewRoom({ nom: '', capacite: 1, equipement: '', isActive: true })
+      invalidateCache('/api/rooms')
+      loadAllData(true)
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || 'Erreur lors de la modification'
+      showError(errorMessage)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleUpdateTariff = async () => {
+    try {
+      setSaving(true)
+      const tariffData = {
+        ...newTariff,
+        montant: parseFloat(newTariff.montant)
+      }
+      await put(`/api/tarifs/${editingTariff.id}`, tariffData)
+      success('Tarif modifié avec succès')
+      setShowTariffModal(false)
+      setEditingTariff(null)
+      setIsEditing(false)
+      setNewTariff({ nom: '', montant: '', duree: 30, description: '' })
+      invalidateCache('/api/tarifs')
+      loadAllData(true)
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || 'Erreur lors de la modification'
+      showError(errorMessage)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -370,25 +371,10 @@ export default function SettingsPage() {
     setNewUser({ name: '', email: '', role: 'SECRETAIRE', password: '', isActive: true })
     setNewRoom({ nom: '', capacite: 1, equipement: '', isActive: true })
     setNewTariff({ nom: '', montant: '', duree: 30, description: '' })
-    resetPasswordForm()
-  }
-
-  const resetPasswordForm = () => {
-    setCurrentPassword('')
-    setNewPassword('')
-    setConfirmPassword('')
-    setPasswordStrength(null)
-    setShowPassword(false)
-  }
-
-  const updateWorkingHour = (day, field, value) => {
-    setWorkingHours(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [field]: value
-      }
-    }))
+    setEditingUser(null)
+    setEditingRoom(null)
+    setEditingTariff(null)
+    setIsEditing(false)
   }
 
   const getRoleColor = (role) => {
@@ -424,13 +410,6 @@ export default function SettingsPage() {
       sunday: 'Dimanche'
     }
     return labels[day] || day
-  }
-
-  const getPasswordStrengthColor = (score) => {
-    if (score >= 80) return 'bg-green-500'
-    if (score >= 60) return 'bg-yellow-500'
-    if (score >= 40) return 'bg-orange-500'
-    return 'bg-red-500'
   }
 
   if (loading) {
@@ -658,7 +637,7 @@ export default function SettingsPage() {
                             <div className="flex items-center space-x-2">
                               <button 
                                 className="text-blue-600 hover:text-blue-900"
-                                onClick={() => {/* handleEditUser(user) */}}
+                                onClick={() => handleEditUser(user)}
                               >
                                 <Edit className="h-4 w-4" />
                               </button>
@@ -676,83 +655,6 @@ export default function SettingsPage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Schedule Settings */}
-          {activeTab === 'schedule' && (
-            <div className="space-y-6">
-              <div className="card">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Heures de travail</h3>
-                  <button
-                    onClick={saveWorkingHours}
-                    disabled={saving}
-                    className="btn-primary flex items-center"
-                  >
-                    {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                    Sauvegarder
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  {Object.entries(workingHours).map(([day, hours]) => (
-                    <div key={day} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <input
-                          type="checkbox"
-                          checked={hours?.isActive || false}
-                          onChange={(e) => updateWorkingHour(day, 'isActive', e.target.checked)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm font-medium text-gray-900 w-20">
-                          {getDayLabel(day)}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="time"
-                          value={hours?.startTime || '08:00'}
-                          onChange={(e) => updateWorkingHour(day, 'startTime', e.target.value)}
-                          className="input-field w-24"
-                          disabled={!hours?.isActive}
-                        />
-                        <span className="text-gray-500">-</span>
-                        <input
-                          type="time"
-                          value={hours?.endTime || '18:00'}
-                          onChange={(e) => updateWorkingHour(day, 'endTime', e.target.value)}
-                          className="input-field w-24"
-                          disabled={!hours?.isActive}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Durée des séances</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Durée par défaut (minutes)
-                    </label>
-                    <input type="number" className="input-field" defaultValue="45" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Pause entre séances (minutes)
-                    </label>
-                    <input type="number" className="input-field" defaultValue="15" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Heure de début
-                    </label>
-                    <input type="time" className="input-field" defaultValue="08:00" />
-                  </div>
                 </div>
               </div>
             </div>
@@ -778,7 +680,10 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-medium text-gray-900">{room.nom}</h4>
                       <div className="flex items-center space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900">
+                        <button 
+                          className="text-blue-600 hover:text-blue-900"
+                          onClick={() => handleEditRoom(room)}
+                        >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button 
@@ -870,7 +775,10 @@ export default function SettingsPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex items-center space-x-2">
-                              <button className="text-blue-600 hover:text-blue-900">
+                              <button 
+                                className="text-blue-600 hover:text-blue-900"
+                                onClick={() => handleEditTariff(tariff)}
+                              >
                                 <Edit className="h-4 w-4" />
                               </button>
                               <button 
@@ -889,198 +797,6 @@ export default function SettingsPage() {
               </div>
             </div>
           )}
-
-          {/* Notifications */}
-          {activeTab === 'notifications' && (
-            <div className="space-y-6">
-              <div className="card">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Préférences de notifications</h3>
-                  <button
-                    onClick={saveNotificationSettings}
-                    disabled={saving}
-                    className="btn-primary flex items-center"
-                  >
-                    {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                    Sauvegarder
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Rappels de rendez-vous</h4>
-                      <p className="text-sm text-gray-600">Envoyer des rappels aux patients</p>
-                    </div>
-                    <input 
-                      type="checkbox" 
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                      checked={notificationSettings.appointmentReminders || false}
-                      onChange={(e) => setNotificationSettings(prev => ({
-                        ...prev, 
-                        appointmentReminders: e.target.checked
-                      }))}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Notifications par email</h4>
-                      <p className="text-sm text-gray-600">Recevoir les notifications par email</p>
-                    </div>
-                    <input 
-                      type="checkbox" 
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                      checked={notificationSettings.emailNotifications || false}
-                      onChange={(e) => setNotificationSettings(prev => ({
-                        ...prev, 
-                        emailNotifications: e.target.checked
-                      }))}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Notifications push</h4>
-                      <p className="text-sm text-gray-600">Recevoir les notifications push</p>
-                    </div>
-                    <input 
-                      type="checkbox" 
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={notificationSettings.pushNotifications || false}
-                      onChange={(e) => setNotificationSettings(prev => ({
-                        ...prev, 
-                        pushNotifications: e.target.checked
-                      }))}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Délai de rappel</h4>
-                      <p className="text-sm text-gray-600">Heures avant le rendez-vous</p>
-                    </div>
-                    <select 
-                      className="input-field w-32"
-                      value={notificationSettings.reminderTime || 24}
-                      onChange={(e) => setNotificationSettings(prev => ({
-                        ...prev, 
-                        reminderTime: parseInt(e.target.value)
-                      }))}
-                    >
-                      <option value={1}>1 heure</option>
-                      <option value={2}>2 heures</option>
-                      <option value={6}>6 heures</option>
-                      <option value={12}>12 heures</option>
-                      <option value={24}>24 heures</option>
-                      <option value={48}>48 heures</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Security */}
-          {activeTab === 'security' && (
-            <div className="space-y-6">
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Sécurité du compte</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Changer le mot de passe</h4>
-                      <p className="text-sm text-gray-600">Mettez à jour votre mot de passe</p>
-                    </div>
-                    <button 
-                      className="btn-secondary"
-                      onClick={() => setShowPasswordModal(true)}
-                    >
-                      Modifier
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Authentification à deux facteurs</h4>
-                      <p className="text-sm text-gray-600">Ajouter une couche de sécurité supplémentaire</p>
-                    </div>
-                    <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Appearance */}
-          {activeTab === 'appearance' && (
-            <div className="space-y-6">
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Apparence</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Thème</h4>
-                      <p className="text-sm text-gray-600">Mode sombre ou clair</p>
-                    </div>
-                    <select className="input-field w-32">
-                      <option value="light">Clair</option>
-                      <option value="dark">Sombre</option>
-                      <option value="auto">Automatique</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Couleur principale</h4>
-                      <p className="text-sm text-gray-600">Couleur du thème de l'application</p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full border-2 border-blue-600 cursor-pointer"></div>
-                      <div className="w-8 h-8 bg-green-500 rounded-full cursor-pointer"></div>
-                      <div className="w-8 h-8 bg-purple-500 rounded-full cursor-pointer"></div>
-                      <div className="w-8 h-8 bg-red-500 rounded-full cursor-pointer"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Backup */}
-          {activeTab === 'backup' && (
-            <div className="space-y-6">
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Sauvegarde et export</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Exporter les données</h4>
-                      <p className="text-sm text-gray-600">Télécharger toutes les données du cabinet</p>
-                    </div>
-                    <button 
-                      className="btn-secondary flex items-center"
-                      onClick={exportData}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Exporter
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Importer des données</h4>
-                      <p className="text-sm text-gray-600">Restaurer des données depuis un fichier</p>
-                    </div>
-                    <button className="btn-secondary flex items-center">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Importer
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Sauvegarde automatique</h4>
-                      <p className="text-sm text-gray-600">Sauvegarder automatiquement chaque semaine</p>
-                    </div>
-                    <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Modals */}
@@ -1092,8 +808,9 @@ export default function SettingsPage() {
             setShowUserModal(false)
             resetForms()
           }}
-          title="Créer un nouvel utilisateur"
+          title={isEditing ? "Modifier l'utilisateur" : "Créer un nouvel utilisateur"}
           size="md"
+          closeOnBackdropClick={false}
         >
           <div className="space-y-4">
             <div>
@@ -1171,10 +888,10 @@ export default function SettingsPage() {
             </button>
             <button 
               className="btn-primary flex-1 flex items-center justify-center"
-              onClick={handleCreateUser}
+              onClick={isEditing ? handleUpdateUser : handleCreateUser}
               disabled={saving}
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Créer'}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEditing ? 'Modifier' : 'Créer')}
             </button>
           </div>
         </Modal>
@@ -1186,8 +903,9 @@ export default function SettingsPage() {
             setShowRoomModal(false)
             resetForms()
           }}
-          title="Créer une nouvelle salle"
+          title={isEditing ? "Modifier la salle" : "Créer une nouvelle salle"}
           size="md"
+          closeOnBackdropClick={false}
         >
           <div className="space-y-4">
             <div>
@@ -1252,10 +970,10 @@ export default function SettingsPage() {
             </button>
             <button 
               className="btn-primary flex-1 flex items-center justify-center"
-              onClick={handleCreateRoom}
+              onClick={isEditing ? handleUpdateRoom : handleCreateRoom}
               disabled={saving}
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Créer'}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEditing ? 'Modifier' : 'Créer')}
             </button>
           </div>
         </Modal>
@@ -1267,8 +985,9 @@ export default function SettingsPage() {
             setShowTariffModal(false)
             resetForms()
           }}
-          title="Créer un nouveau tarif"
+          title={isEditing ? "Modifier le tarif" : "Créer un nouveau tarif"}
           size="md"
+          closeOnBackdropClick={false}
         >
           <div className="space-y-4">
             <div>
@@ -1333,115 +1052,10 @@ export default function SettingsPage() {
             </button>
             <button 
               className="btn-primary flex-1 flex items-center justify-center"
-              onClick={handleCreateTariff}
+              onClick={isEditing ? handleUpdateTariff : handleCreateTariff}
               disabled={saving}
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Créer'}
-            </button>
-          </div>
-        </Modal>
-
-        {/* Change Password Modal */}
-        <Modal
-          isOpen={showPasswordModal}
-          onClose={() => {
-            setShowPasswordModal(false)
-            resetPasswordForm()
-          }}
-          title="Changer le mot de passe"
-          size="md"
-        >
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mot de passe actuel *
-              </label>
-              <div className="relative">
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  className="input-field pr-10"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                />
-                <button 
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4 text-gray-400" /> : <Eye className="h-4 w-4 text-gray-400" />}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nouveau mot de passe *
-              </label>
-              <input 
-                type="password" 
-                className="input-field"
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value)
-                  if (e.target.value) {
-                    validatePassword(e.target.value)
-                  } else {
-                    setPasswordStrength(null)
-                  }
-                }}
-              />
-              {passwordStrength && (
-                <div className="mt-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span>Force du mot de passe</span>
-                    <span>{passwordStrength.score}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                    <div 
-                      className={`h-2 rounded-full transition-all ${getPasswordStrengthColor(passwordStrength.score)}`}
-                      style={{ width: `${passwordStrength.score}%` }}
-                    ></div>
-                  </div>
-                  {passwordStrength.feedback.length > 0 && (
-                    <ul className="mt-2 text-xs text-gray-600">
-                      {passwordStrength.feedback.map((item, index) => (
-                        <li key={index} className="flex items-center">
-                          <AlertTriangle className="h-3 w-3 mr-1 text-yellow-500" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirmer le nouveau mot de passe *
-              </label>
-              <input 
-                type="password" 
-                className="input-field"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="flex space-x-3 mt-6">
-            <button 
-              className="btn-secondary flex-1"
-              onClick={() => {
-                setShowPasswordModal(false)
-                resetPasswordForm()
-              }}
-            >
-              Annuler
-            </button>
-            <button 
-              className="btn-primary flex-1 flex items-center justify-center"
-              onClick={handlePasswordChange}
-              disabled={saving || !passwordStrength?.isValid}
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Changer'}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (isEditing ? 'Modifier' : 'Créer')}
             </button>
           </div>
         </Modal>

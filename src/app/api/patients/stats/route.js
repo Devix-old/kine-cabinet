@@ -26,12 +26,19 @@ export async function GET(request) {
     endOfWeek.setDate(startOfWeek.getDate() + 6)
     endOfWeek.setHours(23, 59, 59, 999)
 
+    // Construire les filtres selon le rôle de l'utilisateur
+    const baseWhere = {}
+    if (session.user.role !== 'SUPER_ADMIN') {
+      baseWhere.cabinetId = session.user.cabinetId
+    }
+
     // Compter les patients
     const [totalPatients, activePatients, newThisMonth, appointmentsThisWeek] = await Promise.all([
-      prisma.patient.count(),
-      prisma.patient.count({ where: { isActive: true } }),
+      prisma.patient.count({ where: baseWhere }),
+      prisma.patient.count({ where: { ...baseWhere, isActive: true } }),
       prisma.patient.count({
         where: {
+          ...baseWhere,
           createdAt: {
             gte: startOfMonth
           }
@@ -39,6 +46,7 @@ export async function GET(request) {
       }),
       prisma.appointment.count({
         where: {
+          ...baseWhere,
           date: {
             gte: startOfWeek,
             lte: endOfWeek

@@ -58,6 +58,8 @@ export default function AppointmentsPage() {
   const [selectedRoom, setSelectedRoom] = useState('all')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [tarifs, setTarifs] = useState([])
+  const [kines, setKines] = useState([])
 
   const { get, post, put, delete: del } = useApi()
   const { success, error: showError } = useToastContext()
@@ -71,6 +73,8 @@ export default function AppointmentsPage() {
       type: 'CONSULTATION',
       statut: 'PLANIFIE',
       salleId: '',
+      kineId: '',           // ✅ Nouveau
+      tarifId: '',          // ✅ Nouveau
       motif: '',
       notes: ''
     }
@@ -104,6 +108,14 @@ export default function AppointmentsPage() {
         const roomsResponse = await get(`/api/rooms?_t=${Date.now()}`)
         setRooms(roomsResponse || [])
       }
+
+      // Charger les tarifs
+      const tarifsResponse = await get(`/api/tarifs?_t=${Date.now()}`)
+      setTarifs(tarifsResponse || [])
+
+      // Charger les kinésithérapeutes
+      const kinesResponse = await get(`/api/users?role=KINE&_t=${Date.now()}`)
+      setKines(kinesResponse.users || [])
 
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error)
@@ -151,6 +163,8 @@ export default function AppointmentsPage() {
         type: 'CONSULTATION',
         statut: 'PLANIFIE',
         salleId: '',
+        kineId: '',
+        tarifId: '',
         motif: '',
         notes: ''
       })
@@ -174,6 +188,8 @@ export default function AppointmentsPage() {
       type: appointment.type,
       statut: appointment.statut,
       salleId: appointment.salleId || '',
+      kineId: appointment.kineId || '',
+      tarifId: appointment.tarifId || '',
       motif: appointment.motif || '',
       notes: appointment.notes || ''
     })
@@ -336,6 +352,22 @@ export default function AppointmentsPage() {
       showError('Erreur lors de la suppression du rendez-vous')
     }
   }
+
+  const selectedTarif = watch('tarifId')
+  const selectedType = watch('type')
+
+  useEffect(() => {
+    // Auto-sélectionner le tarif basé sur le type
+    if (selectedType && tarifs.length > 0) {
+      const defaultTarif = tarifs.find(t => 
+        t.nom.toLowerCase().includes(selectedType.toLowerCase())
+      )
+      if (defaultTarif) {
+        setValue('tarifId', defaultTarif.id)
+        setValue('duree', defaultTarif.duree || 30)
+      }
+    }
+  }, [selectedType, tarifs, setValue])
 
   if (loading) {
     return (
@@ -750,6 +782,56 @@ export default function AppointmentsPage() {
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Kinésithérapeute</label>
+                  <select
+                    {...register('kineId', { required: 'Kinésithérapeute requis' })}
+                    className="input-field"
+                  >
+                    <option value="">Sélectionner un kinésithérapeute</option>
+                    {kines.map(kine => (
+                      <option key={kine.id} value={kine.id}>
+                        {kine.name} - {kine.role}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.kineId && <p className="text-red-500 text-xs mt-1">{errors.kineId.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tarif</label>
+                  <select
+                    {...register('tarifId', { required: 'Tarif requis' })}
+                    className="input-field"
+                  >
+                    <option value="">Sélectionner un tarif</option>
+                    {tarifs.map(tarif => (
+                      <option key={tarif.id} value={tarif.id}>
+                        {tarif.nom} - {tarif.montant}€ ({tarif.duree}min)
+                      </option>
+                    ))}
+                  </select>
+                  {errors.tarifId && <p className="text-red-500 text-xs mt-1">{errors.tarifId.message}</p>}
+                </div>
+              </div>
+
+              {/* Affichage du tarif sélectionné */}
+              {selectedTarif && (
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-900">
+                      {tarifs.find(t => t.id === selectedTarif)?.nom}
+                    </span>
+                    <span className="text-lg font-bold text-blue-900">
+                      {tarifs.find(t => t.id === selectedTarif)?.montant}€
+                    </span>
+                  </div>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Durée : {tarifs.find(t => t.id === selectedTarif)?.duree} minutes
+                  </p>
+                </div>
+              )}
+
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
@@ -836,6 +918,39 @@ export default function AppointmentsPage() {
                     {...register('duree', { min: 15, max: 180 })}
                     className="input-field"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Kinésithérapeute</label>
+                  <select
+                    {...register('kineId', { required: 'Kinésithérapeute requis' })}
+                    className="input-field"
+                  >
+                    <option value="">Sélectionner un kinésithérapeute</option>
+                    {kines.map(kine => (
+                      <option key={kine.id} value={kine.id}>
+                        {kine.name} - {kine.role}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.kineId && <p className="text-red-500 text-xs mt-1">{errors.kineId.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tarif</label>
+                  <select
+                    {...register('tarifId', { required: 'Tarif requis' })}
+                    className="input-field"
+                  >
+                    <option value="">Sélectionner un tarif</option>
+                    {tarifs.map(tarif => (
+                      <option key={tarif.id} value={tarif.id}>
+                        {tarif.nom} - {tarif.montant}€ ({tarif.duree}min)
+                      </option>
+                    ))}
+                  </select>
+                  {errors.tarifId && <p className="text-red-500 text-xs mt-1">{errors.tarifId.message}</p>}
                 </div>
               </div>
 
