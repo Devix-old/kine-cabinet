@@ -30,7 +30,7 @@ export default function Sidebar() {
 
   // Navigation avec permissions
   const navigation = [
-    { name: 'Tableau de bord', href: '/', icon: Home, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },
+    { name: 'Tableau de bord', href: '/dashboard', icon: Home, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },
     { name: 'Patients', href: '/patients', icon: Users, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },
     { name: 'Rendez-vous', href: '/rendez-vous', icon: Calendar, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },
     { name: 'Dossiers', href: '/dossiers', icon: FileText, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },

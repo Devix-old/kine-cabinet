@@ -247,7 +247,7 @@ export async function POST(request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
-
+    
     const body = await request.json()
     
     // Validation des données requises

@@ -5,11 +5,14 @@ export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token
     const isAuth = !!token
-    const isAuthPage = req.nextUrl.pathname.startsWith('/auth')
-    const isApiRoute = req.nextUrl.pathname.startsWith('/api')
+    const pathname = req.nextUrl.pathname
 
-    // Protection des routes API (sauf auth)
-    if (isApiRoute && !req.nextUrl.pathname.startsWith('/api/auth') && !isAuth) {
+    const isApiRoute = pathname.startsWith('/api')
+    const isApiAuthRoute = pathname.startsWith('/api/auth')
+    const isApiPublicRoute = pathname.startsWith('/api/public') || pathname.startsWith('/api/placeholder')
+
+    // Protect API routes except auth and explicitly public ones
+    if (isApiRoute && !isApiAuthRoute && !isApiPublicRoute && !isAuth) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -18,15 +21,16 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        const isAuthPage = req.nextUrl.pathname.startsWith('/auth')
-        const isApiAuthRoute = req.nextUrl.pathname.startsWith('/api/auth')
-        
-        // Autoriser les pages d'auth et les API d'auth
-        if (isAuthPage || isApiAuthRoute) {
+        const pathname = req.nextUrl.pathname
+        const isApiAuthRoute = pathname.startsWith('/api/auth')
+        const isApiPublicRoute = pathname.startsWith('/api/public') || pathname.startsWith('/api/placeholder')
+
+        // Always allow auth and explicitly public API routes
+        if (isApiAuthRoute || isApiPublicRoute) {
           return true
         }
-        
-        // Exiger l'authentification pour tout le reste
+
+        // Require auth for matched routes (see matcher below)
         return !!token
       }
     }
@@ -35,13 +39,18 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (auth API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)'
+    // Protect only application sections and APIs. Marketing pages (/, /about, /pricing, /features, /contact, etc.) remain public.
+    '/dashboard/:path*',
+    '/patients/:path*',
+    '/rendez-vous/:path*',
+    '/dossiers/:path*',
+    '/traitements/:path*',
+    '/statistiques/:path*',
+    '/utilisateurs/:path*',
+    '/parametres/:path*',
+    '/admin/:path*',
+
+    // APIs except those explicitly handled as public in the middleware above
+    '/api/:path*',
   ]
 } 

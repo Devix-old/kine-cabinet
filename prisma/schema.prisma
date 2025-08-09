@@ -321,7 +321,7 @@ model Settings {
   category    String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  
+
   // Multi-tenant
   cabinetId   String
   cabinet     Cabinet     @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
@@ -340,7 +340,7 @@ model WorkingHours {
   breakEndTime   String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  
+
   // Multi-tenant
   cabinetId      String
   cabinet        Cabinet  @relation(fields: [cabinetId], references: [id], onDelete: Cascade)

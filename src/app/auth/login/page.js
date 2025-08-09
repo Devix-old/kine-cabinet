@@ -19,7 +19,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (status === 'authenticated') {
       // Forcer le refresh complet pour éviter les problèmes de cache
-      window.location.href = '/'
+      window.location.href = '/dashboard'
     }
   }, [status])
 

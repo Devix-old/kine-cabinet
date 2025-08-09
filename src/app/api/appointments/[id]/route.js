@@ -157,29 +157,29 @@ export async function PUT(request, { params }) {
     // Si le statut passe à TERMINE, créer automatiquement une facture
     if (body.statut === 'TERMINE') {
       try {
-        const appointment = await prisma.appointment.findUnique({
-          where: { id },
-          include: { tarif: true }
-        })
-        
-        if (appointment && appointment.tarif) {
+      const appointment = await prisma.appointment.findUnique({
+        where: { id },
+        include: { tarif: true }
+      })
+      
+      if (appointment && appointment.tarif) {
           // Vérifier si une facture existe déjà pour ce rendez-vous
           const existingInvoice = await prisma.invoice.findFirst({
             where: { appointmentId: id }
           })
           
           if (!existingInvoice) {
-            // Créer automatiquement la facture
-            await prisma.invoice.create({
-              data: {
-                appointmentId: id,
-                patientId: appointment.patientId,
-                montant: appointment.tarif.montant,
-                statut: 'EN_ATTENTE',
-                dateEmission: new Date(),
-                dateEcheance: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // +30 jours
-              }
-            })
+        // Créer automatiquement la facture
+        await prisma.invoice.create({
+          data: {
+            appointmentId: id,
+            patientId: appointment.patientId,
+            montant: appointment.tarif.montant,
+            statut: 'EN_ATTENTE',
+            dateEmission: new Date(),
+            dateEcheance: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // +30 jours
+          }
+        })
             console.log('✅ Facture créée automatiquement pour le RDV:', id)
           }
         }
