@@ -1,3 +1,5 @@
+"use client"
+
 import Header from '@/components/SaaS/Header'
 import Footer from '@/components/SaaS/Footer'
 import { motion } from 'framer-motion'
