@@ -53,28 +53,42 @@ body {
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
   }
   
-  /* Custom Scrollbar Styles */
+  /* Beautiful Custom Scrollbar Styles */
   .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 #f1f5f9;
+    scrollbar-width: auto;
+    scrollbar-color: #6b72803f #f9fafb;
   }
   
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 12px !important;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 3px;
+    background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+    border-radius: 12px;
+    margin: 8px 4px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-    transition: background 0.2s ease;
+    background: linear-gradient(to bottom, #9ca3af, #6b7280);
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: all 0.3s ease;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: linear-gradient(to bottom, #6b7280, #4b5563);
+    background-clip: content-box;
+    transform: scaleX(1.1);
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(to bottom, #4b5563, #374151);
+    background-clip: content-box;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }

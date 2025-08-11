@@ -25,6 +25,7 @@ import {
   Loader2,
   X
 } from 'lucide-react'
+import Modal from '@/components/UI/Modal'
 
 export default function MedicalRecordsPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -338,104 +339,107 @@ export default function MedicalRecordsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dossiers Médicaux</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Dossiers Médicaux</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
               Gérez les dossiers médicaux et documents de vos patients
             </p>
           </div>
-          <div className="mt-4 lg:mt-0 flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button 
-              className="btn-secondary flex items-center"
+              className="btn-secondary flex items-center justify-center w-full sm:w-auto"
               onClick={() => openNoteModal()}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Ajouter note
+              <span className="hidden sm:inline">Ajouter note</span>
+              <span className="sm:hidden">Note</span>
             </button>
             <button 
-              className="btn-primary flex items-center"
+              className="btn-primary flex items-center justify-center w-full sm:w-auto"
               onClick={() => setShowCreateModal(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Nouveau dossier
+              <span className="hidden sm:inline">Nouveau dossier</span>
+              <span className="sm:hidden">Nouveau</span>
             </button>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="card">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-blue-500">
-                <FileText className="h-6 w-6 text-white" />
+              <div className="p-2 sm:p-3 rounded-lg bg-blue-500">
+                <FileText className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total dossiers</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalRecords}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total dossiers</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.totalRecords}</p>
               </div>
             </div>
           </div>
-          <div className="card">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-green-500">
-                <File className="h-6 w-6 text-white" />
+              <div className="p-2 sm:p-3 rounded-lg bg-green-500">
+                <File className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Documents</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalDocuments}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Documents</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.totalDocuments}</p>
               </div>
             </div>
           </div>
-          <div className="card">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-purple-500">
-                <FileText className="h-6 w-6 text-white" />
+              <div className="p-2 sm:p-3 rounded-lg bg-purple-500">
+                <FileText className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Notes de traitement</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalNotes}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Notes de traitement</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.totalNotes}</p>
               </div>
             </div>
           </div>
-          <div className="card">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-yellow-500">
-                <Clock className="h-6 w-6 text-white" />
+              <div className="p-2 sm:p-3 rounded-lg bg-yellow-500">
+                <Clock className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Mis à jour aujourd'hui</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.updatedToday}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Mis à jour aujourd'hui</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.updatedToday}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Search */}
-        <div className="card">
-          <div className="flex items-center space-x-4">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Rechercher un patient ou un dossier..."
-                className="input-field pl-10"
+                className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="btn-secondary flex items-center">
+            <button className="btn-secondary flex items-center justify-center w-full sm:w-auto">
               <Filter className="h-4 w-4 mr-2" />
-              Filtres
+              <span className="hidden sm:inline">Filtres</span>
+              <span className="sm:hidden">Filtres</span>
             </button>
           </div>
         </div>
 
         {/* Medical Records List */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Dossiers médicaux</h3>
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Dossiers médicaux</h3>
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -444,32 +448,34 @@ export default function MedicalRecordsPage() {
           ) : (
             <div className="space-y-4">
               {filteredRecords.map((record) => (
-                <div key={record.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="h-6 w-6 text-blue-600" />
+                <div key={record.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:bg-gray-50">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                       </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h4 className="text-lg font-medium text-gray-900">
+                      <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1">
+                          <h4 className="text-base sm:text-lg font-medium text-gray-900">
                             {record.patient.prenom} {record.patient.nom}
                           </h4>
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRecordTypeColor(record.type)}`}>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRecordTypeColor(record.type)} mt-1 sm:mt-0`}>
                             {record.type}
                           </span>
                         </div>
-                        <h5 className="text-md font-medium text-gray-700 mb-1">{record.titre}</h5>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
+                        <h5 className="text-sm sm:text-base font-medium text-gray-700 mb-2">{record.titre}</h5>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0">
                           <span>{record._count?.documents || 0} documents</span>
+                          <span className="hidden sm:inline">•</span>
                           <span>Créé par {record.createdBy.name}</span>
+                          <span className="hidden sm:inline">•</span>
                           <span>Le {formatDate(record.date)}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                       <button 
-                        className="btn-secondary text-sm"
+                        className="btn-secondary text-sm flex items-center justify-center w-full sm:w-auto"
                         onClick={() => openRecordDetails(record)}
                         disabled={loading}
                       >
@@ -477,7 +483,7 @@ export default function MedicalRecordsPage() {
                         Voir
                       </button>
                       <button 
-                        className="btn-secondary text-sm"
+                        className="btn-secondary text-sm flex items-center justify-center w-full sm:w-auto"
                         onClick={() => openEditModal(record)}
                         disabled={loading}
                       >
@@ -485,12 +491,13 @@ export default function MedicalRecordsPage() {
                         Modifier
                       </button>
                       <button 
-                        className="text-red-600 hover:text-red-800 p-2 rounded"
+                        className="text-red-600 hover:text-red-800 p-2 rounded border border-red-200 hover:bg-red-50 flex items-center justify-center w-full sm:w-auto"
                         onClick={() => handleDeleteRecord(record.id)}
                         disabled={loading}
                         title="Supprimer"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        <span className="sm:hidden">Supprimer</span>
                       </button>
                     </div>
                   </div>
@@ -515,585 +522,547 @@ export default function MedicalRecordsPage() {
       </div>
 
       {/* Create Medical Record Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Nouveau dossier médical</h3>
-              <button 
-                className="text-gray-400 hover:text-gray-600"
-                onClick={() => {
-                  setShowCreateModal(false)
-                  resetRecordForm()
-                }}
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <form onSubmit={handleCreateRecord}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Patient *
-                  </label>
-                  <select 
-                    className="input-field"
-                    value={recordFormData.patientId}
-                    onChange={(e) => setRecordFormData({...recordFormData, patientId: e.target.value})}
-                    required
-                  >
-                    <option value="">Sélectionner un patient</option>
-                    {patients.map(patient => (
-                      <option key={patient.id} value={patient.id}>
-                        {patient.prenom} {patient.nom} - {patient.numeroDossier}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Titre *
-                  </label>
-                  <input 
-                    type="text" 
-                    className="input-field"
-                    value={recordFormData.titre}
-                    onChange={(e) => setRecordFormData({...recordFormData, titre: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type *
-                  </label>
-                  <select 
-                    className="input-field"
-                    value={recordFormData.type}
-                    onChange={(e) => setRecordFormData({...recordFormData, type: e.target.value})}
-                    required
-                  >
-                    <option value="DIAGNOSTIC">Diagnostic</option>
-                    <option value="PRESCRIPTION">Prescription</option>
-                    <option value="BILAN">Bilan</option>
-                    <option value="COMPTE_RENDU">Compte rendu</option>
-                    <option value="SUIVI">Suivi</option>
-                    <option value="AUTRE">Autre</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date
-                  </label>
-                  <input 
-                    type="date" 
-                    className="input-field"
-                    value={recordFormData.date}
-                    onChange={(e) => setRecordFormData({...recordFormData, date: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea 
-                    className="input-field" 
-                    rows="3"
-                    value={recordFormData.description}
-                    onChange={(e) => setRecordFormData({...recordFormData, description: e.target.value})}
-                    placeholder="Description courte du dossier..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contenu détaillé
-                  </label>
-                  <textarea 
-                    className="input-field" 
-                    rows="5"
-                    value={recordFormData.contenu}
-                    onChange={(e) => setRecordFormData({...recordFormData, contenu: e.target.value})}
-                    placeholder="Contenu détaillé du dossier médical..."
-                  />
-                </div>
-              </div>
-              <div className="flex space-x-3 mt-6">
-                <button 
-                  type="button"
-                  className="btn-secondary flex-1"
-                  onClick={() => {
-                    setShowCreateModal(false)
-                    resetRecordForm()
-                  }}
-                >
-                  Annuler
-                </button>
-                <button 
-                  type="submit"
-                  className="btn-primary flex-1"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Création...
-                    </>
-                  ) : (
-                    'Créer'
-                  )}
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => {
+          setShowCreateModal(false)
+          resetRecordForm()
+        }}
+        title="Nouveau dossier médical"
+        size="lg"
+      >
+        <form onSubmit={handleCreateRecord} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Patient *
+            </label>
+            <select 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              value={recordFormData.patientId}
+              onChange={(e) => setRecordFormData({...recordFormData, patientId: e.target.value})}
+              required
+            >
+              <option value="">Sélectionner un patient</option>
+              {patients.map(patient => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.prenom} {patient.nom} - {patient.numeroDossier}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
-      )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Titre *
+            </label>
+            <input 
+              type="text" 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              value={recordFormData.titre}
+              onChange={(e) => setRecordFormData({...recordFormData, titre: e.target.value})}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Type *
+            </label>
+            <select 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              value={recordFormData.type}
+              onChange={(e) => setRecordFormData({...recordFormData, type: e.target.value})}
+              required
+            >
+              <option value="DIAGNOSTIC">Diagnostic</option>
+              <option value="PRESCRIPTION">Prescription</option>
+              <option value="BILAN">Bilan</option>
+              <option value="COMPTE_RENDU">Compte rendu</option>
+              <option value="SUIVI">Suivi</option>
+              <option value="AUTRE">Autre</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date
+            </label>
+            <input 
+              type="date" 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              value={recordFormData.date}
+              onChange={(e) => setRecordFormData({...recordFormData, date: e.target.value})}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none" 
+              rows="3"
+              value={recordFormData.description}
+              onChange={(e) => setRecordFormData({...recordFormData, description: e.target.value})}
+              placeholder="Description courte du dossier..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Contenu détaillé
+            </label>
+            <textarea 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none" 
+              rows="5"
+              value={recordFormData.contenu}
+              onChange={(e) => setRecordFormData({...recordFormData, contenu: e.target.value})}
+              placeholder="Contenu détaillé du dossier médical..."
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+            <button 
+              type="button"
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              onClick={() => {
+                setShowCreateModal(false)
+                resetRecordForm()
+              }}
+            >
+              Annuler
+            </button>
+            <button 
+              type="submit"
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Création...</span>
+                </>
+              ) : (
+                <span>Créer</span>
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Edit Medical Record Modal */}
       {showEditModal && selectedRecord && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Modifier le dossier médical</h3>
+        <Modal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false)
+            resetRecordForm()
+          }}
+          title="Modifier le dossier médical"
+          size="lg"
+        >
+          <form onSubmit={handleUpdateRecord} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Patient
+              </label>
+              <input 
+                type="text" 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base bg-gray-50"
+                value={`${selectedRecord.patient.prenom} ${selectedRecord.patient.nom}`}
+                disabled
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Titre *
+              </label>
+              <input 
+                type="text" 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                value={recordFormData.titre}
+                onChange={(e) => setRecordFormData({...recordFormData, titre: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Type *
+              </label>
+              <select 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                value={recordFormData.type}
+                onChange={(e) => setRecordFormData({...recordFormData, type: e.target.value})}
+                required
+              >
+                <option value="DIAGNOSTIC">Diagnostic</option>
+                <option value="PRESCRIPTION">Prescription</option>
+                <option value="BILAN">Bilan</option>
+                <option value="COMPTE_RENDU">Compte rendu</option>
+                <option value="SUIVI">Suivi</option>
+                <option value="AUTRE">Autre</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date
+              </label>
+              <input 
+                type="date" 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                value={recordFormData.date}
+                onChange={(e) => setRecordFormData({...recordFormData, date: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none" 
+                rows="3"
+                value={recordFormData.description}
+                onChange={(e) => setRecordFormData({...recordFormData, description: e.target.value})}
+                placeholder="Description courte du dossier..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Contenu détaillé
+              </label>
+              <textarea 
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none" 
+                rows="5"
+                value={recordFormData.contenu}
+                onChange={(e) => setRecordFormData({...recordFormData, contenu: e.target.value})}
+                placeholder="Contenu détaillé du dossier médical..."
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
               <button 
-                className="text-gray-400 hover:text-gray-600"
+                type="button"
+                className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 onClick={() => {
                   setShowEditModal(false)
                   resetRecordForm()
                 }}
               >
-                <X className="h-6 w-6" />
+                Annuler
+              </button>
+              <button 
+                type="submit"
+                className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Mise à jour...</span>
+                  </>
+                ) : (
+                  <span>Mettre à jour</span>
+                )}
               </button>
             </div>
-            <form onSubmit={handleUpdateRecord}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Patient
-                  </label>
-                  <input 
-                    type="text" 
-                    className="input-field bg-gray-50"
-                    value={`${selectedRecord.patient.prenom} ${selectedRecord.patient.nom}`}
-                    disabled
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Titre *
-                  </label>
-                  <input 
-                    type="text" 
-                    className="input-field"
-                    value={recordFormData.titre}
-                    onChange={(e) => setRecordFormData({...recordFormData, titre: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type *
-                  </label>
-                  <select 
-                    className="input-field"
-                    value={recordFormData.type}
-                    onChange={(e) => setRecordFormData({...recordFormData, type: e.target.value})}
-                    required
-                  >
-                    <option value="DIAGNOSTIC">Diagnostic</option>
-                    <option value="PRESCRIPTION">Prescription</option>
-                    <option value="BILAN">Bilan</option>
-                    <option value="COMPTE_RENDU">Compte rendu</option>
-                    <option value="SUIVI">Suivi</option>
-                    <option value="AUTRE">Autre</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date
-                  </label>
-                  <input 
-                    type="date" 
-                    className="input-field"
-                    value={recordFormData.date}
-                    onChange={(e) => setRecordFormData({...recordFormData, date: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea 
-                    className="input-field" 
-                    rows="3"
-                    value={recordFormData.description}
-                    onChange={(e) => setRecordFormData({...recordFormData, description: e.target.value})}
-                    placeholder="Description courte du dossier..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contenu détaillé
-                  </label>
-                  <textarea 
-                    className="input-field" 
-                    rows="5"
-                    value={recordFormData.contenu}
-                    onChange={(e) => setRecordFormData({...recordFormData, contenu: e.target.value})}
-                    placeholder="Contenu détaillé du dossier médical..."
-                  />
-                </div>
-              </div>
-              <div className="flex space-x-3 mt-6">
-                <button 
-                  type="button"
-                  className="btn-secondary flex-1"
-                  onClick={() => {
-                    setShowEditModal(false)
-                    resetRecordForm()
-                  }}
-                >
-                  Annuler
-                </button>
-                <button 
-                  type="submit"
-                  className="btn-primary flex-1"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Mise à jour...
-                    </>
-                  ) : (
-                    'Mettre à jour'
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+          </form>
+        </Modal>
       )}
 
       {/* Record Details Modal */}
       {showRecordModal && selectedRecord && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold">
-                Dossier médical - {selectedRecord.patient.prenom} {selectedRecord.patient.nom}
-              </h3>
-              <button 
-                className="text-gray-400 hover:text-gray-600"
-                onClick={() => setShowRecordModal(false)}
+        <Modal
+          isOpen={showRecordModal}
+          onClose={() => setShowRecordModal(false)}
+          title={`Dossier médical - ${selectedRecord.patient.prenom} ${selectedRecord.patient.nom}`}
+          size="xl"
+        >
+          {/* Tabs */}
+          <div className="border-b border-gray-200 mb-4 sm:mb-6">
+            <nav className="-mb-px flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-8">
+              <button
+                className={`py-2 px-1 border-b-2 font-medium text-sm text-center sm:text-left ${
+                  activeTab === 'documents'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+                onClick={() => setActiveTab('documents')}
               >
-                <X className="h-6 w-6" />
+                Documents ({selectedRecord.documents?.length || 0})
               </button>
-            </div>
+              <button
+                className={`py-2 px-1 border-b-2 font-medium text-sm text-center sm:text-left ${
+                  activeTab === 'notes'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+                onClick={() => setActiveTab('notes')}
+              >
+                Notes de traitement ({selectedRecord.treatmentNotes?.length || 0})
+              </button>
+            </nav>
+          </div>
 
-            {/* Tabs */}
-            <div className="border-b border-gray-200 mb-6">
-              <nav className="-mb-px flex space-x-8">
-                <button
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'documents'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                  onClick={() => setActiveTab('documents')}
-                >
-                  Documents ({selectedRecord.documents?.length || 0})
-                </button>
-                <button
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'notes'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                  onClick={() => setActiveTab('notes')}
-                >
-                  Notes de traitement ({selectedRecord.treatmentNotes?.length || 0})
-                </button>
-              </nav>
-            </div>
-
-            {/* Record Info */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium text-gray-900">{selectedRecord.titre}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{selectedRecord.description}</p>
-                  <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRecordTypeColor(selectedRecord.type)}`}>
-                      {selectedRecord.type}
-                    </span>
-                    <span>Le {formatDate(selectedRecord.date)}</span>
-                    <span>Par {selectedRecord.createdBy.name}</span>
-                  </div>
-                </div>
-                <div>
-                  <h5 className="font-medium text-gray-900 mb-2">Patient</h5>
-                  <p className="text-sm text-gray-600">
-                    {selectedRecord.patient.prenom} {selectedRecord.patient.nom}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Dossier #{selectedRecord.patient.numeroDossier}
-                  </p>
+          {/* Record Info */}
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <h4 className="text-sm sm:text-base font-medium text-gray-900 mb-2">{selectedRecord.titre}</h4>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">{selectedRecord.description}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-0">
+                  <span>Type: {selectedRecord.type}</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span>Date: {formatDate(selectedRecord.date)}</span>
                 </div>
               </div>
-              {selectedRecord.contenu && (
-                <div className="mt-4">
-                  <h5 className="font-medium text-gray-900 mb-2">Contenu</h5>
-                  <div className="bg-white rounded p-3 text-sm text-gray-700 whitespace-pre-wrap">
-                    {selectedRecord.contenu}
-                  </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                <button 
+                  className="btn-secondary text-sm flex items-center justify-center w-full sm:w-auto"
+                  onClick={() => {
+                    setShowRecordModal(false)
+                    openEditModal(selectedRecord)
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Modifier
+                </button>
+                <button 
+                  className="btn-primary text-sm flex items-center justify-center w-full sm:w-auto"
+                  onClick={() => {
+                    setShowRecordModal(false)
+                    openNoteModal(selectedRecord.patientId)
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter note
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Documents Tab */}
+          {activeTab === 'documents' && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h4 className="text-base sm:text-lg font-medium text-gray-900">Documents médicaux</h4>
+                <button className="btn-primary text-sm flex items-center justify-center w-full sm:w-auto">
+                  <Upload className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Ajouter document</span>
+                  <span className="sm:hidden">Ajouter</span>
+                </button>
+              </div>
+              {selectedRecord.documents && selectedRecord.documents.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                  {selectedRecord.documents.map((document) => (
+                    <div key={document.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                          {getFileIcon(document.type)}
+                          <div className="flex-1 min-w-0">
+                            <h5 className="font-medium text-gray-900 text-sm sm:text-base truncate">{document.nom}</h5>
+                            <p className="text-xs sm:text-sm text-gray-600">
+                              {document.taille ? `${Math.round(document.taille / 1024)} KB` : 'Taille inconnue'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatDate(document.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-1 ml-2">
+                          <button className="p-1 hover:bg-gray-100 rounded" title="Voir">
+                            <Eye className="h-4 w-4 text-gray-600" />
+                          </button>
+                          <button className="p-1 hover:bg-gray-100 rounded" title="Télécharger">
+                            <Download className="h-4 w-4 text-gray-600" />
+                          </button>
+                          <button className="p-1 hover:bg-gray-100 rounded" title="Supprimer">
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <File className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">Aucun document associé à ce dossier</p>
                 </div>
               )}
             </div>
+          )}
 
-            {/* Documents Tab */}
-            {activeTab === 'documents' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-lg font-medium text-gray-900">Documents médicaux</h4>
-                  <button className="btn-primary text-sm">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Ajouter document
-                  </button>
-                </div>
-                {selectedRecord.documents && selectedRecord.documents.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {selectedRecord.documents.map((document) => (
-                      <div key={document.id} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-3">
-                            {getFileIcon(document.type)}
-                            <div>
-                              <h5 className="font-medium text-gray-900">{document.nom}</h5>
-                              <p className="text-sm text-gray-600">
-                                {document.taille ? `${Math.round(document.taille / 1024)} KB` : 'Taille inconnue'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {formatDate(document.createdAt)}
-                              </p>
-                            </div>
+          {/* Notes Tab */}
+          {activeTab === 'notes' && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h4 className="text-base sm:text-lg font-medium text-gray-900">Notes de traitement</h4>
+                <button 
+                  className="btn-primary text-sm flex items-center justify-center w-full sm:w-auto"
+                  onClick={() => openNoteModal(selectedRecord.patient.id)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Ajouter note</span>
+                  <span className="sm:hidden">Ajouter</span>
+                </button>
+              </div>
+              {selectedRecord.treatmentNotes && selectedRecord.treatmentNotes.length > 0 ? (
+                <div className="space-y-3 sm:space-y-4">
+                  {selectedRecord.treatmentNotes.map((note) => (
+                    <div key={note.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-2">
+                            <h5 className="font-medium text-gray-900 text-sm sm:text-base">
+                              {note.titre || 'Note sans titre'}
+                            </h5>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${note.isPrivee ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'} mt-1 sm:mt-0`}>
+                              {note.isPrivee ? 'Privée' : 'Publique'}
+                            </span>
                           </div>
-                          <div className="flex items-center space-x-1">
-                            <button className="p-1 hover:bg-gray-100 rounded">
-                              <Eye className="h-4 w-4 text-gray-600" />
-                            </button>
-                            <button className="p-1 hover:bg-gray-100 rounded">
-                              <Download className="h-4 w-4 text-gray-600" />
-                            </button>
-                            <button className="p-1 hover:bg-gray-100 rounded">
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </button>
+                          <p className="text-xs sm:text-sm text-gray-600 mb-2">{note.contenu}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs text-gray-500 space-y-1 sm:space-y-0">
+                            <span>Type: {note.type}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>Par {note.createdBy.name}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>Le {formatDate(note.createdAt)}</span>
                           </div>
                         </div>
+                        <div className="flex items-center space-x-2">
+                          <button 
+                            className="text-red-600 hover:text-red-800 p-2 rounded border border-red-200 hover:bg-red-50"
+                            onClick={() => handleDeleteNote(note.id)}
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <File className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">Aucun document associé à ce dossier</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Notes Tab */}
-            {activeTab === 'notes' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-lg font-medium text-gray-900">Notes de traitement</h4>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">Aucune note de traitement associée à ce dossier</p>
                   <button 
-                    className="btn-primary text-sm"
+                    className="btn-primary mt-4 flex items-center justify-center w-full sm:w-auto"
                     onClick={() => openNoteModal(selectedRecord.patient.id)}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Ajouter note
+                    Ajouter la première note
                   </button>
                 </div>
-                {selectedRecord.treatmentNotes && selectedRecord.treatmentNotes.length > 0 ? (
-                  <div className="space-y-4">
-                    {selectedRecord.treatmentNotes.map((note) => (
-                      <div key={note.id} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center space-x-2">
-                            <Calendar className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm font-medium text-gray-900">
-                              {formatDate(note.createdAt)}
-                            </span>
-                            {note.titre && (
-                              <span className="text-sm font-medium text-gray-700">
-                                - {note.titre}
-                              </span>
-                            )}
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              note.type === 'CLINIQUE' ? 'bg-blue-100 text-blue-800' :
-                              note.type === 'URGENCE' ? 'bg-red-100 text-red-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {note.type}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <button className="p-1 hover:bg-gray-100 rounded">
-                              <Edit className="h-4 w-4 text-gray-600" />
-                            </button>
-                            <button 
-                              className="p-1 hover:bg-gray-100 rounded"
-                              onClick={() => handleDeleteNote(note.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </button>
-                          </div>
-                        </div>
-                        <p className="text-gray-700 mb-2 whitespace-pre-wrap">{note.contenu}</p>
-                        <p className="text-xs text-gray-500">
-                          Par {note.createdBy.name} ({note.createdBy.role})
-                          {note.treatment && ` - Traitement: ${note.treatment.nom}`}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">Aucune note de traitement pour ce patient</p>
-                    <button 
-                      className="btn-primary mt-4"
-                      onClick={() => openNoteModal(selectedRecord.patient.id)}
-                    >
-                      Ajouter la première note
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
+              )}
+            </div>
+          )}
+        </Modal>
       )}
 
       {/* Add Note Modal */}
-      {showNoteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Ajouter une note</h3>
-              <button 
-                className="text-gray-400 hover:text-gray-600"
-                onClick={() => {
-                  setShowNoteModal(false)
-                  resetNoteForm()
-                }}
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <form onSubmit={handleCreateNote}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Patient *
-                  </label>
-                  <select 
-                    className="input-field"
-                    value={noteFormData.patientId}
-                    onChange={(e) => setNoteFormData({...noteFormData, patientId: e.target.value})}
-                    required
-                  >
-                    <option value="">Sélectionner un patient</option>
-                    {patients.map(patient => (
-                      <option key={patient.id} value={patient.id}>
-                        {patient.prenom} {patient.nom} - {patient.numeroDossier}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Titre (optionnel)
-                  </label>
-                  <input 
-                    type="text" 
-                    className="input-field"
-                    value={noteFormData.titre}
-                    onChange={(e) => setNoteFormData({...noteFormData, titre: e.target.value})}
-                    placeholder="Titre de la note..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type *
-                  </label>
-                  <select 
-                    className="input-field"
-                    value={noteFormData.type}
-                    onChange={(e) => setNoteFormData({...noteFormData, type: e.target.value})}
-                    required
-                  >
-                    <option value="GENERALE">Générale</option>
-                    <option value="CLINIQUE">Clinique</option>
-                    <option value="ADMINISTRATIVE">Administrative</option>
-                    <option value="SUIVI">Suivi</option>
-                    <option value="URGENCE">Urgence</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contenu *
-                  </label>
-                  <textarea 
-                    className="input-field" 
-                    rows="6"
-                    value={noteFormData.contenu}
-                    onChange={(e) => setNoteFormData({...noteFormData, contenu: e.target.value})}
-                    placeholder="Contenu de la note..."
-                    required
-                  />
-                </div>
-                <div className="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                    checked={noteFormData.isPrivee}
-                    onChange={(e) => setNoteFormData({...noteFormData, isPrivee: e.target.checked})}
-                  />
-                  <label className="ml-2 text-sm text-gray-700">
-                    Note privée (visible uniquement par le créateur)
-                  </label>
-                </div>
-              </div>
-              <div className="flex space-x-3 mt-6">
-                <button 
-                  type="button"
-                  className="btn-secondary flex-1"
-                  onClick={() => {
-                    setShowNoteModal(false)
-                    resetNoteForm()
-                  }}
-                >
-                  Annuler
-                </button>
-                <button 
-                  type="submit"
-                  className="btn-primary flex-1"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Ajout...
-                    </>
-                  ) : (
-                    'Ajouter'
-                  )}
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showNoteModal}
+        onClose={() => {
+          setShowNoteModal(false)
+          resetNoteForm()
+        }}
+        title="Ajouter une note"
+        size="lg"
+      >
+        <form onSubmit={handleCreateNote} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Patient *
+            </label>
+            <select 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              value={noteFormData.patientId}
+              onChange={(e) => setNoteFormData({...noteFormData, patientId: e.target.value})}
+              required
+            >
+              <option value="">Sélectionner un patient</option>
+              {patients.map(patient => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.prenom} {patient.nom} - {patient.numeroDossier}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
-      )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Titre (optionnel)
+            </label>
+            <input 
+              type="text" 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              value={noteFormData.titre}
+              onChange={(e) => setNoteFormData({...noteFormData, titre: e.target.value})}
+              placeholder="Titre de la note..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Type *
+            </label>
+            <select 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              value={noteFormData.type}
+              onChange={(e) => setNoteFormData({...noteFormData, type: e.target.value})}
+              required
+            >
+              <option value="GENERALE">Générale</option>
+              <option value="CLINIQUE">Clinique</option>
+              <option value="ADMINISTRATIVE">Administrative</option>
+              <option value="SUIVI">Suivi</option>
+              <option value="URGENCE">Urgence</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Contenu *
+            </label>
+            <textarea 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none" 
+              rows="6"
+              value={noteFormData.contenu}
+              onChange={(e) => setNoteFormData({...noteFormData, contenu: e.target.value})}
+              placeholder="Contenu de la note..."
+              required
+            />
+          </div>
+          <div className="flex items-center">
+            <input 
+              type="checkbox" 
+              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+              checked={noteFormData.isPrivee}
+              onChange={(e) => setNoteFormData({...noteFormData, isPrivee: e.target.checked})}
+            />
+            <label className="ml-2 text-sm text-gray-700">
+              Note privée (visible uniquement par le créateur)
+            </label>
+          </div>
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+            <button 
+              type="button"
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              onClick={() => {
+                setShowNoteModal(false)
+                resetNoteForm()
+              }}
+            >
+              Annuler
+            </button>
+            <button 
+              type="submit"
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Ajout...</span>
+                </>
+              ) : (
+                <span>Ajouter</span>
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </DashboardLayout>
   )
 } 

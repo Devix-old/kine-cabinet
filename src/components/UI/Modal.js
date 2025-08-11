@@ -52,11 +52,11 @@ export default function Modal({
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div 
-          className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden`}
+          className={`relative bg-white rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+          <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
             <div className="flex items-center space-x-3">
               <div className="w-2 h-8 bg-blue-600 rounded-full"></div>
               <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
@@ -72,7 +72,7 @@ export default function Modal({
           </div>
 
           {/* Content */}
-          <div className="overflow-y-auto custom-scrollbar">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
             <div className="p-6">
               {children}
             </div>

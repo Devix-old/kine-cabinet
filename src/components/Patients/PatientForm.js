@@ -112,9 +112,9 @@ export default function PatientForm({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-4">
       {/* Section Navigation */}
-      <div className="flex space-x-1 bg-gray-50 p-1 rounded-xl">
+      <div className="flex space-x-1 bg-gray-50 p-1 rounded-xl sticky top-0 z-10">
         {sections.map((section) => {
           const Icon = section.icon
           return (
@@ -135,7 +135,7 @@ export default function PatientForm({
       </div>
 
       {/* Form Content */}
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-8">
         {sections.map((section) => (
           <div
             key={section.id}
@@ -174,33 +174,33 @@ export default function PatientForm({
         ))}
 
         {/* Form Actions */}
-        <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
-            <AlertTriangle className="w-4 h-4" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-6 sm:pt-8 border-t border-gray-100 bg-white sticky bottom-0 space-y-4 sm:space-y-0">
+          <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
+            <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
             <span>Les champs marqués d'un * sont obligatoires</span>
           </div>
           
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-3 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors duration-200 font-medium"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors duration-200 font-medium"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center space-x-2"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center justify-center space-x-2"
             >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Enregistrement...</span>
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm sm:text-base">Enregistrement...</span>
                 </>
               ) : (
                 <>
-                  <span>{mode === 'create' ? 'Créer le patient' : 'Modifier le patient'}</span>
+                  <span className="text-sm sm:text-base">{mode === 'create' ? 'Créer le patient' : 'Modifier le patient'}</span>
                 </>
               )}
             </button>

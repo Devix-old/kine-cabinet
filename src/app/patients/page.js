@@ -230,45 +230,46 @@ export default function PatientsPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Patients</h1>
-          <p className="text-gray-600">Gérez vos patients</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Patients</h1>
+          <p className="text-sm sm:text-base text-gray-600">Gérez vos patients</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-primary flex items-center"
+          className="btn-primary flex items-center justify-center w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Nouveau patient
+          <span className="hidden sm:inline">Nouveau patient</span>
+          <span className="sm:hidden">Ajouter</span>
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-          <div className="text-gray-600">Total patients</div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <div className="text-lg sm:text-2xl font-bold text-blue-600">{stats.total}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Total patients</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-green-600">{stats.active}</div>
-          <div className="text-gray-600">Patients actifs</div>
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <div className="text-lg sm:text-2xl font-bold text-green-600">{stats.active}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Patients actifs</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-purple-600">{stats.newThisMonth}</div>
-          <div className="text-gray-600">Nouveaux ce mois</div>
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <div className="text-lg sm:text-2xl font-bold text-purple-600">{stats.newThisMonth}</div>
+          <div className="text-xs sm:text-sm text-gray-600">Nouveaux ce mois</div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-orange-600">{stats.appointmentsThisWeek}</div>
-          <div className="text-gray-600">RDV cette semaine</div>
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <div className="text-lg sm:text-2xl font-bold text-orange-600">{stats.appointmentsThisWeek}</div>
+          <div className="text-xs sm:text-sm text-gray-600">RDV cette semaine</div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -277,14 +278,14 @@ export default function PatientsPage() {
                 placeholder="Rechercher un patient..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
             </div>
           </div>
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           >
             <option value="all">Tous les statuts</option>
             <option value="active">Actifs</option>
@@ -301,77 +302,131 @@ export default function PatientsPage() {
             <p className="mt-2 text-gray-600">Chargement des patients...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Patient
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPatients.map((patient) => (
-                  <tr key={patient.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {patient.prenom} {patient.nom}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {patient.numeroDossier}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{patient.telephone}</div>
-                      <div className="text-sm text-gray-500">{patient.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        patient.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {patient.isActive ? 'Actif' : 'Inactif'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEdit(patient)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePatient(patient.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop Table */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Patient
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Contact
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredPatients.map((patient) => (
+                    <tr key={patient.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {patient.prenom} {patient.nom}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {patient.numeroDossier}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{patient.telephone}</div>
+                        <div className="text-sm text-gray-500">{patient.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          patient.isActive 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {patient.isActive ? 'Actif' : 'Inactif'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEdit(patient)}
+                            className="text-blue-600 hover:text-blue-900 p-1"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeletePatient(patient.id)}
+                            className="text-red-600 hover:text-red-900 p-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="lg:hidden">
+              {filteredPatients.map((patient) => (
+                <div key={patient.id} className="p-4 border-b border-gray-200 hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-sm font-medium text-gray-900">
+                        {patient.prenom} {patient.nom}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Dossier: {patient.numeroDossier}
+                      </p>
+                    </div>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      patient.isActive 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {patient.isActive ? 'Actif' : 'Inactif'}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-1 mb-3">
+                    <div className="text-xs text-gray-600">
+                      <span className="font-medium">Tél:</span> {patient.telephone || 'Non renseigné'}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      <span className="font-medium">Email:</span> {patient.email || 'Non renseigné'}
+                    </div>
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEdit(patient)}
+                      className="flex-1 bg-blue-50 text-blue-600 py-2 px-3 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                    >
+                      <Edit className="h-3 w-3 inline mr-1" />
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => handleDeletePatient(patient.id)}
+                      className="flex-1 bg-red-50 text-red-600 py-2 px-3 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3 inline mr-1" />
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
             
             {filteredPatients.length === 0 && !loading && (
               <div className="p-8 text-center text-gray-500">
                 Aucun patient trouvé
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
 

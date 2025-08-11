@@ -104,8 +104,8 @@ export default function StatisticsPage() {
     }).format(amount)
   }
 
-  const getPeriodLabel = () => {
-    switch (selectedPeriod) {
+  const getPeriodLabel = (period) => {
+    switch (period) {
       case 'week': return 'cette semaine'
       case 'quarter': return 'ce trimestre'
       case 'year': return 'cette année'
@@ -128,357 +128,329 @@ export default function StatisticsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Statistiques & Rapports</h1>
-            <p className="text-gray-600 mt-2">
-              Analysez les performances de votre cabinet ({getPeriodLabel()})
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Statistiques</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+              Analysez les performances de votre cabinet
             </p>
           </div>
-          <div className="mt-4 lg:mt-0 flex space-x-3">
-            <select 
-              className="input-field"
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-            >
-              <option value="week">Cette semaine</option>
-              <option value="month">Ce mois</option>
-              <option value="quarter">Ce trimestre</option>
-              <option value="year">Cette année</option>
-            </select>
-            <button 
-              className="btn-secondary flex items-center"
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <button
               onClick={() => handleExport('summary')}
               disabled={isExporting}
+              className="btn-secondary flex items-center justify-center w-full sm:w-auto"
             >
               {isExporting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
                 <Download className="h-4 w-4 mr-2" />
               )}
-              Synthèse
-            </button>
-            <button 
-              className="btn-primary flex items-center"
-              onClick={() => handleExport('detailed')}
-              disabled={isExporting}
-            >
-              {isExporting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <FileText className="h-4 w-4 mr-2" />
-              )}
-              Détaillé
+              <span className="hidden sm:inline">Exporter rapport</span>
+              <span className="sm:hidden">Exporter</span>
             </button>
           </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="card">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-blue-500">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Patients {getPeriodLabel()}</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.metrics.patients.current}</p>
-                <div className={`text-sm flex items-center ${getGrowthColor(statistics.metrics.patients.growthRate)}`}>
-                  {getGrowthIcon(statistics.metrics.patients.growthRate)}
-                  <span className="ml-1">{getGrowthRate(statistics.metrics.patients.growthRate)}</span>
-                </div>
-              </div>
+        {/* Period Filter */}
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Période:</span>
             </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-green-500">
-                <Activity className="h-6 w-6 text-white" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Séances {getPeriodLabel()}</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.metrics.sessions.current}</p>
-                <div className={`text-sm flex items-center ${getGrowthColor(statistics.metrics.sessions.growthRate)}`}>
-                  {getGrowthIcon(statistics.metrics.sessions.growthRate)}
-                  <span className="ml-1">{getGrowthRate(statistics.metrics.sessions.growthRate)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-purple-500">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Revenus {getPeriodLabel()}</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(statistics.metrics.revenue.current)}</p>
-                <div className={`text-sm flex items-center ${getGrowthColor(statistics.metrics.revenue.growthRate)}`}>
-                  {getGrowthIcon(statistics.metrics.revenue.growthRate)}
-                  <span className="ml-1">{getGrowthRate(statistics.metrics.revenue.growthRate)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-yellow-500">
-                <Target className="h-6 w-6 text-white" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Satisfaction</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.metrics.satisfaction.average}/5</p>
-                <p className="text-sm text-green-600">Excellent</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Revenue/Sessions Chart */}
-          <div className="card">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Évolution sur 6 mois</h3>
-              <div className="flex space-x-2">
-                <button 
-                  className={`px-3 py-1 text-sm rounded ${selectedChart === 'revenue' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
-                  onClick={() => setSelectedChart('revenue')}
+            <div className="flex space-x-2">
+              {['week', 'month', 'quarter', 'year'].map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setSelectedPeriod(period)}
+                  className={`px-3 sm:px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    selectedPeriod === period
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
                 >
-                  Revenus
+                  {getPeriodLabel(period)}
                 </button>
-                <button 
-                  className={`px-3 py-1 text-sm rounded ${selectedChart === 'sessions' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
-                  onClick={() => setSelectedChart('sessions')}
-                >
-                  Séances
-                </button>
-              </div>
-            </div>
-            {statistics.charts.monthly.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={statistics.charts.monthly}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value, name) => [
-                      selectedChart === 'revenue' ? formatCurrency(value) : value,
-                      selectedChart === 'revenue' ? 'Revenus' : 'Séances'
-                    ]}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey={selectedChart === 'revenue' ? 'revenue' : 'sessions'} 
-                    stroke="#3B82F6" 
-                    strokeWidth={2}
-                    dot={{ fill: '#3B82F6', strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <Database className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Pas encore de données pour les graphiques</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Treatment Types */}
-          <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition des traitements</h3>
-            {statistics.charts.treatmentTypes.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={statistics.charts.treatmentTypes}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name} (${value}%)`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {statistics.charts.treatmentTypes.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, 'Pourcentage']} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <Target className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Aucun traitement enregistré</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Weekly Activity */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Activité hebdomadaire</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={statistics.charts.weekly}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="sessions" fill="#3B82F6" name="Séances" />
-              <Bar dataKey="patients" fill="#10B981" name="Patients" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Detailed Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Patient Satisfaction */}
-          <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Satisfaction des patients</h3>
-            <div className="space-y-3">
-              {statistics.metrics.satisfaction.distribution.map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{item.rating}</span>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-32 bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-yellow-500 h-2 rounded-full" 
-                        style={{ width: `${item.percentage}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">{item.count}</span>
-                  </div>
-                </div>
               ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-900">Note moyenne</span>
-                <span className="text-lg font-bold text-gray-900">{statistics.metrics.satisfaction.average}/5</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Performance Summary */}
-          <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Résumé des performances</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <Clock className="h-5 w-5 text-blue-600 mr-3" />
-                  <span className="text-sm font-medium text-gray-700">Temps moyen par séance</span>
-                </div>
-                <span className="text-sm font-bold text-gray-900">{statistics.performance.averageSessionDuration} min</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <Users className="h-5 w-5 text-green-600 mr-3" />
-                  <span className="text-sm font-medium text-gray-700">Nouveaux patients</span>
-                </div>
-                <span className="text-sm font-bold text-gray-900">{statistics.performance.newPatients} {getPeriodLabel()}</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <Target className="h-5 w-5 text-purple-600 mr-3" />
-                  <span className="text-sm font-medium text-gray-700">Taux de réussite</span>
-                </div>
-                <span className="text-sm font-bold text-gray-900">{statistics.performance.successRate}%</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <Calendar className="h-5 w-5 text-yellow-600 mr-3" />
-                  <span className="text-sm font-medium text-gray-700">Taux d'occupation</span>
-                </div>
-                <span className="text-sm font-bold text-gray-900">{statistics.performance.occupancyRate}%</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <Activity className="h-5 w-5 text-indigo-600 mr-3" />
-                  <span className="text-sm font-medium text-gray-700">Traitements actifs</span>
-                </div>
-                <span className="text-sm font-bold text-gray-900">{statistics.performance.activeTreatments}</span>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button 
-              className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              onClick={() => handleExport('summary')}
-              disabled={isExporting}
-            >
-              <Download className="h-5 w-5 text-blue-600 mr-3" />
-              <span className="font-medium">Exporter synthèse</span>
-            </button>
-            <button 
-              className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              onClick={() => handleExport('detailed')}
-              disabled={isExporting}
-            >
-              <BarChart3 className="h-5 w-5 text-green-600 mr-3" />
-              <span className="font-medium">Rapport détaillé</span>
-            </button>
-            <button 
-              className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              onClick={loadStatistics}
-            >
-              <TrendingUp className="h-5 w-5 text-purple-600 mr-3" />
-              <span className="font-medium">Actualiser</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Period Summary */}
-        <div className="card bg-blue-50 border-blue-200">
-          <div className="flex items-start space-x-4">
-            <div className="p-3 bg-blue-500 rounded-lg">
-              <Calendar className="h-6 w-6 text-white" />
+        {loading ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
+              <p className="text-gray-600">Chargement des statistiques...</p>
             </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                Résumé de la période ({getPeriodLabel()})
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <span className="text-blue-700 font-medium">Période:</span>
-                  <p className="text-blue-900">
-                    {new Date(statistics.dateRange.startDate).toLocaleDateString('fr-FR')} - {new Date(statistics.dateRange.endDate).toLocaleDateString('fr-FR')}
-                  </p>
+          </div>
+        ) : statistics ? (
+          <>
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                <div className="flex items-center">
+                  <div className="p-2 sm:p-3 rounded-lg bg-blue-500">
+                    <DollarSign className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Chiffre d'affaires</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                      {formatCurrency(statistics.revenue)}
+                    </p>
+                    <div className="flex items-center mt-1">
+                      {getGrowthIcon(statistics.revenueGrowth)}
+                      <span className={`text-xs ml-1 ${getGrowthColor(statistics.revenueGrowth)}`}>
+                        {getGrowthRate(statistics.revenueGrowth)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-blue-700 font-medium">Patients uniques:</span>
-                  <p className="text-blue-900 font-bold">{statistics.metrics.patients.current}</p>
+              </div>
+
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                <div className="flex items-center">
+                  <div className="p-2 sm:p-3 rounded-lg bg-green-500">
+                    <Users className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Nouveaux patients</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                      {statistics.newPatients}
+                    </p>
+                    <div className="flex items-center mt-1">
+                      {getGrowthIcon(statistics.newPatientsGrowth)}
+                      <span className={`text-xs ml-1 ${getGrowthColor(statistics.newPatientsGrowth)}`}>
+                        {getGrowthRate(statistics.newPatientsGrowth)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-blue-700 font-medium">Séances réalisées:</span>
-                  <p className="text-blue-900 font-bold">{statistics.metrics.sessions.current}</p>
+              </div>
+
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                <div className="flex items-center">
+                  <div className="p-2 sm:p-3 rounded-lg bg-purple-500">
+                    <Calendar className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Rendez-vous</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                      {statistics.appointments}
+                    </p>
+                    <div className="flex items-center mt-1">
+                      {getGrowthIcon(statistics.appointmentsGrowth)}
+                      <span className={`text-xs ml-1 ${getGrowthColor(statistics.appointmentsGrowth)}`}>
+                        {getGrowthRate(statistics.appointmentsGrowth)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-blue-700 font-medium">Revenus générés:</span>
-                  <p className="text-blue-900 font-bold">{formatCurrency(statistics.metrics.revenue.current)}</p>
+              </div>
+
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                <div className="flex items-center">
+                  <div className="p-2 sm:p-3 rounded-lg bg-orange-500">
+                    <Activity className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-xs sm:text-sm font-medium text-gray-600">Taux de remplissage</p>
+                    <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                      {statistics.occupancyRate}%
+                    </p>
+                    <div className="flex items-center mt-1">
+                      {getGrowthIcon(statistics.occupancyRateGrowth)}
+                      <span className={`text-xs ml-1 ${getGrowthColor(statistics.occupancyRateGrowth)}`}>
+                        {getGrowthRate(statistics.occupancyRateGrowth)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Chart Selection */}
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Graphiques</h2>
+                <div className="flex space-x-2">
+                  {[
+                    { value: 'revenue', label: 'Revenus', icon: DollarSign },
+                    { value: 'patients', label: 'Patients', icon: Users },
+                    { value: 'appointments', label: 'RDV', icon: Calendar },
+                    { value: 'treatments', label: 'Traitements', icon: Target }
+                  ].map((chart) => {
+                    const Icon = chart.icon
+                    return (
+                      <button
+                        key={chart.value}
+                        onClick={() => setSelectedChart(chart.value)}
+                        className={`flex items-center space-x-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                          selectedChart === chart.value
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span className="hidden sm:inline">{chart.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              {/* Main Chart */}
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Évolution des {selectedChart === 'revenue' ? 'revenus' : 
+                    selectedChart === 'patients' ? 'nouveaux patients' :
+                    selectedChart === 'appointments' ? 'rendez-vous' : 'traitements'}
+                </h3>
+                <div className="h-64 sm:h-80">
+                  {(statistics.chartData && statistics.chartData.length > 0) ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={statistics.chartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="date" 
+                          fontSize={12}
+                          tick={{ fontSize: 10 }}
+                        />
+                        <YAxis 
+                          fontSize={12}
+                          tick={{ fontSize: 10 }}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            fontSize: '12px'
+                          }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey={selectedChart} 
+                          stroke="#3b82f6" 
+                          strokeWidth={2}
+                          dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-gray-500 text-center">Aucune donnée disponible</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Pie Chart */}
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition par type</h3>
+                <div className="h-64 sm:h-80">
+                  {(statistics.pieData && statistics.pieData.length > 0) ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={statistics.pieData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {statistics.pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444'][index % 4]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'white', 
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            fontSize: '12px'
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-gray-500 text-center">Aucune donnée disponible</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Top 5 Patients</h3>
+                <div className="space-y-3">
+                  {(statistics.topPatients || []).map((patient, index) => (
+                    <div key={patient.id} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-blue-600">{index + 1}</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {patient.prenom} {patient.nom}
+                          </p>
+                          <p className="text-xs text-gray-500">{patient.appointments} RDV</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">
+                        {formatCurrency(patient.revenue)}
+                      </span>
+                    </div>
+                  ))}
+                  {(!statistics.topPatients || statistics.topPatients.length === 0) && (
+                    <p className="text-gray-500 text-center py-4">Aucun patient trouvé</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance par salle</h3>
+                <div className="space-y-3">
+                  {(statistics.roomPerformance || []).map((room) => (
+                    <div key={room.id} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-green-600">🏠</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{room.nom}</p>
+                          <p className="text-xs text-gray-500">{room.appointments} RDV</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">
+                        {room.occupancyRate}%
+                      </span>
+                    </div>
+                  ))}
+                  {(!statistics.roomPerformance || statistics.roomPerformance.length === 0) && (
+                    <p className="text-gray-500 text-center py-4">Aucune salle trouvée</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <Database className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500">Aucune donnée disponible</p>
           </div>
-        </div>
+        )}
       </div>
     </DashboardLayout>
   )

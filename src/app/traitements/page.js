@@ -25,6 +25,7 @@ import {
   X,
   Loader2
 } from 'lucide-react'
+import Modal from '@/components/UI/Modal'
 
 const sessionTypes = [
   { value: 'SEANCE', label: 'Séance' },
@@ -254,97 +255,99 @@ export default function TreatmentsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Suivi des Traitements</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Suivi des Traitements</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
               Suivez l'évolution et les progrès de vos patients
             </p>
           </div>
-          <div className="mt-4 lg:mt-0 flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button 
-              className="btn-secondary flex items-center"
+              className="btn-secondary flex items-center justify-center w-full sm:w-auto"
               onClick={() => openSessionModal()}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Nouvelle séance
+              <span className="hidden sm:inline">Nouvelle séance</span>
+              <span className="sm:hidden">Nouvelle séance</span>
             </button>
             <button 
-              className="btn-primary flex items-center"
+              className="btn-primary flex items-center justify-center w-full sm:w-auto"
               onClick={() => setShowNewTreatmentModal(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Nouveau traitement
+              <span className="hidden sm:inline">Nouveau traitement</span>
+              <span className="sm:hidden">Nouveau</span>
             </button>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="card">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-blue-500">
-                <Activity className="h-6 w-6 text-white" />
+              <div className="p-2 sm:p-3 rounded-lg bg-blue-500">
+                <Activity className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Traitements actifs</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.actif}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Traitements actifs</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.actif}</p>
               </div>
             </div>
           </div>
-          <div className="card">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-green-500">
-                <CheckCircle className="h-6 w-6 text-white" />
+              <div className="p-2 sm:p-3 rounded-lg bg-green-500">
+                <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Traitements terminés</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.termine}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Traitements terminés</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.termine}</p>
               </div>
             </div>
           </div>
-          <div className="card">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-purple-500">
-                <BarChart3 className="h-6 w-6 text-white" />
+              <div className="p-2 sm:p-3 rounded-lg bg-purple-500">
+                <BarChart3 className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Séances total</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalSessions}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Séances total</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.totalSessions}</p>
               </div>
             </div>
           </div>
-          <div className="card">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-yellow-500">
-                <Target className="h-6 w-6 text-white" />
+              <div className="p-2 sm:p-3 rounded-lg bg-yellow-500">
+                <Target className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total traitements</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total traitements</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.total}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="card">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Rechercher un traitement..."
-                  className="input-field pl-10"
+                  className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <select 
-                className="input-field"
+                className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
               >
@@ -360,7 +363,7 @@ export default function TreatmentsPage() {
         {/* Treatments List */}
         <div className="space-y-4">
           {filteredTreatments.length === 0 ? (
-            <div className="card text-center py-8">
+            <div className="bg-white p-6 sm:p-8 rounded-lg shadow text-center">
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500">Aucun traitement trouvé</p>
             </div>
@@ -371,23 +374,23 @@ export default function TreatmentsPage() {
               const previousSession = treatment.sessions[1] // Second most recent
 
               return (
-                <div key={treatment.id} className="card">
-                  <div className="flex items-start justify-between">
+                <div key={treatment.id} className="bg-white p-3 sm:p-4 rounded-lg shadow">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-4 mb-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="h-6 w-6 text-blue-600" />
+                      <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-medium text-gray-900">
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900">
                             {treatment.patient?.prenom} {treatment.patient?.nom}
                           </h3>
                           <p className="text-sm text-gray-600">{treatment.nom}</p>
-                          <div className="flex items-center space-x-4 mt-1">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-1">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(treatment.statut)}`}>
                               {getStatusText(treatment.statut)}
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 mt-1 sm:mt-0">
                               {treatment.sessions.length} séances
                             </span>
                           </div>
@@ -396,14 +399,14 @@ export default function TreatmentsPage() {
 
                       {/* Progress Indicators */}
                       {lastSession && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-gray-700">Douleur</span>
+                              <span className="text-xs sm:text-sm font-medium text-gray-700">Douleur</span>
                               {previousSession && getProgressIcon(lastSession.douleur, previousSession.douleur)}
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className={`text-lg font-bold ${getProgressColor(lastSession.douleur, previousSession?.douleur || lastSession.douleur)}`}>
+                              <span className={`text-sm sm:text-lg font-bold ${getProgressColor(lastSession.douleur, previousSession?.douleur || lastSession.douleur)}`}>
                                 {lastSession.douleur ? `${lastSession.douleur}/10` : 'N/A'}
                               </span>
                               {progress.pain > 0 && (
@@ -414,11 +417,11 @@ export default function TreatmentsPage() {
 
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-gray-700">Progression</span>
-                              <BarChart3 className="h-4 w-4 text-gray-400" />
+                              <span className="text-xs sm:text-sm font-medium text-gray-700">Progression</span>
+                              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-sm text-gray-700 truncate">
+                              <span className="text-xs sm:text-sm text-gray-700 truncate">
                                 {lastSession.progression || 'Aucune note'}
                               </span>
                             </div>
@@ -426,10 +429,10 @@ export default function TreatmentsPage() {
 
                           <div className="bg-gray-50 rounded-lg p-3">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-gray-700">Objectifs</span>
-                              <Target className="h-4 w-4 text-gray-400" />
+                              <span className="text-xs sm:text-sm font-medium text-gray-700">Objectifs</span>
+                              <Target className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
                             </div>
-                            <p className="text-sm text-gray-700 truncate">
+                            <p className="text-xs sm:text-sm text-gray-700 truncate">
                               {treatment.objectifs || 'Non définis'}
                             </p>
                           </div>
@@ -439,29 +442,29 @@ export default function TreatmentsPage() {
                       {/* Last Session */}
                       {lastSession && (
                         <div className="bg-blue-50 rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-700">Dernière séance</span>
-                            <span className="text-xs text-gray-500">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                            <span className="text-xs sm:text-sm font-medium text-gray-700">Dernière séance</span>
+                            <span className="text-xs text-gray-500 mt-1 sm:mt-0">
                               {new Date(lastSession.date).toLocaleDateString('fr-FR')}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-xs sm:text-sm text-gray-700">
                             {lastSession.observations || lastSession.description || 'Aucune note'}
                           </p>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex flex-col space-y-2 ml-4">
+                    <div className="flex flex-col space-y-2 lg:ml-4">
                       <button 
-                        className="btn-secondary text-sm"
+                        className="btn-secondary text-sm flex items-center justify-center w-full lg:w-auto"
                         onClick={() => openTreatmentDetails(treatment)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Détails
                       </button>
                       <button 
-                        className="btn-primary text-sm"
+                        className="btn-primary text-sm flex items-center justify-center w-full lg:w-auto"
                         onClick={() => openSessionModal(treatment)}
                       >
                         <Plus className="h-4 w-4 mr-2" />
@@ -477,355 +480,301 @@ export default function TreatmentsPage() {
       </div>
 
       {/* Treatment Details Modal */}
-      {showTreatmentModal && selectedTreatment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold">
-                Détails du traitement - {selectedTreatment.patient?.prenom} {selectedTreatment.patient?.nom}
-              </h3>
-              <button 
-                className="text-gray-400 hover:text-gray-600"
-                onClick={() => setShowTreatmentModal(false)}
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Treatment Info */}
-              <div className="space-y-4">
-                <div className="card">
-                  <h4 className="text-lg font-medium text-gray-900 mb-4">Informations du traitement</h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Type de traitement</span>
-                      <span className="text-sm font-medium">{selectedTreatment.nom}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Date de début</span>
-                      <span className="text-sm font-medium">
-                        {new Date(selectedTreatment.dateDebut).toLocaleDateString('fr-FR')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Date de fin prévue</span>
-                      <span className="text-sm font-medium">
-                        {selectedTreatment.dateFin ? 
-                          new Date(selectedTreatment.dateFin).toLocaleDateString('fr-FR') : 
-                          'Non définie'
-                        }
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Statut</span>
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedTreatment.statut)}`}>
-                        {getStatusText(selectedTreatment.statut)}
-                      </span>
-                    </div>
-                    {selectedTreatment.description && (
-                      <div>
-                        <span className="text-sm text-gray-600">Description</span>
-                        <p className="text-sm font-medium mt-1">{selectedTreatment.description}</p>
-                      </div>
-                    )}
-                  </div>
+      <Modal
+        isOpen={showTreatmentModal}
+        onClose={() => setShowTreatmentModal(false)}
+        title={`Détails du traitement - ${selectedTreatment?.patient?.prenom} ${selectedTreatment?.patient?.nom}`}
+        size="xl"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Treatment Info */}
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="text-lg font-medium text-gray-900 mb-4">Informations du traitement</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Type de traitement</span>
+                  <span className="text-sm font-medium">{selectedTreatment?.nom}</span>
                 </div>
-
-                {selectedTreatment.objectifs && (
-                  <div className="card">
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">Objectifs</h4>
-                    <p className="text-sm text-gray-700">{selectedTreatment.objectifs}</p>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Date de début</span>
+                  <span className="text-sm font-medium">
+                    {selectedTreatment?.dateDebut ? new Date(selectedTreatment.dateDebut).toLocaleDateString('fr-FR') : 'Non définie'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Date de fin prévue</span>
+                  <span className="text-sm font-medium">
+                    {selectedTreatment?.dateFin ? 
+                      new Date(selectedTreatment.dateFin).toLocaleDateString('fr-FR') : 
+                      'Non définie'
+                    }
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Statut</span>
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedTreatment?.statut)}`}>
+                    {getStatusText(selectedTreatment?.statut)}
+                  </span>
+                </div>
+                {selectedTreatment?.description && (
+                  <div>
+                    <span className="text-sm text-gray-600">Description</span>
+                    <p className="text-sm font-medium mt-1">{selectedTreatment.description}</p>
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Sessions History */}
-              <div className="space-y-4">
-                <div className="card">
-                  <h4 className="text-lg font-medium text-gray-900 mb-4">
-                    Historique des séances ({selectedTreatment.sessions.length})
-                  </h4>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {selectedTreatment.sessions.length === 0 ? (
-                      <p className="text-gray-500 text-center py-4">Aucune séance enregistrée</p>
-                    ) : (
-                      selectedTreatment.sessions.map((session) => (
-                        <div key={session.id} className="border border-gray-200 rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-gray-900">
-                              Séance du {new Date(session.date).toLocaleDateString('fr-FR')}
-                            </span>
-                            <div className="flex items-center space-x-2">
-                              {session.douleur && (
-                                <span className="text-xs text-gray-500">Douleur: {session.douleur}/10</span>
-                              )}
-                              <span className="text-xs text-gray-500">{session.duree}min</span>
-                            </div>
-                          </div>
-                          {session.observations && (
-                            <p className="text-sm text-gray-700 mb-2">{session.observations}</p>
+            {selectedTreatment?.objectifs && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-lg font-medium text-gray-900 mb-4">Objectifs</h4>
+                <p className="text-sm text-gray-700">{selectedTreatment.objectifs}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Sessions History */}
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="text-lg font-medium text-gray-900 mb-4">
+                Historique des séances ({selectedTreatment?.sessions?.length || 0})
+              </h4>
+              <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+                {!selectedTreatment?.sessions || selectedTreatment.sessions.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">Aucune séance enregistrée</p>
+                ) : (
+                  selectedTreatment.sessions.map((session) => (
+                    <div key={session.id} className="border border-gray-200 rounded-lg p-3 bg-white">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-900">
+                          Séance du {new Date(session.date).toLocaleDateString('fr-FR')}
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          {session.douleur && (
+                            <span className="text-xs text-gray-500">Douleur: {session.douleur}/10</span>
                           )}
-                          {session.progression && (
-                            <p className="text-sm text-blue-700">
-                              <strong>Progression:</strong> {session.progression}
-                            </p>
-                          )}
+                          <span className="text-xs text-gray-500">{session.duree}min</span>
                         </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+                      </div>
+                      {session.observations && (
+                        <p className="text-sm text-gray-700 mb-2">{session.observations}</p>
+                      )}
+                      {session.progression && (
+                        <p className="text-sm text-blue-700">
+                          <strong>Progression:</strong> {session.progression}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* New Treatment Modal */}
-      {showNewTreatmentModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Nouveau Traitement</h2>
-              <button 
-                onClick={() => setShowNewTreatmentModal(false)} 
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <form onSubmit={treatmentForm.handleSubmit(handleCreateTreatment)} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Patient</label>
-                <select
-                  {...treatmentForm.register('patientId', { required: 'Patient requis' })}
-                  className="input-field"
-                >
-                  <option value="">Sélectionner un patient</option>
-                  {patients.map(patient => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.prenom} {patient.nom} - {patient.numeroDossier}
-                    </option>
-                  ))}
-                </select>
-                {treatmentForm.formState.errors.patientId && (
-                  <p className="text-red-500 text-xs mt-1">{treatmentForm.formState.errors.patientId.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nom du traitement</label>
-                <input
-                  type="text"
-                  {...treatmentForm.register('nom', { required: 'Nom requis' })}
-                  className="input-field"
-                  placeholder="Ex: Rééducation genou post-opératoire"
-                />
-                {treatmentForm.formState.errors.nom && (
-                  <p className="text-red-500 text-xs mt-1">{treatmentForm.formState.errors.nom.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  {...treatmentForm.register('description')}
-                  rows={3}
-                  className="input-field"
-                  placeholder="Description détaillée du traitement"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Objectifs</label>
-                <textarea
-                  {...treatmentForm.register('objectifs')}
-                  rows={3}
-                  className="input-field"
-                  placeholder="Objectifs thérapeutiques du traitement"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
-                  <input
-                    type="date"
-                    {...treatmentForm.register('dateDebut')}
-                    className="input-field"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Durée estimée (semaines)</label>
-                  <input
-                    type="number"
-                    {...treatmentForm.register('duree')}
-                    className="input-field"
-                    placeholder="12"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date de fin prévue</label>
-                <input
-                  type="date"
-                  {...treatmentForm.register('dateFin')}
-                  className="input-field"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowNewTreatmentModal(false)}
-                  className="btn-secondary"
-                >
-                  Annuler
-                </button>
-                <button type="submit" className="btn-primary">
-                  Créer le traitement
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showNewTreatmentModal}
+        onClose={() => setShowNewTreatmentModal(false)}
+        title="Nouveau Traitement"
+        size="lg"
+      >
+        <form onSubmit={treatmentForm.handleSubmit(handleCreateTreatment)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Patient</label>
+            <select
+              {...treatmentForm.register('patientId', { required: 'Patient requis' })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            >
+              <option value="">Sélectionner un patient</option>
+              {patients.map(patient => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.prenom} {patient.nom} - {patient.numeroDossier}
+                </option>
+              ))}
+            </select>
+            {treatmentForm.formState.errors.patientId && (
+              <p className="text-red-500 text-xs mt-1">{treatmentForm.formState.errors.patientId.message}</p>
+            )}
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nom du traitement</label>
+            <input
+              type="text"
+              {...treatmentForm.register('nom', { required: 'Nom requis' })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              placeholder="Ex: Rééducation genou post-opératoire"
+            />
+            {treatmentForm.formState.errors.nom && (
+              <p className="text-red-500 text-xs mt-1">{treatmentForm.formState.errors.nom.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              {...treatmentForm.register('description')}
+              rows={3}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none"
+              placeholder="Description détaillée du traitement"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Objectifs</label>
+            <textarea
+              {...treatmentForm.register('objectifs')}
+              rows={3}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none"
+              placeholder="Objectifs thérapeutiques du traitement"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
+              <input
+                type="date"
+                {...treatmentForm.register('dateDebut')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Durée estimée (semaines)</label>
+              <input
+                type="number"
+                {...treatmentForm.register('duree')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                placeholder="12"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date de fin prévue</label>
+            <input
+              type="date"
+              {...treatmentForm.register('dateFin')}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowNewTreatmentModal(false)}
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Annuler
+            </button>
+            <button 
+              type="submit" 
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Créer le traitement
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* New Session Modal */}
-      {showSessionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Nouvelle Séance</h2>
-              <button 
-                onClick={() => setShowSessionModal(false)} 
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            
-            <form onSubmit={sessionForm.handleSubmit(handleCreateSession)} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Traitement</label>
-                <select
-                  {...sessionForm.register('treatmentId', { required: 'Traitement requis' })}
-                  className="input-field"
-                  disabled={!!selectedTreatmentForSession}
-                >
-                  <option value="">Sélectionner un traitement</option>
-                  {treatments.filter(t => t.statut === 'ACTIF').map(treatment => (
-                    <option key={treatment.id} value={treatment.id}>
-                      {treatment.patient?.prenom} {treatment.patient?.nom} - {treatment.nom}
-                    </option>
-                  ))}
-                </select>
-                {sessionForm.formState.errors.treatmentId && (
-                  <p className="text-red-500 text-xs mt-1">{sessionForm.formState.errors.treatmentId.message}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date de la séance</label>
-                  <input
-                    type="date"
-                    {...sessionForm.register('date', { required: 'Date requise' })}
-                    className="input-field"
-                  />
-                  {sessionForm.formState.errors.date && (
-                    <p className="text-red-500 text-xs mt-1">{sessionForm.formState.errors.date.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Durée (min)</label>
-                  <input
-                    type="number"
-                    {...sessionForm.register('duree')}
-                    className="input-field"
-                    min="15"
-                    max="180"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type de séance</label>
-                <select
-                  {...sessionForm.register('type')}
-                  className="input-field"
-                >
-                  {sessionTypes.map(type => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Niveau de douleur (0-10)</label>
-                <input
-                  type="number"
-                  {...sessionForm.register('douleur')}
-                  className="input-field"
-                  min="0"
-                  max="10"
-                  placeholder="6"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description de la séance</label>
-                <textarea
-                  {...sessionForm.register('description')}
-                  rows={3}
-                  className="input-field"
-                  placeholder="Exercices réalisés, techniques utilisées..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observations</label>
-                <textarea
-                  {...sessionForm.register('observations')}
-                  rows={3}
-                  className="input-field"
-                  placeholder="État du patient, réactions aux exercices..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Progression</label>
-                <textarea
-                  {...sessionForm.register('progression')}
-                  rows={2}
-                  className="input-field"
-                  placeholder="Évolution, progrès constatés..."
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSessionModal(false)
-                    setSelectedTreatmentForSession(null)
-                    sessionForm.reset()
-                  }}
-                  className="btn-secondary"
-                >
-                  Annuler
-                </button>
-                <button type="submit" className="btn-primary">
-                  Enregistrer la séance
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showSessionModal}
+        onClose={() => setShowSessionModal(false)}
+        title="Nouvelle Séance"
+        size="lg"
+      >
+        <form onSubmit={sessionForm.handleSubmit(handleCreateSession)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Traitement</label>
+            <select
+              {...sessionForm.register('treatmentId', { required: 'Traitement requis' })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              disabled={!!selectedTreatmentForSession}
+            >
+              <option value="">Sélectionner un traitement</option>
+              {treatments.filter(t => t.statut === 'ACTIF').map(treatment => (
+                <option key={treatment.id} value={treatment.id}>
+                  {treatment.nom} - {treatment.patient.prenom} {treatment.patient.nom}
+                </option>
+              ))}
+            </select>
+            {sessionForm.formState.errors.treatmentId && (
+              <p className="text-red-500 text-xs mt-1">{sessionForm.formState.errors.treatmentId.message}</p>
+            )}
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date de la séance</label>
+            <input
+              type="date"
+              {...sessionForm.register('date', { required: 'Date requise' })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            />
+            {sessionForm.formState.errors.date && (
+              <p className="text-red-500 text-xs mt-1">{sessionForm.formState.errors.date.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Durée (minutes)</label>
+            <input
+              type="number"
+              {...sessionForm.register('duree', { required: 'Durée requise' })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              placeholder="45"
+              min="15"
+              max="180"
+            />
+            {sessionForm.formState.errors.duree && (
+              <p className="text-red-500 text-xs mt-1">{sessionForm.formState.errors.duree.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Type de séance</label>
+            <select
+              {...sessionForm.register('type')}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            >
+              <option value="EVALUATION">Évaluation</option>
+              <option value="TRAITEMENT">Traitement</option>
+              <option value="REEDUCATION">Rééducation</option>
+              <option value="CONTROLE">Contrôle</option>
+              <option value="AUTRE">Autre</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Observations</label>
+            <textarea
+              {...sessionForm.register('observations')}
+              rows={4}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none"
+              placeholder="Observations et notes de la séance..."
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowSessionModal(false)}
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Annuler
+            </button>
+            <button 
+              type="submit" 
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Créer la séance
+            </button>
+          </div>
+        </form>
+      </Modal>
     </DashboardLayout>
   )
 } 

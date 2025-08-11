@@ -428,375 +428,300 @@ export default function SettingsPage() {
   }
 
   return (
-    <ProtectedRoute requiredRole="ADMIN">
+    <ProtectedRoute>
       <DashboardLayout>
-        <div className="space-y-6">
+        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
           {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Paramètres</h1>
-            <p className="text-gray-600 mt-2">
-              Configurez votre cabinet et gérez les préférences système
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Paramètres</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+                Configurez votre cabinet et gérez les utilisateurs
+              </p>
+            </div>
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 overflow-x-auto">
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                return (
-                  <button
-                    key={tab.id}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                    onClick={() => setActiveTab(tab.id)}
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    {tab.name}
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-
-          {/* General Settings */}
-          {activeTab === 'general' && (
-            <div className="space-y-6">
-              <div className="card">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Informations du cabinet</h3>
-                  <button
-                    onClick={saveGeneralSettings}
-                    disabled={saving}
-                    className="btn-primary flex items-center"
-                  >
-                    {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                    Sauvegarder
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nom du cabinet
-                    </label>
-                    <input 
-                      type="text" 
-                      className="input-field" 
-                      value={cabinetForm.name}
-                      onChange={(e) => setCabinetForm(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Cabinet de Kinésithérapie..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Adresse
-                    </label>
-                    <input 
-                      type="text" 
-                      className="input-field" 
-                      value={cabinetForm.address}
-                      onChange={(e) => setCabinetForm(prev => ({ ...prev, address: e.target.value }))}
-                      placeholder="123 Rue de la Paix, 75001 Paris"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Téléphone
-                    </label>
-                    <input 
-                      type="tel" 
-                      className="input-field" 
-                      value={cabinetForm.phone}
-                      onChange={(e) => setCabinetForm(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="01 23 45 67 89"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
-                    </label>
-                    <input 
-                      type="email" 
-                      className="input-field" 
-                      value={cabinetForm.email}
-                      onChange={(e) => setCabinetForm(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="contact@cabinet-kine.fr"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Préférences générales</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Langue</h4>
-                      <p className="text-sm text-gray-600">Langue d'affichage de l'application</p>
-                    </div>
-                    <select 
-                      className="input-field w-32"
-                      value={cabinetForm.language}
-                      onChange={(e) => setCabinetForm(prev => ({ ...prev, language: e.target.value }))}
+          <div className="bg-white rounded-lg shadow">
+            <div className="border-b border-gray-200">
+              <nav className="flex flex-col sm:flex-row -mb-px">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center justify-center sm:justify-start px-3 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                        activeTab === tab.id
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
                     >
-                      <option value="fr">Français</option>
-                      <option value="en">English</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Fuseau horaire</h4>
-                      <p className="text-sm text-gray-600">Fuseau horaire local</p>
-                    </div>
-                    <select 
-                      className="input-field w-48"
-                      value={cabinetForm.timezone}
-                      onChange={(e) => setCabinetForm(prev => ({ ...prev, timezone: e.target.value }))}
-                    >
-                      <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
-                      <option value="Europe/London">Europe/London (UTC+0)</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Format de date</h4>
-                      <p className="text-sm text-gray-600">Format d'affichage des dates</p>
-                    </div>
-                    <select 
-                      className="input-field w-32"
-                      value={cabinetForm.dateFormat}
-                      onChange={(e) => setCabinetForm(prev => ({ ...prev, dateFormat: e.target.value }))}
-                    >
-                      <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                      <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                      <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+                      <Icon className="h-4 w-4 mr-2" />
+                      {tab.name}
+                    </button>
+                  )
+                })}
+              </nav>
             </div>
-          )}
 
-          {/* Users Management */}
-          {activeTab === 'users' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900">Gestion des utilisateurs</h3>
-                <button 
-                  className="btn-primary flex items-center"
-                  onClick={() => setShowUserModal(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouvel utilisateur
-                </button>
-              </div>
+            {/* Tab Content */}
+            <div className="p-3 sm:p-6">
+              {activeTab === 'general' && (
+                <div className="space-y-4 sm:space-y-6">
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Informations du cabinet</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nom du cabinet</label>
+                        <input
+                          type="text"
+                          value={cabinetForm.name}
+                          onChange={(e) => setCabinetForm({...cabinetForm, name: e.target.value})}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                        <input
+                          type="tel"
+                          value={cabinetForm.phone}
+                          onChange={(e) => setCabinetForm({...cabinetForm, phone: e.target.value})}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                        <textarea
+                          value={cabinetForm.address}
+                          onChange={(e) => setCabinetForm({...cabinetForm, address: e.target.value})}
+                          rows={3}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input
+                          type="email"
+                          value={cabinetForm.email}
+                          onChange={(e) => setCabinetForm({...cabinetForm, email: e.target.value})}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Langue</label>
+                        <select
+                          value={cabinetForm.language}
+                          onChange={(e) => setCabinetForm({...cabinetForm, language: e.target.value})}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                        >
+                          <option value="fr">Français</option>
+                          <option value="en">English</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="mt-4 sm:mt-6">
+                      <button
+                        onClick={saveGeneralSettings}
+                        disabled={saving}
+                        className="btn-primary flex items-center justify-center w-full sm:w-auto"
+                      >
+                        {saving ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Save className="h-4 w-4 mr-2" />
+                        )}
+                        Sauvegarder
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-              <div className="card">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Utilisateur
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Rôle
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Statut
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {users.map((user) => (
-                        <tr key={user.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                              <div className="text-sm text-gray-500">{user.email}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
-                              {getRoleLabel(user.role)}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.isActive)}`}>
-                              {user.isActive ? <CheckCircle className="w-3 h-3 mr-1" /> : <XCircle className="w-3 h-3 mr-1" />}
-                              {user.isActive ? 'Actif' : 'Inactif'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex items-center space-x-2">
-                              <button 
-                                className="text-blue-600 hover:text-blue-900"
+              {activeTab === 'users' && (
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Gestion des utilisateurs</h2>
+                    <button
+                      onClick={() => setShowUserModal(true)}
+                      className="btn-primary flex items-center justify-center w-full sm:w-auto"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">Ajouter un utilisateur</span>
+                      <span className="sm:hidden">Ajouter</span>
+                    </button>
+                  </div>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                            Utilisateur
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                            Rôle
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                            Statut
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {users.map((user) => (
+                          <tr key={user.id}>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                <div className="text-sm text-gray-500">{user.email}</div>
+                              </div>
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                                {getRoleLabel(user.role)}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.isActive)}`}>
+                                {user.isActive ? (
+                                  <>
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Actif
+                                  </>
+                                ) : (
+                                  <>
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    Inactif
+                                  </>
+                                )}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
                                 onClick={() => handleEditUser(user)}
+                                className="text-blue-600 hover:text-blue-900 mr-3"
                               >
                                 <Edit className="h-4 w-4" />
                               </button>
-                              {user.isActive && (
-                                <button 
-                                  className="text-red-600 hover:text-red-900"
-                                  onClick={() => {/* handleDeleteUser(user) */}}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Rooms Management */}
-          {activeTab === 'rooms' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900">Gestion des salles</h3>
-                <button 
-                  className="btn-primary flex items-center"
-                  onClick={() => setShowRoomModal(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouvelle salle
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {rooms.map((room) => (
-                  <div key={room.id} className="card">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-medium text-gray-900">{room.nom}</h4>
-                      <div className="flex items-center space-x-2">
-                        <button 
-                          className="text-blue-600 hover:text-blue-900"
-                          onClick={() => handleEditRoom(room)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button 
-                          className="text-red-600 hover:text-red-900"
-                          onClick={() => handleDeleteRoom(room.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">Capacité: {room.capacite} patient(s)</p>
-                      <div className="flex items-center">
-                        <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(room.isActive)}`}>
-                          {room.isActive ? <CheckCircle className="w-3 h-3 mr-1" /> : <XCircle className="w-3 h-3 mr-1" />}
-                          {room.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </div>
-                      {room.equipement && room.equipement.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium text-gray-700 mb-1">Équipements:</p>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            {room.equipement.map((item, index) => (
-                              <li key={index} className="flex items-center">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Tariffs Management */}
-          {activeTab === 'tariffs' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900">Gestion des tarifs</h3>
-                <button 
-                  className="btn-primary flex items-center"
-                  onClick={() => setShowTariffModal(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouveau tarif
-                </button>
-              </div>
-
-              <div className="card">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Nom
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Montant
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Durée
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Description
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {tariffs.map((tariff) => (
-                        <tr key={tariff.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{tariff.nom}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{tariff.montant}€</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{tariff.duree} min</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900 max-w-xs truncate">{tariff.description}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex items-center space-x-2">
-                              <button 
-                                className="text-blue-600 hover:text-blue-900"
-                                onClick={() => handleEditTariff(tariff)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </button>
-                              <button 
-                                className="text-red-600 hover:text-red-900"
-                                onClick={() => handleDeleteTariff(tariff.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
-              </div>
+              )}
+
+              {activeTab === 'rooms' && (
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Gestion des salles</h2>
+                    <button
+                      onClick={() => setShowRoomModal(true)}
+                      className="btn-primary flex items-center justify-center w-full sm:w-auto"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">Ajouter une salle</span>
+                      <span className="sm:hidden">Ajouter</span>
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {rooms.map((room) => (
+                      <div key={room.id} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-sm sm:text-base font-medium text-gray-900">{room.nom}</h3>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1">Capacité: {room.capacite} personne(s)</p>
+                            {room.equipement && (
+                              <p className="text-xs sm:text-sm text-gray-500 mt-1">{room.equipement}</p>
+                            )}
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-2 ${getStatusColor(room.isActive)}`}>
+                              {room.isActive ? (
+                                <>
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Active
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="h-3 w-3 mr-1" />
+                                  Inactive
+                                </>
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex space-x-2 ml-4">
+                            <button
+                              onClick={() => handleEditRoom(room)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteRoom(room.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'tariffs' && (
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Gestion des tarifs</h2>
+                    <button
+                      onClick={() => setShowTariffModal(true)}
+                      className="btn-primary flex items-center justify-center w-full sm:w-auto"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">Ajouter un tarif</span>
+                      <span className="sm:hidden">Ajouter</span>
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {tariffs.map((tariff) => (
+                      <div key={tariff.id} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-sm sm:text-base font-medium text-gray-900">{tariff.nom}</h3>
+                            <p className="text-lg sm:text-xl font-bold text-blue-600 mt-1">{tariff.montant}€</p>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1">Durée: {tariff.duree} minutes</p>
+                            {tariff.description && (
+                              <p className="text-xs sm:text-sm text-gray-500 mt-1">{tariff.description}</p>
+                            )}
+                          </div>
+                          <div className="flex space-x-2 ml-4">
+                            <button
+                              onClick={() => handleEditTariff(tariff)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTariff(tariff.id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Modals */}

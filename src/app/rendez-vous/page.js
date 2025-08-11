@@ -23,6 +23,7 @@ import {
   Activity,
   Target
 } from 'lucide-react'
+import Modal from '@/components/UI/Modal'
 
 const timeSlots = [
   '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
@@ -665,356 +666,350 @@ export default function AppointmentsPage() {
       </div>
 
       {/* Add Appointment Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Nouveau Rendez-vous</h2>
-              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="h-6 w-6" />
-              </button>
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Nouveau Rendez-vous"
+        size="lg"
+      >
+        <form onSubmit={handleSubmit(handleCreateAppointment)} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input
+                type="date"
+                {...register('date', { required: 'Date requise' })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              />
+              {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
             </div>
-            
-            <form onSubmit={handleSubmit(handleCreateAppointment)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    {...register('date', { required: 'Date requise' })}
-                    className="input-field"
-                  />
-                  {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Heure</label>
-                  <input
-                    type="time"
-                    {...register('time', { required: 'Heure requise' })}
-                    className="input-field"
-                  />
-                  {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Patient</label>
-                <select
-                  {...register('patientId', { required: 'Patient requis' })}
-                  className="input-field"
-                >
-                  <option value="">Sélectionner un patient</option>
-                  {patients.map(patient => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.prenom} {patient.nom} - {patient.numeroDossier}
-                    </option>
-                  ))}
-                </select>
-                {errors.patientId && <p className="text-red-500 text-xs mt-1">{errors.patientId.message}</p>}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salle</label>
-                  <select
-                    {...register('salleId')}
-                    className="input-field"
-                  >
-                    <option value="">Sélectionner une salle</option>
-                    {rooms.map(room => (
-                      <option key={room.id} value={room.id}>{room.nom}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Durée (min)</label>
-                  <input
-                    type="number"
-                    {...register('duree', { min: 15, max: 180 })}
-                    defaultValue={30}
-                    className="input-field"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <select
-                    {...register('type')}
-                    className="input-field"
-                  >
-                    {appointmentTypes.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                  <select
-                    {...register('statut')}
-                    className="input-field"
-                  >
-                    {appointmentStatuses.map(status => (
-                      <option key={status.value} value={status.value}>{status.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Motif</label>
-                <input
-                  type="text"
-                  {...register('motif')}
-                  className="input-field"
-                  placeholder="Motif de la consultation"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea
-                  {...register('notes')}
-                  rows={3}
-                  className="input-field"
-                  placeholder="Notes additionnelles"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Kinésithérapeute</label>
-                  <select
-                    {...register('kineId', { required: 'Kinésithérapeute requis' })}
-                    className="input-field"
-                  >
-                    <option value="">Sélectionner un kinésithérapeute</option>
-                    {kines.map(kine => (
-                      <option key={kine.id} value={kine.id}>
-                        {kine.name} - {kine.role}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.kineId && <p className="text-red-500 text-xs mt-1">{errors.kineId.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tarif</label>
-                  <select
-                    {...register('tarifId', { required: 'Tarif requis' })}
-                    className="input-field"
-                  >
-                    <option value="">Sélectionner un tarif</option>
-                    {tarifs.map(tarif => (
-                      <option key={tarif.id} value={tarif.id}>
-                        {tarif.nom} - {tarif.montant}€ ({tarif.duree}min)
-                      </option>
-                    ))}
-                  </select>
-                  {errors.tarifId && <p className="text-red-500 text-xs mt-1">{errors.tarifId.message}</p>}
-                </div>
-              </div>
-
-              {/* Affichage du tarif sélectionné */}
-              {selectedTarif && (
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-blue-900">
-                      {tarifs.find(t => t.id === selectedTarif)?.nom}
-                    </span>
-                    <span className="text-lg font-bold text-blue-900">
-                      {tarifs.find(t => t.id === selectedTarif)?.montant}€
-                    </span>
-                  </div>
-                  <p className="text-xs text-blue-700 mt-1">
-                    Durée : {tarifs.find(t => t.id === selectedTarif)?.duree} minutes
-                  </p>
-                </div>
-              )}
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="btn-secondary"
-                >
-                  Annuler
-                </button>
-                <button type="submit" className="btn-primary">
-                  Créer le RDV
-                </button>
-              </div>
-            </form>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Heure</label>
+              <input
+                type="time"
+                {...register('time', { required: 'Heure requise' })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              />
+              {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>}
+            </div>
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Patient</label>
+            <select
+              {...register('patientId', { required: 'Patient requis' })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            >
+              <option value="">Sélectionner un patient</option>
+              {patients.map(patient => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.prenom} {patient.nom} - {patient.numeroDossier}
+                </option>
+              ))}
+            </select>
+            {errors.patientId && <p className="text-red-500 text-xs mt-1">{errors.patientId.message}</p>}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Salle</label>
+              <select
+                {...register('salleId')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                <option value="">Sélectionner une salle</option>
+                {rooms.map(room => (
+                  <option key={room.id} value={room.id}>{room.nom}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Durée (min)</label>
+              <input
+                type="number"
+                {...register('duree', { min: 15, max: 180 })}
+                defaultValue={30}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select
+                {...register('type')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                {appointmentTypes.map(type => (
+                  <option key={type.value} value={type.value}>{type.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+              <select
+                {...register('statut')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                {appointmentStatuses.map(status => (
+                  <option key={status.value} value={status.value}>{status.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Motif</label>
+            <input
+              type="text"
+              {...register('motif')}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              placeholder="Motif de la consultation"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea
+              {...register('notes')}
+              rows={3}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none"
+              placeholder="Notes additionnelles"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Kinésithérapeute</label>
+              <select
+                {...register('kineId', { required: 'Kinésithérapeute requis' })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                <option value="">Sélectionner un kinésithérapeute</option>
+                {kines.map(kine => (
+                  <option key={kine.id} value={kine.id}>
+                    {kine.name} - {kine.role}
+                  </option>
+                ))}
+              </select>
+              {errors.kineId && <p className="text-red-500 text-xs mt-1">{errors.kineId.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tarif</label>
+              <select
+                {...register('tarifId', { required: 'Tarif requis' })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                <option value="">Sélectionner un tarif</option>
+                {tarifs.map(tarif => (
+                  <option key={tarif.id} value={tarif.id}>
+                    {tarif.nom} - {tarif.montant}€ ({tarif.duree}min)
+                  </option>
+                ))}
+              </select>
+              {errors.tarifId && <p className="text-red-500 text-xs mt-1">{errors.tarifId.message}</p>}
+            </div>
+          </div>
+
+          {/* Affichage du tarif sélectionné */}
+          {selectedTarif && (
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-blue-900">
+                  {tarifs.find(t => t.id === selectedTarif)?.nom}
+                </span>
+                <span className="text-lg font-bold text-blue-900">
+                  {tarifs.find(t => t.id === selectedTarif)?.montant}€
+                </span>
+              </div>
+              <p className="text-xs text-blue-700 mt-1">
+                Durée : {tarifs.find(t => t.id === selectedTarif)?.duree} minutes
+              </p>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Annuler
+            </button>
+            <button 
+              type="submit" 
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Créer le RDV
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Edit Appointment Modal */}
-      {showEditModal && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Modifier le Rendez-vous</h2>
-              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="h-6 w-6" />
-              </button>
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Modifier le Rendez-vous"
+        size="lg"
+      >
+        <form onSubmit={handleSubmit(handleUpdateAppointment)} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input
+                type="date"
+                {...register('date', { required: 'Date requise' })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              />
+              {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
             </div>
-            
-            <form onSubmit={handleSubmit(handleUpdateAppointment)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    {...register('date', { required: 'Date requise' })}
-                    className="input-field"
-                  />
-                  {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Heure</label>
-                  <input
-                    type="time"
-                    {...register('time', { required: 'Heure requise' })}
-                    className="input-field"
-                  />
-                  {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Patient</label>
-                <select
-                  {...register('patientId', { required: 'Patient requis' })}
-                  className="input-field"
-                >
-                  <option value="">Sélectionner un patient</option>
-                  {patients.map(patient => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.prenom} {patient.nom} - {patient.numeroDossier}
-                    </option>
-                  ))}
-                </select>
-                {errors.patientId && <p className="text-red-500 text-xs mt-1">{errors.patientId.message}</p>}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salle</label>
-                  <select
-                    {...register('salleId')}
-                    className="input-field"
-                  >
-                    <option value="">Sélectionner une salle</option>
-                    {rooms.map(room => (
-                      <option key={room.id} value={room.id}>{room.nom}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Durée (min)</label>
-                  <input
-                    type="number"
-                    {...register('duree', { min: 15, max: 180 })}
-                    className="input-field"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Kinésithérapeute</label>
-                  <select
-                    {...register('kineId', { required: 'Kinésithérapeute requis' })}
-                    className="input-field"
-                  >
-                    <option value="">Sélectionner un kinésithérapeute</option>
-                    {kines.map(kine => (
-                      <option key={kine.id} value={kine.id}>
-                        {kine.name} - {kine.role}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.kineId && <p className="text-red-500 text-xs mt-1">{errors.kineId.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tarif</label>
-                  <select
-                    {...register('tarifId', { required: 'Tarif requis' })}
-                    className="input-field"
-                  >
-                    <option value="">Sélectionner un tarif</option>
-                    {tarifs.map(tarif => (
-                      <option key={tarif.id} value={tarif.id}>
-                        {tarif.nom} - {tarif.montant}€ ({tarif.duree}min)
-                      </option>
-                    ))}
-                  </select>
-                  {errors.tarifId && <p className="text-red-500 text-xs mt-1">{errors.tarifId.message}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <select
-                    {...register('type')}
-                    className="input-field"
-                  >
-                    {appointmentTypes.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                  <select
-                    {...register('statut')}
-                    className="input-field"
-                  >
-                    {appointmentStatuses.map(status => (
-                      <option key={status.value} value={status.value}>{status.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Motif</label>
-                <input
-                  type="text"
-                  {...register('motif')}
-                  className="input-field"
-                  placeholder="Motif de la consultation"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea
-                  {...register('notes')}
-                  rows={3}
-                  className="input-field"
-                  placeholder="Notes additionnelles"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="btn-secondary"
-                >
-                  Annuler
-                </button>
-                <button type="submit" className="btn-primary">
-                  Mettre à jour
-                </button>
-              </div>
-            </form>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Heure</label>
+              <input
+                type="time"
+                {...register('time', { required: 'Heure requise' })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              />
+              {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>}
+            </div>
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Patient</label>
+            <select
+              {...register('patientId', { required: 'Patient requis' })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            >
+              <option value="">Sélectionner un patient</option>
+              {patients.map(patient => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.prenom} {patient.nom} - {patient.numeroDossier}
+                </option>
+              ))}
+            </select>
+            {errors.patientId && <p className="text-red-500 text-xs mt-1">{errors.patientId.message}</p>}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Salle</label>
+              <select
+                {...register('salleId')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                <option value="">Sélectionner une salle</option>
+                {rooms.map(room => (
+                  <option key={room.id} value={room.id}>{room.nom}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Durée (min)</label>
+              <input
+                type="number"
+                {...register('duree', { min: 15, max: 180 })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select
+                {...register('type')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                {appointmentTypes.map(type => (
+                  <option key={type.value} value={type.value}>{type.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+              <select
+                {...register('statut')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                {appointmentStatuses.map(status => (
+                  <option key={status.value} value={status.value}>{status.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Motif</label>
+            <input
+              type="text"
+              {...register('motif')}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              placeholder="Motif de la consultation"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea
+              {...register('notes')}
+              rows={3}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none"
+              placeholder="Notes additionnelles"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Kinésithérapeute</label>
+              <select
+                {...register('kineId', { required: 'Kinésithérapeute requis' })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                <option value="">Sélectionner un kinésithérapeute</option>
+                {kines.map(kine => (
+                  <option key={kine.id} value={kine.id}>
+                    {kine.name} - {kine.role}
+                  </option>
+                ))}
+              </select>
+              {errors.kineId && <p className="text-red-500 text-xs mt-1">{errors.kineId.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tarif</label>
+              <select
+                {...register('tarifId', { required: 'Tarif requis' })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              >
+                <option value="">Sélectionner un tarif</option>
+                {tarifs.map(tarif => (
+                  <option key={tarif.id} value={tarif.id}>
+                    {tarif.nom} - {tarif.montant}€ ({tarif.duree}min)
+                  </option>
+                ))}
+              </select>
+              {errors.tarifId && <p className="text-red-500 text-xs mt-1">{errors.tarifId.message}</p>}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowEditModal(false)}
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Annuler
+            </button>
+            <button 
+              type="submit" 
+              className="w-full sm:w-auto px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Modifier le RDV
+            </button>
+          </div>
+        </form>
+      </Modal>
     </DashboardLayout>
   )
 }
