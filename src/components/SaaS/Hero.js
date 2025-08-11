@@ -75,7 +75,7 @@ export default function ProfessionalHero() {
                 {features.map((feature, index) => (
                   <div
                     key={index}
-                    className={`flex items-center justify-center lg:justify-start space-x-3 p-2 sm:p-0 transform transition-all duration-700 ${
+                    className={`flex items-center justify-center space-x-3 p-2 sm:p-0 transform transition-all duration-700 ${
                       isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                     }`}
                     style={{ transitionDelay: `${(index + 1) * 200}ms` }}

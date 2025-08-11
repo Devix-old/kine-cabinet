@@ -2,25 +2,21 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
-// POST /api/public/register - Self-serve registration: create cabinet and admin
+// POST /api/public/register - Self-serve registration with trial
 export async function POST(request) {
   try {
     const body = await request.json()
     const {
-      firstName,
-      lastName,
       email,
       password,
-      clinicName,
-      phone,
-      address,
-      siret
+      trialDays = 7,
+      maxPatients = 50
     } = body || {}
 
     // Basic validation
-    if (!firstName || !lastName || !email || !password || !clinicName) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: 'firstName, lastName, email, password et clinicName sont requis' },
+        { error: 'email et password sont requis' },
         { status: 400 }
       )
     }
@@ -32,18 +28,10 @@ export async function POST(request) {
       )
     }
 
-    // Check duplicates
-    const [existingCabinet, existingUser] = await Promise.all([
-      prisma.cabinet.findUnique({ where: { nom: clinicName } }),
-      prisma.user.findFirst({ where: { email } })
-    ])
-
-    if (existingCabinet) {
-      return NextResponse.json(
-        { error: 'Un cabinet avec ce nom existe déjà' },
-        { status: 409 }
-      )
-    }
+    // Check if user already exists
+    const existingUser = await prisma.user.findFirst({ 
+      where: { email } 
+    })
 
     if (existingUser) {
       return NextResponse.json(
@@ -52,26 +40,41 @@ export async function POST(request) {
       )
     }
 
-    const fullName = `${firstName} ${lastName}`.trim()
+    // Generate cabinet name from email
+    const emailPrefix = email.split('@')[0]
+    const cabinetName = `Cabinet ${emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1)}`
+    
+    // Check if cabinet name exists and make it unique
+    let finalCabinetName = cabinetName
+    let counter = 1
+    while (await prisma.cabinet.findUnique({ where: { nom: finalCabinetName } })) {
+      finalCabinetName = `${cabinetName} ${counter}`
+      counter++
+    }
 
-    // Create cabinet and admin in a transaction
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create cabinet and admin in a transaction with trial settings
     const result = await prisma.$transaction(async (tx) => {
       const cabinet = await tx.cabinet.create({
         data: {
-          nom: clinicName,
-          adresse: address || null,
-          telephone: phone || null,
+          nom: finalCabinetName,
+          adresse: null,
+          telephone: null,
           email: email,
-          siret: siret || null,
+          siret: null,
           isActive: true,
+          // Trial settings
+          trialStartDate: new Date(),
+          trialEndDate: new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000), // +7 days
+          isTrialActive: true,
+          maxPatients: maxPatients, // Limit to 50 patients during trial
         },
       })
 
-      const hashedPassword = await bcrypt.hash(password, 10)
-
       const admin = await tx.user.create({
         data: {
-          name: fullName,
+          name: email.split('@')[0], // Use email prefix as name
           email,
           password: hashedPassword,
           role: 'ADMIN',
@@ -86,9 +89,19 @@ export async function POST(request) {
 
     return NextResponse.json(
       {
-        message: 'Compte créé avec succès',
-        cabinet: { id: result.cabinet.id, nom: result.cabinet.nom },
+        message: 'Compte créé avec succès - Essai gratuit de 7 jours activé',
+        cabinet: { 
+          id: result.cabinet.id, 
+          nom: result.cabinet.nom,
+          trialEndDate: result.cabinet.trialEndDate,
+          maxPatients: result.cabinet.maxPatients
+        },
         admin: result.admin,
+        trial: {
+          days: trialDays,
+          endDate: result.cabinet.trialEndDate,
+          maxPatients: maxPatients
+        }
       },
       { status: 201 }
     )
@@ -97,10 +110,14 @@ export async function POST(request) {
     // Handle Prisma unique constraint
     if (error.code === 'P2002') {
       return NextResponse.json(
-        { error: 'Conflit de duplication (email ou nom de cabinet déjà utilisé)' },
+        { error: 'Cet email est déjà utilisé' },
         { status: 409 }
       )
     }
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    
+    return NextResponse.json(
+      { error: 'Erreur interne du serveur' },
+      { status: 500 }
+    )
   }
 }

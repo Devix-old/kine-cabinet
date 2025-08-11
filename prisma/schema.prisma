@@ -19,6 +19,12 @@ model Cabinet {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
+  // Trial settings
+  trialStartDate  DateTime?
+  trialEndDate    DateTime?
+  isTrialActive   Boolean  @default(false)
+  maxPatients     Int      @default(1000) // Limit during trial
+  
   // Relations
   users           User[]
   patients        Patient[]
@@ -34,6 +40,10 @@ model Cabinet {
   settings        Settings[]
   workingHours    WorkingHours[]
   notificationSettings NotificationSettings[]
+  subscriptions   Subscription[]
+  payments        Payment[]
+  usageRecords    UsageRecord[]
+  paymentMethods  PaymentMethod[]
 
   @@map("cabinets")
 }
@@ -48,6 +58,7 @@ model User {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   lastLogin             DateTime?
+  stripeCustomerId      String?               @unique
   
   // Multi-tenant (null pour SUPER_ADMIN)
   cabinetId             String?
@@ -60,6 +71,7 @@ model User {
   notesCreated          Note[]                @relation("NoteCreator")
   notificationSettings  NotificationSettings?
   treatmentsCreated     Treatment[]           @relation("TreatmentCreator")
+  paymentMethods        PaymentMethod[]
 
   @@unique([email, cabinetId])
   @@map("users")
@@ -482,9 +494,109 @@ model Invoice {
   // Relations
   appointment   Appointment   @relation(fields: [appointmentId], references: [id])
   patient       Patient       @relation(fields: [patientId], references: [id])
+  payments      Payment[]
 
   @@unique([numero, cabinetId])
   @@map("invoices")
+}
+
+// New models for payment integration
+model Subscription {
+  id                    String              @id @default(cuid())
+  stripeSubscriptionId  String?             @unique
+  stripeCustomerId      String?
+  planId                String
+  status                SubscriptionStatus  @default(ACTIVE)
+  currentPeriodStart    DateTime?
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean             @default(false)
+  canceledAt            DateTime?
+  trialStart            DateTime?
+  trialEnd              DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  // Multi-tenant
+  cabinetId             String
+  cabinet               Cabinet             @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  payments              Payment[]
+  usageRecords          UsageRecord[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id                    String          @id @default(cuid())
+  stripePaymentIntentId String?         @unique
+  stripeChargeId        String?
+  amount                Float
+  currency              String          @default("EUR")
+  status                PaymentStatus   @default(PENDING)
+  paymentMethod         PaymentMethodType   @default(CARD)
+  paymentMethodType     String?
+  description           String?
+  metadata              Json?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  
+  // Multi-tenant
+  cabinetId             String
+  cabinet               Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  subscriptionId        String?
+  subscription          Subscription?   @relation(fields: [subscriptionId], references: [id])
+  invoiceId             String?
+  invoice               Invoice?        @relation(fields: [invoiceId], references: [id])
+
+  @@map("payments")
+}
+
+model PaymentMethod {
+  id                    String              @id @default(cuid())
+  stripePaymentMethodId String?             @unique
+  type                  PaymentMethodTypeEnum   @default(CARD)
+  cardBrand             String?
+  cardLast4             String?
+  cardExpMonth          Int?
+  cardExpYear           Int?
+  billingDetails        Json?
+  isDefault             Boolean             @default(false)
+  isActive              Boolean             @default(true)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  // Multi-tenant
+  cabinetId             String
+  cabinet               Cabinet             @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  userId                String
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payment_methods")
+}
+
+model UsageRecord {
+  id                    String   @id @default(cuid())
+  stripeUsageRecordId   String?  @unique
+  quantity              Int
+  timestamp             DateTime @default(now())
+  action                String   @default("increment")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Multi-tenant
+  cabinetId             String
+  cabinet               Cabinet  @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  subscriptionId        String
+  subscription          Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("usage_records")
 }
 
 enum InvoiceStatus {
@@ -492,4 +604,54 @@ enum InvoiceStatus {
   PAYEE
   EN_RETARD
   ANNULEE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  PAST_DUE
+  TRIALING
+  UNPAID
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELED
+  REQUIRES_ACTION
+  REQUIRES_CONFIRMATION
+}
+
+enum PaymentMethodType {
+  CARD
+  BANK_TRANSFER
+  CASH
+  CHECK
+  MOBILE_MONEY
+  ELECTRONIC_WALLET
+}
+
+enum PaymentMethodTypeEnum {
+  CARD
+  BANK_ACCOUNT
+  SEPA_DEBIT
+  IDEAL
+  SOFORT
+  BANCONTACT
+  GIROPAY
+  EPS
+  P24
+  ALIPAY
+  WECHAT_PAY
+  APPLE_PAY
+  GOOGLE_PAY
+  LINK
+  US_BANK_ACCOUNT
+  CASHAPP
+  MOBILE_MONEY
+  ELECTRONIC_WALLET
 }

@@ -39,7 +39,7 @@ export default function LoginPage() {
         showError('Email ou mot de passe incorrect')
       } else {
         // Forcer le refresh complet pour éviter les problèmes de cache
-        window.location.href = '/'
+        window.location.href = '/dashboard'
       }
     } catch (error) {
       showError('Erreur lors de la connexion')

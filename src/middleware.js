@@ -10,9 +10,10 @@ export default withAuth(
     const isApiRoute = pathname.startsWith('/api')
     const isApiAuthRoute = pathname.startsWith('/api/auth')
     const isApiPublicRoute = pathname.startsWith('/api/public') || pathname.startsWith('/api/placeholder')
+    const isWebhookRoute = pathname.startsWith('/api/payments/webhook')
 
-    // Protect API routes except auth and explicitly public ones
-    if (isApiRoute && !isApiAuthRoute && !isApiPublicRoute && !isAuth) {
+    // Protect API routes except auth, webhooks, and explicitly public ones
+    if (isApiRoute && !isApiAuthRoute && !isApiPublicRoute && !isWebhookRoute && !isAuth) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -24,9 +25,10 @@ export default withAuth(
         const pathname = req.nextUrl.pathname
         const isApiAuthRoute = pathname.startsWith('/api/auth')
         const isApiPublicRoute = pathname.startsWith('/api/public') || pathname.startsWith('/api/placeholder')
+        const isWebhookRoute = pathname.startsWith('/api/payments/webhook')
 
-        // Always allow auth and explicitly public API routes
-        if (isApiAuthRoute || isApiPublicRoute) {
+        // Always allow auth, webhooks, and explicitly public API routes
+        if (isApiAuthRoute || isApiPublicRoute || isWebhookRoute) {
           return true
         }
 

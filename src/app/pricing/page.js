@@ -2,6 +2,7 @@
 
 import Header from '@/components/SaaS/Header'
 import Footer from '@/components/SaaS/Footer'
+import SubscriptionForm from '@/components/Payment/SubscriptionForm'
 import { motion } from 'framer-motion'
 import { Check, Star } from 'lucide-react'
 import Link from 'next/link'
@@ -21,8 +22,8 @@ const plans = [
       'Interface mobile'
     ],
     popular: false,
-    cta: 'Commencer gratuitement',
-    href: '/auth/register'
+    cta: 'Essai gratuit 7 jours',
+    href: '/auth/register?plan=starter'
   },
   {
     name: 'Professional',
@@ -40,8 +41,8 @@ const plans = [
       'Formation personnalisée'
     ],
     popular: true,
-    cta: 'Commencer gratuitement',
-    href: '/auth/register'
+    cta: 'Essai gratuit 7 jours',
+    href: '/auth/register?plan=professional'
   },
   {
     name: 'Enterprise',

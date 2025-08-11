@@ -89,12 +89,12 @@ const Features = () => {
                 className="group relative p-4 sm:p-6 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 mx-auto w-full max-w-sm sm:max-w-none"
               >
                 {/* Icon */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-blue-200 transition-colors duration-300 mx-auto sm:mx-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-blue-200 transition-colors duration-300 mx-auto">
                   <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                 </div>
 
                 {/* Content */}
-                <div className="text-center sm:text-left">
+                <div className="text-center">
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
                     {feature.title}
                   </h3>
