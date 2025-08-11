@@ -116,6 +116,7 @@ export default function Header() {
                 <div className="absolute right-0 mt-2 w-44 bg-white rounded-md shadow-lg ring-1 ring-black/5 py-1 z-50">
                   <div className="px-3 py-2 text-xs text-gray-500 border-b">Connecté</div>
                   <a href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Tableau de bord</a>
+                  <a href="/compte" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Mon compte</a>
                   <a href="/parametres" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setMenuOpen(false)}>Paramètres</a>
                   <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Se déconnecter</button>
                 </div>
@@ -181,6 +182,9 @@ export default function Header() {
                   <>
                     <a href="/dashboard" className="block rounded-lg px-3 py-3 text-base font-medium text-gray-900 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
                       Tableau de bord
+                    </a>
+                    <a href="/compte" className="block rounded-lg px-3 py-3 text-base font-medium text-gray-900 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
+                      Mon compte
                     </a>
                     <a href="/parametres" className="block rounded-lg px-3 py-3 text-base font-medium text-gray-900 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
                       Paramètres

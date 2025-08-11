@@ -4,8 +4,10 @@ import Header from '@/components/SaaS/Header'
 import Footer from '@/components/SaaS/Footer'
 import SubscriptionForm from '@/components/Payment/SubscriptionForm'
 import { motion } from 'framer-motion'
-import { Check, Star } from 'lucide-react'
+import { Check, Star, Crown, Clock, Users } from 'lucide-react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import { useState, useEffect } from 'react'
 
 const plans = [
   {
@@ -84,7 +86,7 @@ const faqs = [
   },
   {
     question: "Puis-je essayer avant d'acheter ?",
-    answer: "Oui, nous offrons un essai gratuit de 14 jours avec toutes les fonctionnalités."
+    answer: "Oui, nous offrons un essai gratuit de 7 jours avec toutes les fonctionnalités."
   },
   {
     question: "Le support technique est-il inclus ?",
@@ -93,105 +95,180 @@ const faqs = [
 ]
 
 export default function PricingPage() {
+  const { data: session, status } = useSession()
+  const [cabinetInfo, setCabinetInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchCabinetInfo()
+    } else {
+      setLoading(false)
+    }
+  }, [session])
+
+  const fetchCabinetInfo = async () => {
+    try {
+      const response = await fetch('/api/cabinet')
+      if (response.ok) {
+        const data = await response.json()
+        setCabinetInfo(data.cabinet)
+      }
+    } catch (error) {
+      console.error('Error fetching cabinet info:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getStatusBadge = () => {
+    if (!cabinetInfo) return null
+
+    if (cabinetInfo.isTrialActive) {
+      const daysLeft = Math.ceil((new Date(cabinetInfo.trialEndDate) - new Date()) / (1000 * 60 * 60 * 24))
+      return (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+          <div className="flex items-center space-x-3">
+            <Clock className="w-5 h-5 text-blue-600" />
+            <div>
+              <h3 className="text-blue-900 font-semibold">Essai gratuit actif</h3>
+              <p className="text-blue-700 text-sm">
+                {daysLeft} jour{daysLeft > 1 ? 's' : ''} restant{daysLeft > 1 ? 's' : ''} • 
+                Limite : {cabinetInfo.maxPatients} patients
+              </p>
+            </div>
+          </div>
+          <div className="mt-3">
+            <Link 
+              href="/billing"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Choisir un plan
+            </Link>
+          </div>
+        </div>
+      )
+    } else {
+      return (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8">
+          <div className="flex items-center space-x-3">
+            <Crown className="w-5 h-5 text-green-600" />
+            <div>
+              <h3 className="text-green-900 font-semibold">Abonnement actif</h3>
+              <p className="text-green-700 text-sm">
+                Patients illimités • Accès complet à toutes les fonctionnalités
+              </p>
+            </div>
+          </div>
+          <div className="mt-3">
+            <Link 
+              href="/dashboard"
+              className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Aller au tableau de bord
+            </Link>
+          </div>
+        </div>
+      )
+    }
+  }
+
   return (
     <div className="bg-white">
       <Header />
       
       <main>
         {/* Hero Section */}
-        <section className="relative isolate overflow-hidden bg-white pt-14">
-          <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:text-center">
-              <motion.h1
+        <section className="relative bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="text-base font-semibold leading-7 text-blue-600"
+                transition={{ duration: 0.6 }}
+                className="text-4xl md:text-5xl font-bold text-gray-900 mb-6"
               >
-                Tarifs
+                Plans et Tarifs
               </motion.h1>
-              <motion.p
+              <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
-              >
-                Des tarifs simples et transparents
-              </motion.p>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="mt-6 text-lg leading-8 text-gray-600"
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="text-xl text-gray-600 max-w-3xl mx-auto"
               >
                 Choisissez le plan qui correspond le mieux à vos besoins. 
-                Tous nos plans incluent un essai gratuit de 14 jours.
+                Tous nos plans incluent un essai gratuit de 7 jours.
               </motion.p>
             </div>
           </div>
         </section>
 
-        {/* Pricing Cards */}
-        <section className="py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {/* User Status Section */}
+        {session?.user && !loading && (
+          <section className="py-8 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {getStatusBadge()}
+            </div>
+          </section>
+        )}
+
+        {/* Pricing Plans */}
+        <section className="py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-3 gap-8">
               {plans.map((plan, index) => (
                 <motion.div
                   key={plan.name}
                   initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
-                  viewport={{ once: true }}
-                  className={`relative bg-white p-8 rounded-2xl shadow-sm border ${
-                    plan.popular 
-                      ? 'border-blue-600 ring-2 ring-blue-600/20' 
-                      : 'border-gray-200'
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className={`relative bg-white rounded-2xl shadow-lg border-2 p-8 ${
+                    plan.popular ? 'border-blue-500 scale-105' : 'border-gray-200'
                   }`}
                 >
                   {plan.popular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <span className="inline-flex items-center rounded-full bg-blue-600 px-4 py-1 text-sm font-semibold text-white">
-                        <Star className="h-4 w-4 mr-1" />
-                        Le plus populaire
+                      <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center">
+                        <Star className="w-4 h-4 mr-1" />
+                        Recommandé
                       </span>
                     </div>
                   )}
-                  
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>
-                    <p className="mt-2 text-sm text-gray-600">{plan.description}</p>
+
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-gray-600 mb-6">{plan.description}</p>
                     
-                    <div className="mt-8">
-                      <div className="flex items-baseline justify-center">
-                        <span className="text-4xl font-bold tracking-tight text-gray-900">
-                          {plan.price}€
-                        </span>
-                        <span className="text-sm text-gray-600 ml-1">/{plan.period}</span>
-                      </div>
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-gray-900">€{plan.price}</span>
+                      <span className="text-gray-600">/{plan.period}</span>
                     </div>
+
+                    {session?.user ? (
+                      <Link
+                        href="/billing"
+                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
+                      >
+                        Gérer l'abonnement
+                      </Link>
+                    ) : (
+                      <Link
+                        href={plan.href}
+                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
+                      >
+                        {plan.cta}
+                      </Link>
+                    )}
                   </div>
-                  
-                  <ul className="mt-8 space-y-4">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start">
-                        <Check className="h-5 w-5 text-green-500 flex-shrink-0 mr-3 mt-0.5" />
-                        <span className="text-sm text-gray-700">{feature}</span>
+
+                  <ul className="space-y-4">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start">
+                        <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
-                  
-                  <div className="mt-8">
-                    <Link
-                      href={plan.href}
-                      className={`block w-full rounded-lg px-4 py-3 text-center text-sm font-semibold transition-colors ${
-                        plan.popular
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                      }`}
-                    >
-                      {plan.cta}
-                    </Link>
-                  </div>
                 </motion.div>
               ))}
             </div>
@@ -199,101 +276,64 @@ export default function PricingPage() {
         </section>
 
         {/* FAQ Section */}
-        <section className="bg-gray-50 py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl lg:text-center">
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="text-base font-semibold leading-7 text-blue-600"
-              >
-                FAQ
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                viewport={{ once: true }}
-                className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
-              >
-                Questions fréquentes
-              </motion.p>
+        <section className="py-20 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Questions Fréquentes
+              </h2>
+              <p className="text-gray-600">
+                Tout ce que vous devez savoir sur nos plans et tarifs
+              </p>
             </div>
-            
-            <div className="mx-auto mt-16 max-w-4xl">
-              <dl className="space-y-8">
-                {faqs.map((faq, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    className="bg-white rounded-lg p-6 shadow-sm"
-                  >
-                    <dt className="text-lg font-semibold text-gray-900 mb-2">
-                      {faq.question}
-                    </dt>
-                    <dd className="text-gray-600">
-                      {faq.answer}
-                    </dd>
-                  </motion.div>
-                ))}
-              </dl>
+
+            <div className="grid gap-6">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="bg-white rounded-lg p-6 shadow-sm"
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {faq.question}
+                  </h3>
+                  <p className="text-gray-600">{faq.answer}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="bg-blue-600">
-          <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-                className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
+        <section className="py-20 bg-blue-600">
+          <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Prêt à commencer ?
+            </h2>
+            <p className="text-blue-100 mb-8 text-lg">
+              Rejoignez des milliers de cabinets qui font confiance à notre plateforme
+            </p>
+            {session?.user ? (
+              <Link
+                href="/dashboard"
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
               >
-                Prêt à commencer ?
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                viewport={{ once: true }}
-                className="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100"
+                Aller au tableau de bord
+              </Link>
+            ) : (
+              <Link
+                href="/auth/register"
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
               >
-                Rejoignez des centaines de kinésithérapeutes qui font confiance à KineCabinet 
-                pour gérer leur cabinet plus efficacement.
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                viewport={{ once: true }}
-                className="mt-10 flex items-center justify-center gap-x-6"
-              >
-                <Link
-                  href="/auth/register"
-                  className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-blue-600 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors"
-                >
-                  Commencer gratuitement
-                </Link>
-                <Link
-                  href="/contact"
-                  className="text-sm font-semibold leading-6 text-white hover:text-blue-100 transition-colors"
-                >
-                  Contacter l'équipe <span aria-hidden="true">→</span>
-                </Link>
-              </motion.div>
-            </div>
+                Commencer l'essai gratuit
+              </Link>
+            )}
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   )

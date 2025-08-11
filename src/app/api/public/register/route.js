@@ -10,7 +10,7 @@ export async function POST(request) {
       email,
       password,
       trialDays = 7,
-      maxPatients = 50
+      maxPatients = 3
     } = body || {}
 
     // Basic validation
@@ -68,7 +68,7 @@ export async function POST(request) {
           trialStartDate: new Date(),
           trialEndDate: new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000), // +7 days
           isTrialActive: true,
-          maxPatients: maxPatients, // Limit to 50 patients during trial
+          maxPatients: maxPatients, // Limit to 3 patients during trial
         },
       })
 
