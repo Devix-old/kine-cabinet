@@ -22,19 +22,9 @@ const relevantEvents = new Set([
 ])
 
 export async function POST(request) {
-  console.log('🚀 WEBHOOK ENDPOINT CALLED!')
-  
   const body = await request.text()
   const headersList = await headers()
   const signature = headersList.get('stripe-signature')
-
-  console.log('🔔 Webhook received:', { 
-    bodyLength: body.length, 
-    hasSignature: !!signature,
-    timestamp: new Date().toISOString(),
-    url: request.url,
-    method: request.method
-  })
 
   let event
 
@@ -44,7 +34,7 @@ export async function POST(request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
     )
-    console.log('✅ Webhook signature verified, event type:', event.type)
+    // Webhook signature verified
   } catch (error) {
     console.error('❌ Webhook signature verification failed:', error.message)
     return NextResponse.json(
@@ -54,7 +44,6 @@ export async function POST(request) {
   }
 
   if (relevantEvents.has(event.type)) {
-    console.log('🎯 Processing relevant event:', event.type)
     try {
       switch (event.type) {
         case 'payment_intent.succeeded':
@@ -125,7 +114,7 @@ async function handlePaymentIntentSucceeded(paymentIntent) {
     })
   }
 
-  console.log('✅ Payment succeeded:', paymentIntent.id)
+  // Payment succeeded
 }
 
 async function handlePaymentIntentFailed(paymentIntent) {
@@ -137,7 +126,7 @@ async function handlePaymentIntentFailed(paymentIntent) {
     }
   })
 
-  console.log('❌ Payment failed:', paymentIntent.id)
+  // Payment failed
 }
 
 async function handleInvoicePaymentSucceeded(invoice) {
@@ -152,7 +141,7 @@ async function handleInvoicePaymentSucceeded(invoice) {
     })
   }
 
-  console.log('✅ Invoice payment succeeded:', invoice.id)
+  // Invoice payment succeeded
 }
 
 async function handleInvoicePaymentFailed(invoice) {
@@ -167,12 +156,10 @@ async function handleInvoicePaymentFailed(invoice) {
     })
   }
 
-  console.log('❌ Invoice payment failed:', invoice.id)
+  // Invoice payment failed
 }
 
 async function handleSubscriptionCreated(subscription) {
-  console.log('🔄 Processing subscription created:', subscription.id)
-  console.log('📋 Subscription metadata:', subscription.metadata)
 
   try {
     // Update subscription record
@@ -203,14 +190,12 @@ async function handleSubscriptionCreated(subscription) {
         }
       })
 
-      console.log('✅ Cabinet updated - trial ended, subscription activated')
-      console.log('📊 Plan:', subscription.metadata.planId)
-      console.log('🏥 Cabinet ID:', subscription.metadata.cabinetId)
+      // Cabinet updated - trial ended, subscription activated
     } else {
-      console.log('⚠️ No cabinetId in subscription metadata')
+      // No cabinetId in subscription metadata
     }
 
-    console.log('✅ Subscription created and cabinet updated:', subscription.id)
+    // Subscription created and cabinet updated
   } catch (error) {
     console.error('❌ Error updating subscription/cabinet:', error)
     throw error
@@ -231,7 +216,7 @@ async function handleSubscriptionUpdated(subscription) {
     }
   })
 
-  console.log('✅ Subscription updated:', subscription.id)
+  // Subscription updated
 }
 
 async function handleSubscriptionDeleted(subscription) {
@@ -245,7 +230,7 @@ async function handleSubscriptionDeleted(subscription) {
     }
   })
 
-  console.log('✅ Subscription deleted:', subscription.id)
+  // Subscription deleted
 }
 
 async function handleSetupIntentSucceeded(setupIntent) {
@@ -262,12 +247,10 @@ async function handleSetupIntentSucceeded(setupIntent) {
     })
   }
 
-  console.log('✅ Setup intent succeeded:', setupIntent.id)
+  // Setup intent succeeded
 }
 
 async function handleCheckoutSessionCompleted(checkoutSession) {
-  console.log('🔄 Processing checkout session completed:', checkoutSession.id)
-  console.log('📋 Checkout metadata:', checkoutSession.metadata)
 
   try {
     // If this is a subscription checkout, update cabinet immediately
@@ -284,12 +267,10 @@ async function handleCheckoutSessionCompleted(checkoutSession) {
         }
       })
 
-      console.log('✅ Cabinet updated from checkout session')
-      console.log('📊 Plan:', checkoutSession.metadata.planId)
-      console.log('🏥 Cabinet ID:', checkoutSession.metadata.cabinetId)
+      // Cabinet updated from checkout session
     }
 
-    console.log('✅ Checkout session completed:', checkoutSession.id)
+    // Checkout session completed
   } catch (error) {
     console.error('❌ Error processing checkout session:', error)
     throw error

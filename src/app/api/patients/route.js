@@ -7,7 +7,6 @@ import { authOptions } from '@/lib/auth'
 // GET /api/patients - Récupérer tous les patients
 export async function GET(request) {
   try {
-    console.log('🔍 Patients API: GET request - Connexion automatique Prisma')
     
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -202,8 +201,6 @@ export async function GET(request) {
 
     const totalPages = Math.ceil(total / limit)
 
-    console.log('✅ Patients API: Données récupérées, count:', patients.length)
-
     return NextResponse.json({
       patients: enrichedPatients,
       pagination: {
@@ -240,9 +237,7 @@ export async function GET(request) {
 
 // POST /api/patients - Créer un nouveau patient
 export async function POST(request) {
-  try {
-    console.log(' Patients API: POST request - Connexion automatique Prisma')
-    
+  try {    
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
@@ -305,7 +300,7 @@ export async function POST(request) {
       }
     })
 
-    console.log('✅ Patients API: Patient créé avec succès, ID:', patient.id)
+    // Patient created successfully
     return NextResponse.json(patient, { status: 201 })
 
   } catch (error) {

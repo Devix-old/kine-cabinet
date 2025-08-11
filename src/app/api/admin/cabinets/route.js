@@ -114,8 +114,6 @@ export async function POST(request) {
       return { cabinet, admin }
     })
 
-    console.log('✅ Cabinet créé avec succès:', result.cabinet.nom)
-    console.log('✅ Administrateur créé:', result.admin.name)
 
     return NextResponse.json({
       message: 'Cabinet créé avec succès',

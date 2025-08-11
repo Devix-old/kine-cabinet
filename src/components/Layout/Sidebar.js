@@ -68,7 +68,9 @@ export default function Sidebar() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-blue-600">Kine Cabinet</h1>
+          <Link href="/" className="text-xl font-bold text-blue-600 cursor-pointer">
+            Kine Cabinet
+          </Link>
           </div>
 
           {/* Navigation */}

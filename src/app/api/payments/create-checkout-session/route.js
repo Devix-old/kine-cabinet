@@ -61,15 +61,7 @@ export async function POST(request) {
     }
 
     // Debug: Log the plan details
-    console.log('🔍 DEBUG - Plan details:', {
-      planId,
-      plan: plans[planId],
-      envVars: {
-        starter: process.env.STRIPE_STARTER_PRICE_ID,
-        professional: process.env.STRIPE_PROFESSIONAL_PRICE_ID,
-        enterprise: process.env.STRIPE_ENTERPRISE_PRICE_ID
-      }
-    })
+
 
     // Check if we have Product IDs instead of Price IDs
     const hasProductIds = Object.values(plans).some(plan => 

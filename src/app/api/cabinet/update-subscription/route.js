@@ -38,13 +38,6 @@ export async function POST(request) {
       }
     })
 
-    console.log('✅ Cabinet subscription status updated:', {
-      cabinetId: session.user.cabinetId,
-      planId,
-      isActive,
-      isTrialActive: !isActive
-    })
-
     return NextResponse.json({
       success: true,
       message: 'Statut d\'abonnement mis à jour',

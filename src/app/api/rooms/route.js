@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth'
 // GET /api/rooms - Récupérer toutes les salles
 export async function GET(request) {
   try {
-    console.log('🔍 Rooms API: GET request - Connexion automatique Prisma')
+    // Rooms API: GET request
     
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -31,7 +31,7 @@ export async function GET(request) {
       orderBy: { nom: 'asc' }
     })
 
-    console.log('✅ Rooms API: Salles récupérées, count:', rooms.length)
+    // Rooms retrieved successfully
     return NextResponse.json(rooms)
 
   } catch (error) {

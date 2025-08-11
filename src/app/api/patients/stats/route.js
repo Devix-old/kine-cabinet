@@ -5,9 +5,7 @@ import { authOptions } from '@/lib/auth'
 
 // GET /api/patients/stats - Récupérer les statistiques des patients
 export async function GET(request) {
-  try {
-    console.log(' Patients Stats API: GET request - Connexion automatique Prisma')
-    
+  try {    
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -61,12 +59,9 @@ export async function GET(request) {
       newThisMonth: newThisMonth,
       appointmentsThisWeek: appointmentsThisWeek
     }
-
-    console.log('✅ Patients Stats API: Statistiques calculées:', stats)
     return NextResponse.json(stats)
 
   } catch (error) {
-    console.error('❌ Patients Stats API: Erreur:', error)
     return NextResponse.json(
       { error: 'Erreur serveur lors du calcul des statistiques' },
       { status: 500 }

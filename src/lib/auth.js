@@ -52,7 +52,7 @@ export const authOptions = {
             return null
           }
 
-          console.log('✅ Authentification réussie pour:', credentials.email, 'Rôle:', user.role)
+          // Authentication successful
 
           return {
             id: user.id,
@@ -101,18 +101,6 @@ export const authOptions = {
     error: '/auth/login'
   },
   secret: 'f397711554f5050d1eb316d23da2059d4b81fb7914842d0b8570104f8841d3c0',
-  // Activer les logs pour le debug
-  debug: true,
-  // Logger pour le debug
-  logger: {
-    error(code, ...message) {
-      console.error('Auth Error:', code, ...message)
-    },
-    warn(code, ...message) {
-      console.warn('Auth Warning:', code, ...message)
-    },
-    debug(code, ...message) {
-      console.log('Auth Debug:', code, ...message)
-    }
-  }
+  // Debug disabled for clean terminal
+  debug: false
 } 

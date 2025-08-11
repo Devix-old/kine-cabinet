@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth'
 // GET /api/appointments - Récupérer tous les rendez-vous
 export async function GET(request) {
   try {
-    console.log('🔍 Appointments API: GET request - Connexion automatique Prisma')
+    // Appointments API: GET request
     
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -116,7 +116,7 @@ export async function GET(request) {
 
     const totalPages = Math.ceil(total / limit)
 
-    console.log('✅ Appointments API: Données récupérées, count:', appointments.length)
+    // Appointments retrieved successfully
 
     return NextResponse.json({
       appointments,

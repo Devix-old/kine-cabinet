@@ -6,7 +6,6 @@ import { authOptions } from '@/lib/auth'
 // GET /api/appointments/[id] - Récupérer un rendez-vous spécifique
 export async function GET(request, { params }) {
   try {
-    console.log(' Appointment Detail API: GET request - Connexion automatique Prisma')
     
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -77,7 +76,6 @@ export async function GET(request, { params }) {
       )
     }
 
-    console.log('✅ Appointment Detail API: Rendez-vous récupéré, ID:', appointment.id)
     return NextResponse.json(appointment)
 
   } catch (error) {
@@ -92,8 +90,6 @@ export async function GET(request, { params }) {
 // PUT /api/appointments/[id] - Mettre à jour un rendez-vous
 export async function PUT(request, { params }) {
   try {
-    console.log(' Appointment Detail API: PUT request - Connexion automatique Prisma')
-    
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
@@ -180,7 +176,6 @@ export async function PUT(request, { params }) {
             dateEcheance: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // +30 jours
           }
         })
-            console.log('✅ Facture créée automatiquement pour le RDV:', id)
           }
         }
       } catch (invoiceError) {
