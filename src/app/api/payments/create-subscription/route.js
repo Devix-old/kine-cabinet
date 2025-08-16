@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createSubscription, createCustomer, SUBSCRIPTION_PLANS } from '@/lib/stripe'
+import { createSubscription, createCustomer, SUBSCRIPTION_PLANS } from '@/lib/stripe-client'
 import { withCabinetIsolation } from '@/middleware/cabinetIsolation'
 
 export const POST = withCabinetIsolation(async (request, context) => {
@@ -100,12 +100,7 @@ export const POST = withCabinetIsolation(async (request, context) => {
         cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
         trialStart: stripeSubscription.trial_start ? new Date(stripeSubscription.trial_start * 1000) : null,
         trialEnd: stripeSubscription.trial_end ? new Date(stripeSubscription.trial_end * 1000) : null,
-        cabinetId,
-        metadata: {
-          ...metadata,
-          country,
-          planName: plan.name
-        }
+        cabinetId
       }
     })
 

@@ -34,7 +34,20 @@ export async function GET(request) {
             trialStartDate: true,
             trialEndDate: true,
             isTrialActive: true,
-            maxPatients: true
+            maxPatients: true,
+            subscriptions: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+              select: {
+                id: true,
+                planId: true,
+                status: true,
+                currentPeriodStart: true,
+                currentPeriodEnd: true,
+                trialStart: true,
+                trialEnd: true
+              }
+            }
           }
         }
       }
@@ -47,8 +60,15 @@ export async function GET(request) {
       )
     }
 
+    const [currentSubscription] = user.cabinet.subscriptions || []
+    const cabinetPayload = { ...user.cabinet }
+    delete cabinetPayload.subscriptions
+
     return NextResponse.json({
-      ...user.cabinet,
+      cabinet: {
+        ...cabinetPayload,
+        currentSubscription: currentSubscription || null
+      },
       user: {
         id: user.id,
         name: user.name,

@@ -23,7 +23,8 @@ export function CabinetConfigProvider({ children }) {
           const response = await fetch('/api/cabinet')
           if (response.ok) {
             const data = await response.json()
-            setCabinetType(data.type || 'KINESITHERAPIE')
+            const apiCabinet = data.cabinet || data
+            setCabinetType(apiCabinet?.type || 'KINESITHERAPIE')
           }
         } catch (error) {
           console.error('Error fetching cabinet type:', error)

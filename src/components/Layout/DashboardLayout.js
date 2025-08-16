@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }) {
         const response = await fetch('/api/cabinet')
         if (response.ok) {
           const data = await response.json()
-          setCabinet(data)
+          setCabinet(data.cabinet || data)
         }
       } catch (error) {
         console.error('Error fetching cabinet:', error)

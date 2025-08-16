@@ -49,7 +49,7 @@ export default function ComptePage() {
       const response = await fetch('/api/cabinet')
       if (response.ok) {
         const data = await response.json()
-        setCabinetInfo(data.cabinet)
+        setCabinetInfo(data.cabinet || data)
       }
     } catch (error) {
       console.error('Error fetching cabinet info:', error)
@@ -132,10 +132,15 @@ export default function ComptePage() {
         color: 'blue'
       }
     } else {
+      const sub = cabinetInfo.currentSubscription || null
+      const planLabel = sub?.planId ? sub.planId.charAt(0).toUpperCase() + sub.planId.slice(1) : 'Plan actif'
+      const period = sub?.currentPeriodStart && sub?.currentPeriodEnd
+        ? `Du ${new Date(sub.currentPeriodStart).toLocaleDateString()} au ${new Date(sub.currentPeriodEnd).toLocaleDateString()}`
+        : 'Période en cours'
       return {
         type: 'active',
-        title: 'Abonnement actif',
-        description: 'Patients illimités',
+        title: `Abonnement actif${sub?.planId ? ` · ${planLabel}` : ''}`,
+        description: period,
         limit: 'Accès complet à toutes les fonctionnalités',
         icon: Crown,
         color: 'green'

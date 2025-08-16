@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 })
 
 // Import client-side configurations
-import { SUBSCRIPTION_PLANS as CLIENT_PLANS, getCurrencyForCountry } from './stripe-client'
+import { SUBSCRIPTION_PLANS as CLIENT_PLANS, getCurrencyForCountry } from './stripe'
 
 // Server-side subscription plans with Stripe price IDs
 export const SUBSCRIPTION_PLANS = {

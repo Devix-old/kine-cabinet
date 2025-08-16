@@ -162,19 +162,63 @@ async function handleInvoicePaymentFailed(invoice) {
 async function handleSubscriptionCreated(subscription) {
 
   try {
-    // Update subscription record
-    await prisma.subscription.updateMany({
-      where: { stripeSubscriptionId: subscription.id },
-      data: {
-        status: subscription.status.toUpperCase(),
-        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
-        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-        trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-        updatedAt: new Date()
-      }
-    })
+    // Upsert subscription record (create if missing)
+    const planIdFromPrice = Array.isArray(subscription.items?.data) && subscription.items.data[0]?.price?.nickname
+      ? subscription.items.data[0].price.nickname.toLowerCase()
+      : (subscription.metadata?.planId || 'unknown')
+
+    const stripeCustomerId = subscription.customer?.toString?.() || null
+    let cabinetId = subscription.metadata?.cabinetId || null
+    if (!cabinetId && stripeCustomerId) {
+      const owner = await prisma.user.findFirst({
+        where: { stripeCustomerId },
+        select: { cabinetId: true }
+      })
+      cabinetId = owner?.cabinetId || null
+    }
+
+    if (cabinetId) {
+      await prisma.subscription.upsert({
+        where: { stripeSubscriptionId: subscription.id },
+        create: {
+          stripeSubscriptionId: subscription.id,
+          stripeCustomerId,
+          planId: planIdFromPrice,
+          status: subscription.status.toUpperCase(),
+          currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
+          currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+          trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+          cabinetId
+        },
+        update: {
+          planId: planIdFromPrice,
+          status: subscription.status.toUpperCase(),
+          currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
+          currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+          trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+          updatedAt: new Date()
+        }
+      })
+    } else {
+      // Fallback: update only if exists
+      await prisma.subscription.updateMany({
+        where: { stripeSubscriptionId: subscription.id },
+        data: {
+          planId: planIdFromPrice,
+          status: subscription.status.toUpperCase(),
+          currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
+          currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+          trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+          updatedAt: new Date()
+        }
+      })
+    }
 
     // Update cabinet status - end trial and activate subscription
     if (subscription.metadata?.cabinetId) {
@@ -203,18 +247,60 @@ async function handleSubscriptionCreated(subscription) {
 }
 
 async function handleSubscriptionUpdated(subscription) {
-  // Update subscription record
-  await prisma.subscription.updateMany({
-    where: { stripeSubscriptionId: subscription.id },
-    data: {
-      status: subscription.status.toUpperCase(),
-      currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
-      currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
-      updatedAt: new Date()
-    }
-  })
+  // Upsert subscription record to ensure existence and update
+  const planIdFromPrice = Array.isArray(subscription.items?.data) && subscription.items.data[0]?.price?.nickname
+    ? subscription.items.data[0].price.nickname.toLowerCase()
+    : (subscription.metadata?.planId || 'unknown')
+
+  const stripeCustomerId = subscription.customer?.toString?.() || null
+  let cabinetId = subscription.metadata?.cabinetId || null
+  if (!cabinetId && stripeCustomerId) {
+    const owner = await prisma.user.findFirst({
+      where: { stripeCustomerId },
+      select: { cabinetId: true }
+    })
+    cabinetId = owner?.cabinetId || null
+  }
+
+  if (cabinetId) {
+    await prisma.subscription.upsert({
+      where: { stripeSubscriptionId: subscription.id },
+      create: {
+        stripeSubscriptionId: subscription.id,
+        stripeCustomerId,
+        planId: planIdFromPrice,
+        status: subscription.status.toUpperCase(),
+        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
+        trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+        cabinetId
+      },
+      update: {
+        planId: planIdFromPrice,
+        status: subscription.status.toUpperCase(),
+        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
+        updatedAt: new Date()
+      }
+    })
+  } else {
+    await prisma.subscription.updateMany({
+      where: { stripeSubscriptionId: subscription.id },
+      data: {
+        planId: planIdFromPrice,
+        status: subscription.status.toUpperCase(),
+        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
+        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
+        updatedAt: new Date()
+      }
+    })
+  }
 
   // Subscription updated
 }
@@ -253,16 +339,54 @@ async function handleSetupIntentSucceeded(setupIntent) {
 async function handleCheckoutSessionCompleted(checkoutSession) {
 
   try {
-    // If this is a subscription checkout, update cabinet immediately
+    // If this is a subscription checkout, persist subscription and update cabinet
     if (checkoutSession.mode === 'subscription' && checkoutSession.metadata?.cabinetId) {
+      const subscriptionId = checkoutSession.subscription?.toString?.()
+      if (subscriptionId) {
+        // Fetch latest subscription from Stripe to get accurate periods
+        const StripeModule = (await import('stripe')).default
+        const client = new StripeModule(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-12-18.acacia', typescript: true })
+        const sub = await client.subscriptions.retrieve(subscriptionId)
+
+        const planIdFromPrice = Array.isArray(sub.items?.data) && sub.items.data[0]?.price?.nickname
+          ? sub.items.data[0].price.nickname.toLowerCase()
+          : (checkoutSession.metadata?.planId || 'unknown')
+
+        await prisma.subscription.upsert({
+          where: { stripeSubscriptionId: sub.id },
+          create: {
+            stripeSubscriptionId: sub.id,
+            stripeCustomerId: sub.customer?.toString?.() || null,
+            planId: planIdFromPrice,
+            status: sub.status.toUpperCase(),
+            currentPeriodStart: sub.current_period_start ? new Date(sub.current_period_start * 1000) : null,
+            currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
+            cancelAtPeriodEnd: sub.cancel_at_period_end,
+            trialStart: sub.trial_start ? new Date(sub.trial_start * 1000) : null,
+            trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
+            cabinetId: checkoutSession.metadata.cabinetId,
+          },
+          update: {
+            planId: planIdFromPrice,
+            status: sub.status.toUpperCase(),
+            currentPeriodStart: sub.current_period_start ? new Date(sub.current_period_start * 1000) : null,
+            currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
+            cancelAtPeriodEnd: sub.cancel_at_period_end,
+            trialStart: sub.trial_start ? new Date(sub.trial_start * 1000) : null,
+            trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
+            updatedAt: new Date()
+          }
+        })
+      }
+
       await prisma.cabinet.updateMany({
         where: { id: checkoutSession.metadata.cabinetId },
         data: {
           isTrialActive: false,
-          trialEndDate: new Date(), // End trial immediately
+          trialEndDate: new Date(),
           maxPatients: checkoutSession.metadata.planId === 'starter' ? 100 : 
                       checkoutSession.metadata.planId === 'professional' ? 1000 : 
-                      10000, // Unlimited for enterprise
+                      10000,
           updatedAt: new Date()
         }
       })
