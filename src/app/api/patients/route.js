@@ -261,6 +261,38 @@ export async function POST(request) {
       )
     }
 
+    // Check patient limit for the cabinet
+    if (session.user.role !== 'SUPER_ADMIN') {
+      // Get user with cabinet info (same as cabinet API)
+      const user = await prisma.user.findFirst({
+        where: { email: session.user.email },
+        include: { 
+          cabinet: {
+            select: {
+              id: true,
+              maxPatients: true,
+              isTrialActive: true
+            }
+          }
+        }
+      })
+
+      if (user?.cabinet) {
+        const currentPatientCount = await prisma.patient.count({
+          where: { cabinetId: session.user.cabinetId }
+        })
+
+        if (currentPatientCount >= user.cabinet.maxPatients) {
+          return NextResponse.json(
+            { 
+              error: `Limite de patients atteinte (${currentPatientCount}/${user.cabinet.maxPatients}). ${user.cabinet.isTrialActive ? 'Passez à un plan payant pour ajouter plus de patients.' : 'Contactez-nous pour augmenter votre limite.'}` 
+            },
+            { status: 403 }
+          )
+        }
+      }
+    }
+
     // Générer un numéro de dossier unique dans le cabinet
     let numeroDossier
     let isUnique = false

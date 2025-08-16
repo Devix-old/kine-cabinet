@@ -4,8 +4,18 @@ import { fr } from 'date-fns/locale'
 // Formatage des dates
 export const formatDate = (date, formatStr = 'dd/MM/yyyy') => {
   if (!date) return ''
-  const dateObj = typeof date === 'string' ? parseISO(date) : date
-  return format(dateObj, formatStr, { locale: fr })
+  
+  try {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date
+    
+    // Vérifier si la date est valide
+    if (isNaN(dateObj.getTime())) return ''
+    
+    return format(dateObj, formatStr, { locale: fr })
+  } catch (error) {
+    console.error('Erreur lors du formatage de la date:', error)
+    return ''
+  }
 }
 
 export const formatDateTime = (date) => {
@@ -43,16 +53,27 @@ export const formatCurrency = (amount) => {
 
 // Calcul de l'âge
 export const calculateAge = (birthDate) => {
-  const today = new Date()
-  const birth = new Date(birthDate)
-  let age = today.getFullYear() - birth.getFullYear()
-  const monthDiff = today.getMonth() - birth.getMonth()
+  if (!birthDate) return null
   
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--
+  try {
+    const today = new Date()
+    const birth = new Date(birthDate)
+    
+    // Vérifier si la date est valide
+    if (isNaN(birth.getTime())) return null
+    
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    
+    return age
+  } catch (error) {
+    console.error('Erreur lors du calcul de l\'âge:', error)
+    return null
   }
-  
-  return age
 }
 
 // Pagination

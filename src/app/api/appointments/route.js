@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
+import { getCabinetConfig } from '@/lib/cabinet-configs'
 
 // GET /api/appointments - Récupérer tous les rendez-vous
 export async function GET(request) {
@@ -66,7 +67,7 @@ export async function GET(request) {
       where.patientId = patientId
     }
 
-    // Récupérer les rendez-vous avec pagination
+    // Récupérer les rendez-vous avec pagination (scoped to cabinet)
     const [appointments, total] = await Promise.all([
       prisma.appointment.findMany({
         where,
@@ -176,6 +177,8 @@ export async function POST(request) {
     }
     
     const createdById = session.user.id
+    const cabinetType = session.user.cabinetType
+    const moduleConfig = getCabinetConfig(cabinetType || 'KINESITHERAPIE')
 
     // Vérifier les conflits de créneaux si une salle est spécifiée
     if (body.salleId) {
@@ -203,6 +206,17 @@ export async function POST(request) {
             { status: 409 }
           )
         }
+      }
+    }
+
+    // Validation module-aware (appointment type allowed)
+    if (body.type) {
+      const allowedTypes = (moduleConfig?.appointmentTypes || []).map(t => t.value)
+      if (!allowedTypes.includes(body.type)) {
+        return NextResponse.json(
+          { error: `Type de rendez-vous non autorisé pour le module ${cabinetType}` },
+          { status: 400 }
+        )
       }
     }
 

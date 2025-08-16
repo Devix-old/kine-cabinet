@@ -9,8 +9,9 @@ export async function POST(request) {
     const {
       email,
       password,
+      cabinetType = 'KINESITHERAPIE', // Default to kinesiology
       trialDays = 7,
-      maxPatients = 3
+      maxPatients = 3 // Fixed: should be 3 for trial, not 50
     } = body || {}
 
     // Basic validation
@@ -40,16 +41,11 @@ export async function POST(request) {
       )
     }
 
-    // Generate cabinet name from email
-    const emailPrefix = email.split('@')[0]
-    const cabinetName = `Cabinet ${emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1)}`
-    
-    // Check if cabinet name exists and make it unique
-    let finalCabinetName = cabinetName
-    let counter = 1
+    // Create a temporary cabinet name; real name will be set during onboarding
+    const generateTempName = () => `Cabinet Temp ${Math.random().toString(36).slice(2, 8).toUpperCase()}`
+    let finalCabinetName = generateTempName()
     while (await prisma.cabinet.findUnique({ where: { nom: finalCabinetName } })) {
-      finalCabinetName = `${cabinetName} ${counter}`
-      counter++
+      finalCabinetName = generateTempName()
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -59,11 +55,14 @@ export async function POST(request) {
       const cabinet = await tx.cabinet.create({
         data: {
           nom: finalCabinetName,
+          type: cabinetType, // Set cabinet type
+          specialites: [], // Empty array for now
           adresse: null,
           telephone: null,
           email: email,
           siret: null,
           isActive: true,
+          onboardingCompleted: false,
           // Trial settings
           trialStartDate: new Date(),
           trialEndDate: new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000), // +7 days
@@ -93,6 +92,7 @@ export async function POST(request) {
         cabinet: { 
           id: result.cabinet.id, 
           nom: result.cabinet.nom,
+          type: result.cabinet.type,
           trialEndDate: result.cabinet.trialEndDate,
           maxPatients: result.cabinet.maxPatients
         },

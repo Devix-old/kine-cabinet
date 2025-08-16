@@ -54,41 +54,70 @@ body {
   }
   
   /* Beautiful Custom Scrollbar Styles */
-  .custom-scrollbar {
-    scrollbar-width: auto;
-    scrollbar-color: #6b72803f #f9fafb;
+  /* Gradient Professional Scrollbar */
+  .gradient-pro {
+    scrollbar-width: thin;
+    scrollbar-color: #6366f1 #f1f5f9;
+    transition: scrollbar-color 0.3s ease;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 12px !important;
+
+  .gradient-pro::-webkit-scrollbar {
+    width: 10px;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
-    border-radius: 12px;
-    margin: 8px 4px;
+
+  .gradient-pro::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 5px;
+    box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #9ca3af, #6b7280);
-    border-radius: 12px;
-    border: 2px solid transparent;
-    background-clip: content-box;
+
+  .gradient-pro::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #6b7280, #4b5563);
-    background-clip: content-box;
-    transform: scaleX(1.1);
+
+  .gradient-pro::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    transform: scale(1.05);
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:active {
-    background: linear-gradient(to bottom, #4b5563, #374151);
-    background-clip: content-box;
+
+  /* Invisible Until Hover Scrollbar */
+  .invisible-hover {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-corner {
+
+  .invisible-hover:hover {
+    scrollbar-color: #94a3b8 #f1f5f9;
+  }
+
+  .invisible-hover::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .invisible-hover::-webkit-scrollbar-track {
     background: transparent;
+    transition: background 0.3s ease;
+  }
+
+  .invisible-hover::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+
+  .invisible-hover:hover::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+
+  .invisible-hover:hover::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+  }
+
+  .invisible-hover:hover::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
   }
 }

@@ -28,6 +28,8 @@ export const authOptions = {
                 select: {
                   id: true,
                   nom: true,
+                  type: true,
+                  onboardingCompleted: true,
                   isActive: true
                 }
               }
@@ -60,7 +62,9 @@ export const authOptions = {
             name: user.name,
             role: user.role,
             cabinetId: user.cabinetId,
-            cabinetName: user.cabinet?.nom || null
+            cabinetName: user.cabinet?.nom || null,
+            cabinetType: user.cabinet?.type || null,
+            cabinetOnboardingCompleted: user.cabinet?.onboardingCompleted || false
           }
         } catch (error) {
           console.error('❌ Erreur lors de l\'authentification:', error)
@@ -82,6 +86,8 @@ export const authOptions = {
         token.name = user.name
         token.cabinetId = user.cabinetId
         token.cabinetName = user.cabinetName
+        token.cabinetType = user.cabinetType
+        token.cabinetOnboardingCompleted = user.cabinetOnboardingCompleted
       }
       return token
     },
@@ -92,6 +98,8 @@ export const authOptions = {
         session.user.name = token.name
         session.user.cabinetId = token.cabinetId
         session.user.cabinetName = token.cabinetName
+        session.user.cabinetType = token.cabinetType
+        session.user.cabinetOnboardingCompleted = token.cabinetOnboardingCompleted
       }
       return session
     }

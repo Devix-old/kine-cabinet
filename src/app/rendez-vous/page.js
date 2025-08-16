@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import DashboardLayout from '@/components/Layout/DashboardLayout'
 import { useApi } from '@/hooks/useApi'
 import { useToastContext } from '@/contexts/ToastContext'
+import { useCabinetConfig } from '@/hooks/useCabinetConfig'
 import { formatDate, formatDateTime } from '@/lib/utils'
 import { 
   Calendar, 
@@ -30,13 +31,6 @@ const timeSlots = [
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
 ]
 
-const appointmentTypes = [
-  { value: 'CONSULTATION', label: 'Consultation' },
-  { value: 'SEANCE', label: 'Séance' },
-  { value: 'SUIVI', label: 'Suivi' },
-  { value: 'URGENCE', label: 'Urgence' }
-]
-
 const appointmentStatuses = [
   { value: 'PLANIFIE', label: 'Planifié' },
   { value: 'CONFIRME', label: 'Confirmé' },
@@ -47,6 +41,10 @@ const appointmentStatuses = [
 ]
 
 export default function AppointmentsPage() {
+  const { config, cabinetType } = useCabinetConfig()
+  const practitionerLabel = (config?.terminology?.practitioner || 'Praticien')
+  const practitionerPlaceholder = `Sélectionner un ${practitionerLabel}`
+  const practitionerError = `${practitionerLabel} requis`
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [view, setView] = useState('week')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -65,13 +63,21 @@ export default function AppointmentsPage() {
   const { get, post, put, delete: del } = useApi()
   const { success, error: showError } = useToastContext()
 
+  // Get dynamic appointment types from cabinet config
+  const appointmentTypes = config?.appointmentTypes || [
+    { value: 'CONSULTATION', label: 'Consultation' },
+    { value: 'SEANCE', label: 'Séance' },
+    { value: 'SUIVI', label: 'Suivi' },
+    { value: 'URGENCE', label: 'Urgence' }
+  ]
+
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
       patientId: '',
       date: new Date().toISOString().split('T')[0],
       time: '09:00',
       duree: 30,
-      type: 'CONSULTATION',
+      type: appointmentTypes[0]?.value || 'CONSULTATION',
       statut: 'PLANIFIE',
       salleId: '',
       kineId: '',           // ✅ Nouveau
@@ -114,9 +120,14 @@ export default function AppointmentsPage() {
       const tarifsResponse = await get(`/api/tarifs?_t=${Date.now()}`)
       setTarifs(tarifsResponse || [])
 
-      // Charger les kinésithérapeutes
-      const kinesResponse = await get(`/api/users?role=KINE&_t=${Date.now()}`)
-      setKines(kinesResponse.users || [])
+      // Charger les praticiens selon le module
+      if (cabinetType === 'KINESITHERAPIE') {
+        const kinesResponse = await get(`/api/users?role=KINE&_t=${Date.now()}`)
+        setKines(kinesResponse.users || [])
+      } else {
+        const adminsResponse = await get(`/api/users?role=ADMIN&_t=${Date.now()}`)
+        setKines(adminsResponse.users || [])
+      }
 
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error)
@@ -161,7 +172,7 @@ export default function AppointmentsPage() {
         date: dateStr,
         time: time,
         duree: 30,
-        type: 'CONSULTATION',
+        type: appointmentTypes[0]?.value || 'CONSULTATION',
         statut: 'PLANIFIE',
         salleId: '',
         kineId: '',
@@ -781,12 +792,12 @@ export default function AppointmentsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kinésithérapeute</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{practitionerLabel}</label>
               <select
-                {...register('kineId', { required: 'Kinésithérapeute requis' })}
+                {...register('kineId', { required: practitionerError })}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
-                <option value="">Sélectionner un kinésithérapeute</option>
+                <option value="">{practitionerPlaceholder}</option>
                 {kines.map(kine => (
                   <option key={kine.id} value={kine.id}>
                     {kine.name} - {kine.role}
@@ -962,12 +973,12 @@ export default function AppointmentsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kinésithérapeute</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{practitionerLabel}</label>
               <select
-                {...register('kineId', { required: 'Kinésithérapeute requis' })}
+                {...register('kineId', { required: practitionerError })}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
-                <option value="">Sélectionner un kinésithérapeute</option>
+                <option value="">{practitionerPlaceholder}</option>
                 {kines.map(kine => (
                   <option key={kine.id} value={kine.id}>
                     {kine.name} - {kine.role}

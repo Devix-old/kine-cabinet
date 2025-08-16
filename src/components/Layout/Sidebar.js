@@ -1,13 +1,14 @@
-'use client'
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { useCabinetConfig, useEnabledModules } from '@/hooks/useCabinetConfig'
 import { 
   Home, 
   Users, 
   Calendar, 
+  Activity, 
   FileText, 
   Settings, 
   BarChart3, 
@@ -15,36 +16,111 @@ import {
   LogOut,
   Menu,
   X,
-  FlaskConical
+  FlaskConical,
+  CreditCard
 } from 'lucide-react'
+
+const menuItems = [
+  { 
+    name: 'Tableau de bord', 
+    href: '/dashboard', 
+    icon: Home, 
+    always: true 
+  },
+  { 
+    name: 'Patients', 
+    href: '/patients', 
+    icon: Users, 
+    moduleKey: 'patients' 
+  },
+  { 
+    name: 'Rendez-vous', 
+    href: '/rendez-vous', 
+    icon: Calendar, 
+    moduleKey: 'appointments' 
+  },
+  { 
+    name: 'Traitements', 
+    href: '/traitements', 
+    icon: Activity, 
+    moduleKey: 'treatments' 
+  },
+  { 
+    name: 'Dossiers', 
+    href: '/dossiers', 
+    icon: FileText, 
+    moduleKey: 'medicalRecords' 
+  },
+  { 
+    name: 'Facturation', 
+    href: '/billing', 
+    icon: CreditCard, 
+    moduleKey: 'billing' 
+  },
+  { 
+    name: 'Statistiques', 
+    href: '/statistiques', 
+    icon: BarChart3, 
+    moduleKey: 'statistics' 
+  },
+  { 
+    name: 'Utilisateurs', 
+    href: '/utilisateurs', 
+    icon: User, 
+    moduleKey: 'users' 
+  },
+  { 
+    name: 'Paramètres', 
+    href: '/parametres', 
+    icon: Settings, 
+    moduleKey: 'settings' 
+  }
+]
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
   const { user, logout, canAccess } = useAuth()
+  const { config, isLoading } = useCabinetConfig()
+  const enabledModules = useEnabledModules()
 
   const handleLogout = async () => {
     await logout()
     // Le logout force déjà le refresh
   }
 
-  // Navigation avec permissions
-  const navigation = [
-    { name: 'Tableau de bord', href: '/dashboard', icon: Home, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },
-    { name: 'Patients', href: '/patients', icon: Users, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },
-    { name: 'Rendez-vous', href: '/rendez-vous', icon: Calendar, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },
-    { name: 'Dossiers', href: '/dossiers', icon: FileText, roles: ['ADMIN', 'KINE', 'SECRETAIRE'] },
-    { name: 'Traitements', href: '/traitements', icon: FlaskConical, roles: ['ADMIN', 'KINE'] },
-    { name: 'Statistiques', href: '/statistiques', icon: BarChart3, roles: ['ADMIN', 'KINE'] },
-    { name: 'Utilisateurs', href: '/utilisateurs', icon: User, roles: ['ADMIN'] },
-    { name: 'Paramètres', href: '/parametres', icon: Settings, roles: ['ADMIN'] },
-  ]
-
-  // Filtrer la navigation selon les permissions
+  // Filter menu items based on enabled modules and user permissions
   const filteredNavigation = useMemo(() => {
-    if (!user?.role) return []
-    return navigation.filter(item => item.roles.includes(user.role))
-  }, [user?.role])
+    if (!user?.role || !config) return [] // Return empty if no config
+    
+    const filteredByModules = menuItems.filter(item => 
+      item.always || (item.moduleKey && enabledModules.includes(item.moduleKey))
+    )
+    
+    // Apply role-based filtering
+    return filteredByModules.filter(item => {
+      switch (item.href) {
+        case '/dashboard':
+          return ['ADMIN', 'KINE', 'SECRETAIRE'].includes(user.role)
+        case '/patients':
+          return ['ADMIN', 'KINE', 'SECRETAIRE'].includes(user.role)
+        case '/rendez-vous':
+          return ['ADMIN', 'KINE', 'SECRETAIRE'].includes(user.role)
+        case '/dossiers':
+          return ['ADMIN', 'KINE', 'SECRETAIRE'].includes(user.role)
+        case '/traitements':
+          return ['ADMIN', 'KINE'].includes(user.role)
+        case '/statistiques':
+          return ['ADMIN', 'KINE'].includes(user.role)
+        case '/utilisateurs':
+          return ['ADMIN'].includes(user.role)
+        case '/parametres':
+          return ['ADMIN'].includes(user.role)
+        default:
+          return true
+      }
+    })
+  }, [user?.role, enabledModules, config]) // Added config to dependencies
 
   const isActive = (href) => pathname === href
 
@@ -67,10 +143,24 @@ export default function Sidebar() {
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
-          <Link href="/" className="text-xl font-bold text-blue-600 cursor-pointer">
-            Kine Cabinet
-          </Link>
+          <div className="flex items-center justify-center h-20 px-6 border-b border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img 
+                  src="/logo.png" 
+                  alt="Eniripsa Logo" 
+                  className="w-8 h-8 object-contain"
+                />
+              </div>
+              <div className="text-left">
+                <h1 className="text-lg font-bold text-teal-700 leading-tight">
+                  Eniripsa
+                </h1>
+                <p className="text-xs text-gray-500 font-medium">
+                  {config?.name || ''}
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}

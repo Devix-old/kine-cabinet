@@ -6,6 +6,7 @@ export default withAuth(
     const token = req.nextauth.token
     const isAuth = !!token
     const pathname = req.nextUrl.pathname
+    const isOnboardingRoute = pathname.startsWith('/onboarding')
 
     const isApiRoute = pathname.startsWith('/api')
     const isApiAuthRoute = pathname.startsWith('/api/auth')
@@ -15,6 +16,20 @@ export default withAuth(
     // Protect API routes except auth, webhooks, and explicitly public ones
     if (isApiRoute && !isApiAuthRoute && !isApiPublicRoute && !isWebhookRoute && !isAuth) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
+    // Enforce onboarding completion for app routes (non-API) when authenticated
+    if (!isApiRoute && isAuth) {
+      const onboardingCookie = req.cookies.get('onboardingCompleted')?.value
+      const onboardingDoneFromCookie = onboardingCookie === 'true'
+      const onboardingDoneFromToken = token?.cabinetOnboardingCompleted === true
+
+      if (!isOnboardingRoute && !(onboardingDoneFromCookie || onboardingDoneFromToken)) {
+        const url = req.nextUrl.clone()
+        url.pathname = '/onboarding'
+        url.search = ''
+        return NextResponse.redirect(url)
+      }
     }
 
     return NextResponse.next()
@@ -51,6 +66,7 @@ export const config = {
     '/utilisateurs/:path*',
     '/parametres/:path*',
     '/admin/:path*',
+    '/onboarding/:path*',
 
     // APIs except those explicitly handled as public in the middleware above
     '/api/:path*',

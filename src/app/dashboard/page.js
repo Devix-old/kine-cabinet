@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/Layout/DashboardLayout'
 import { useApi } from '@/hooks/useApi'
 import { useAuth } from '@/hooks/useAuth'
+import { useCabinetConfig } from '@/hooks/useCabinetConfig'
 import { formatDate, calculateAge } from '@/lib/utils'
 import { 
   Calendar, 
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react'
 
 export default function DashboardPage() {
+  const { config, refreshCabinetConfig } = useCabinetConfig()
   const [currentTime] = useState(new Date())
   const [stats, setStats] = useState({
     totalPatients: 0,
@@ -32,7 +34,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   const { get } = useApi()
-  const { user } = useAuth()
+  const { user, isLoading: authLoading, isAuthenticated } = useAuth()
   const router = useRouter()
 
   // Memoize greeting calculation
@@ -78,33 +80,75 @@ export default function DashboardPage() {
     loadDashboardData()
   }, [loadDashboardData])
 
-  // Memoize quick stats to prevent recalculation
-  const quickStats = useMemo(() => [
-    { 
-      title: 'Patients actifs', 
-      value: loading ? '...' : stats.activePatients.toString(), 
-      icon: Users, 
-      color: 'bg-green-500' 
-    },
-    { 
-      title: 'Rendez-vous aujourd\'hui', 
-      value: loading ? '...' : stats.appointmentsToday.toString(), 
-      icon: Calendar, 
-      color: 'bg-blue-500' 
-    },
-    { 
-      title: 'Rendez-vous cette semaine', 
-      value: loading ? '...' : stats.appointmentsThisWeek.toString(), 
-      icon: Clock, 
-      color: 'bg-purple-500' 
-    },
-    { 
-      title: 'Total patients', 
-      value: loading ? '...' : stats.totalPatients.toString(), 
-      icon: TrendingUp, 
-      color: 'bg-orange-500' 
+  // Refresh config after onboarding
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('onboarding') === 'completed') {
+      refreshCabinetConfig()
+      document.cookie = 'onboardingCompleted=true; path=/'
+      window.history.replaceState({}, document.title, window.location.pathname)
     }
-  ], [stats, loading])
+  }, [refreshCabinetConfig])
+
+  // Memoize quick stats to prevent recalculation
+  const quickStats = useMemo(() => {
+    // Return loading state if config is not available
+    if (!config) {
+      return [
+        { 
+          title: 'Patients actifs', 
+          value: '...', 
+          icon: Users, 
+          color: 'bg-green-500' 
+        },
+        { 
+          title: 'Rendez-vous aujourd\'hui', 
+          value: '...', 
+          icon: Calendar, 
+          color: 'bg-blue-500' 
+        },
+        { 
+          title: 'Rendez-vous cette semaine', 
+          value: '...', 
+          icon: Clock, 
+          color: 'bg-purple-500' 
+        },
+        { 
+          title: 'Total patients', 
+          value: '...', 
+          icon: TrendingUp, 
+          color: 'bg-orange-500' 
+        }
+      ]
+    }
+
+    return [
+      { 
+        title: `${config.terminology?.patient || 'Patient'}s actifs`, 
+        value: loading ? '...' : stats.activePatients.toString(), 
+        icon: Users, 
+        color: 'bg-green-500' 
+      },
+      { 
+        title: `${config.terminology?.appointment || 'Rendez-vous'}s aujourd'hui`, 
+        value: loading ? '...' : stats.appointmentsToday.toString(), 
+        icon: Calendar, 
+        color: 'bg-blue-500' 
+      },
+      { 
+        title: `${config.terminology?.appointment || 'Rendez-vous'}s cette semaine`, 
+        value: loading ? '...' : stats.appointmentsThisWeek.toString(), 
+        icon: Clock, 
+        color: 'bg-purple-500' 
+      },
+      { 
+        title: 'Total patients', 
+        value: loading ? '...' : stats.totalPatients.toString(), 
+        icon: TrendingUp, 
+        color: 'bg-orange-500' 
+      }
+    ]
+  }, [stats, loading, config])
 
   const handleQuickAction = (action) => {
     switch (action) {
@@ -125,6 +169,26 @@ export default function DashboardPage() {
     }
   }
 
+  // Show loading state while authentication is loading
+  if (authLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
+            <p className="text-gray-600">Chargement...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    router.push('/auth/login')
+    return null
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -132,7 +196,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {greeting}, {user?.name || 'Utilisateur'}
+              {greeting}, {user && user.name ? user.name : 'Utilisateur'}
             </h1>
             <p className="text-gray-600 mt-1">
               Voici un aperçu de votre activité aujourd'hui
@@ -245,15 +309,22 @@ export default function DashboardPage() {
                         <Users className="h-5 w-5 text-blue-600" />
                       </div>
                       <div className="ml-3">
-                        <p className="font-medium text-gray-900">{patient.nom} {patient.prenom}</p>
+                        <p className="font-medium text-gray-900">{patient.nom || ''} {patient.prenom || ''}</p>
                         <p className="text-sm text-gray-600">
-                          {calculateAge(patient.dateNaissance)} ans • {patient.telephone}
+                          {(() => {
+                            if (!patient.dateNaissance) return 'Âge non renseigné'
+                            const age = calculateAge(patient.dateNaissance)
+                            return age ? `${age} ans` : 'Âge invalide'
+                          })()} • {patient.telephone || 'Téléphone non renseigné'}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-600">
-                        {formatDate(patient.dateCreation, 'dd/MM/yyyy')}
+                        {(() => {
+                          const formattedDate = formatDate(patient.dateCreation, 'dd/MM/yyyy')
+                          return formattedDate || 'Date inconnue'
+                        })()}
                       </p>
                     </div>
                   </div>
@@ -293,10 +364,13 @@ export default function DashboardPage() {
                       </div>
                       <div className="ml-3">
                         <p className="font-medium text-gray-900">
-                          {appointment.patient?.nom} {appointment.patient?.prenom}
+                          {appointment.patient ? `${appointment.patient.nom || ''} ${appointment.patient.prenom || ''}`.trim() : 'Patient inconnu'}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {formatDate(appointment.date, 'HH:mm')} • {appointment.duree} min
+                          {(() => {
+                            const formattedTime = formatDate(appointment.date, 'HH:mm')
+                            return formattedTime || 'Heure non définie'
+                          })()} • {appointment.duree || 0} min
                         </p>
                       </div>
                     </div>

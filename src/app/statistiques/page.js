@@ -48,21 +48,24 @@ export default function StatisticsPage() {
   }
 
   const getGrowthRate = (growthRate) => {
-    if (growthRate > 0) return `+${growthRate.toFixed(1)}%`
-    if (growthRate < 0) return `${growthRate.toFixed(1)}%`
-    return '0%'
+    const value = Number(growthRate)
+    if (!Number.isFinite(value) || value === 0) return '0%'
+    if (value > 0) return `+${value.toFixed(1)}%`
+    return `${value.toFixed(1)}%`
   }
 
   const getGrowthColor = (growthRate) => {
-    if (growthRate > 0) return 'text-green-600'
-    if (growthRate < 0) return 'text-red-600'
-    return 'text-gray-600'
+    const value = Number(growthRate)
+    if (!Number.isFinite(value) || value === 0) return 'text-gray-600'
+    if (value > 0) return 'text-green-600'
+    return 'text-red-600'
   }
 
   const getGrowthIcon = (growthRate) => {
-    if (growthRate > 0) return <TrendingUp className="h-3 w-3" />
-    if (growthRate < 0) return <TrendingDown className="h-3 w-3" />
-    return <Minus className="h-3 w-3" />
+    const value = Number(growthRate)
+    if (!Number.isFinite(value) || value === 0) return <Minus className="h-3 w-3" />
+    if (value > 0) return <TrendingUp className="h-3 w-3" />
+    return <TrendingDown className="h-3 w-3" />
   }
 
   const handleExport = async (type = 'summary') => {
@@ -198,12 +201,12 @@ export default function StatisticsPage() {
                   <div className="ml-3 sm:ml-4">
                     <p className="text-xs sm:text-sm font-medium text-gray-600">Chiffre d'affaires</p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-900">
-                      {formatCurrency(statistics.revenue)}
+                      {formatCurrency(Number(statistics?.metrics?.revenue?.current || 0))}
                     </p>
                     <div className="flex items-center mt-1">
-                      {getGrowthIcon(statistics.revenueGrowth)}
-                      <span className={`text-xs ml-1 ${getGrowthColor(statistics.revenueGrowth)}`}>
-                        {getGrowthRate(statistics.revenueGrowth)}
+                      {getGrowthIcon(statistics?.metrics?.revenue?.growthRate)}
+                      <span className={`text-xs ml-1 ${getGrowthColor(statistics?.metrics?.revenue?.growthRate)}`}>
+                        {getGrowthRate(statistics?.metrics?.revenue?.growthRate)}
                       </span>
                     </div>
                   </div>
@@ -218,12 +221,12 @@ export default function StatisticsPage() {
                   <div className="ml-3 sm:ml-4">
                     <p className="text-xs sm:text-sm font-medium text-gray-600">Nouveaux patients</p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-900">
-                      {statistics.newPatients}
+                      {Number(statistics?.performance?.newPatients || 0)}
                     </p>
                     <div className="flex items-center mt-1">
-                      {getGrowthIcon(statistics.newPatientsGrowth)}
-                      <span className={`text-xs ml-1 ${getGrowthColor(statistics.newPatientsGrowth)}`}>
-                        {getGrowthRate(statistics.newPatientsGrowth)}
+                      {getGrowthIcon(statistics?.metrics?.patients?.growthRate)}
+                      <span className={`text-xs ml-1 ${getGrowthColor(statistics?.metrics?.patients?.growthRate)}`}>
+                        {getGrowthRate(statistics?.metrics?.patients?.growthRate)}
                       </span>
                     </div>
                   </div>
@@ -238,12 +241,12 @@ export default function StatisticsPage() {
                   <div className="ml-3 sm:ml-4">
                     <p className="text-xs sm:text-sm font-medium text-gray-600">Rendez-vous</p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-900">
-                      {statistics.appointments}
+                      {Number(statistics?.metrics?.sessions?.current || 0)}
                     </p>
                     <div className="flex items-center mt-1">
-                      {getGrowthIcon(statistics.appointmentsGrowth)}
-                      <span className={`text-xs ml-1 ${getGrowthColor(statistics.appointmentsGrowth)}`}>
-                        {getGrowthRate(statistics.appointmentsGrowth)}
+                      {getGrowthIcon(statistics?.metrics?.sessions?.growthRate)}
+                      <span className={`text-xs ml-1 ${getGrowthColor(statistics?.metrics?.sessions?.growthRate)}`}>
+                        {getGrowthRate(statistics?.metrics?.sessions?.growthRate)}
                       </span>
                     </div>
                   </div>
@@ -258,12 +261,12 @@ export default function StatisticsPage() {
                   <div className="ml-3 sm:ml-4">
                     <p className="text-xs sm:text-sm font-medium text-gray-600">Taux de remplissage</p>
                     <p className="text-lg sm:text-2xl font-bold text-gray-900">
-                      {statistics.occupancyRate}%
+                      {Number(statistics?.performance?.occupancyRate || 0)}%
                     </p>
                     <div className="flex items-center mt-1">
-                      {getGrowthIcon(statistics.occupancyRateGrowth)}
-                      <span className={`text-xs ml-1 ${getGrowthColor(statistics.occupancyRateGrowth)}`}>
-                        {getGrowthRate(statistics.occupancyRateGrowth)}
+                      {getGrowthIcon(0)}
+                      <span className={`text-xs ml-1 ${getGrowthColor(0)}`}>
+                        {getGrowthRate(0)}
                       </span>
                     </div>
                   </div>
@@ -312,12 +315,12 @@ export default function StatisticsPage() {
                     selectedChart === 'appointments' ? 'rendez-vous' : 'traitements'}
                 </h3>
                 <div className="h-64 sm:h-80">
-                  {(statistics.chartData && statistics.chartData.length > 0) ? (
+                  {((statistics.charts?.monthly || []).length > 0) ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={statistics.chartData}>
+                      <LineChart data={statistics.charts.monthly}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis 
-                          dataKey="date" 
+                          dataKey="month" 
                           fontSize={12}
                           tick={{ fontSize: 10 }}
                         />
@@ -335,7 +338,7 @@ export default function StatisticsPage() {
                         />
                         <Line 
                           type="monotone" 
-                          dataKey={selectedChart} 
+                          dataKey={{ revenue: 'revenue', patients: 'patients', appointments: 'sessions', treatments: 'sessions' }[selectedChart]} 
                           stroke="#3b82f6" 
                           strokeWidth={2}
                           dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
@@ -354,11 +357,11 @@ export default function StatisticsPage() {
               <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition par type</h3>
                 <div className="h-64 sm:h-80">
-                  {(statistics.pieData && statistics.pieData.length > 0) ? (
+                  {((statistics.charts?.treatmentTypes || []).length > 0) ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={statistics.pieData}
+                          data={statistics.charts.treatmentTypes}
                           cx="50%"
                           cy="50%"
                           labelLine={false}
@@ -367,7 +370,7 @@ export default function StatisticsPage() {
                           fill="#8884d8"
                           dataKey="value"
                         >
-                          {statistics.pieData.map((entry, index) => (
+                          {statistics.charts.treatmentTypes.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#ef4444'][index % 4]} />
                           ))}
                         </Pie>

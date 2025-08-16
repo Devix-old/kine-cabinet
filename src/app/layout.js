@@ -1,11 +1,12 @@
 import './globals.css'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { Providers } from './providers'
+import { CabinetConfigProvider } from '@/hooks/useCabinetConfig'
 // import PerformanceMonitor from '@/components/UI/PerformanceMonitor' // Temporairement désactivé
 
 export const metadata = {
-  title: 'Cabinet de Kinésithérapie',
-  description: 'Application de gestion pour cabinet de kinésithérapie',
+  title: 'Cabinet de Santé - Gestion Universelle',
+  description: 'Application de gestion universelle pour tous types de cabinets de santé',
 }
 
 export default function RootLayout({ children }) {
@@ -13,10 +14,12 @@ export default function RootLayout({ children }) {
     <html lang="fr">
       <body className="bg-gray-50 min-h-screen">
         <Providers>
-          <ToastProvider>
-            {children}
-            {/* <PerformanceMonitor /> */} {/* Temporairement désactivé */}
-          </ToastProvider>
+          <CabinetConfigProvider>
+            <ToastProvider>
+              {children}
+              {/* <PerformanceMonitor /> */} {/* Temporairement désactivé */}
+            </ToastProvider>
+          </CabinetConfigProvider>
         </Providers>
       </body>
     </html>

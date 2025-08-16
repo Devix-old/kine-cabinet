@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }) {
         const response = await fetch('/api/cabinet')
         if (response.ok) {
           const data = await response.json()
-          setCabinet(data.cabinet)
+          setCabinet(data)
         }
       } catch (error) {
         console.error('Error fetching cabinet:', error)
@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }) {
         <Sidebar />
         <main className="lg:ml-64">
           {/* Trial Banner */}
-          {!loading && cabinet && (
+          {!loading && cabinet && cabinet.isTrialActive && (
             <TrialBanner 
               cabinet={cabinet} 
               onClose={() => setCabinet(prev => prev ? { ...prev, isTrialActive: false } : null)}

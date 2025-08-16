@@ -8,16 +8,19 @@ datasource db {
 }
 
 model Cabinet {
-  id              String   @id @default(cuid())
-  nom             String   @unique
+  id              String      @id @default(cuid())
+  nom             String      @unique
+  type            CabinetType @default(KINESITHERAPIE)
+  specialites     String[]    @default([])
   adresse         String?
   telephone       String?
   email           String?
-  siret           String?  @unique
+  siret           String?     @unique
   logo            String?
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  isActive        Boolean     @default(true)
+  onboardingCompleted Boolean  @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   
   // Trial settings
   trialStartDate  DateTime?
@@ -457,6 +460,24 @@ enum SettingType {
   INTEGER
   BOOLEAN
   JSON
+}
+
+enum CabinetType {
+  KINESITHERAPIE
+  DENTAIRE
+  MEDICAL_GENERAL
+  CARDIOLOGIE
+  DERMATOLOGIE
+  GYNECOLOGIE
+  PEDIATRIE
+  PSYCHIATRIE
+  OPHTALMOLOGIE
+  ORTHOPEDIE
+  CHIRURGIE
+  RADIOLOGIE
+  LABORATOIRE
+  PHARMACIE
+  AUTRE
 }
 
 // Modèle de test pour comprendre les connexions Prisma

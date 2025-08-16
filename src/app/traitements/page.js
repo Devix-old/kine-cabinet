@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import DashboardLayout from '@/components/Layout/DashboardLayout'
 import { useApi } from '@/hooks/useApi'
 import { useToastContext } from '@/contexts/ToastContext'
+import { useCabinetConfig, useModuleEnabled } from '@/hooks/useCabinetConfig'
 import { 
   Activity, 
   Plus, 
@@ -23,7 +24,8 @@ import {
   Eye,
   BarChart3,
   X,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react'
 import Modal from '@/components/UI/Modal'
 
@@ -42,6 +44,9 @@ const treatmentStatuses = [
 ]
 
 export default function TreatmentsPage() {
+  const { config } = useCabinetConfig()
+  const isTreatmentsEnabled = useModuleEnabled('treatments')
+  
   const [treatments, setTreatments] = useState([])
   const [patients, setPatients] = useState([])
   const [stats, setStats] = useState({
@@ -61,6 +66,29 @@ export default function TreatmentsPage() {
 
   const { get, post, loading } = useApi()
   const { success, error: showError } = useToastContext()
+
+  // Get dynamic treatment types from cabinet config
+  const treatmentTypes = config?.treatmentTypes || []
+
+  // If treatments are not enabled for this cabinet type, show message
+  if (!isTreatmentsEnabled) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <AlertTriangle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Module Traitements non disponible
+            </h2>
+            <p className="text-gray-600 max-w-md">
+              Le module des traitements n'est pas disponible pour votre type de cabinet ({config?.name ? config.name.toLowerCase() : 'votre cabinet'}).
+              Cette fonctionnalité est spécifique à certains types de cabinets de santé.
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
 
   // Forms
   const treatmentForm = useForm({

@@ -38,7 +38,7 @@ export default function LoginPage() {
       if (result?.error) {
         showError('Email ou mot de passe incorrect')
       } else {
-        // Forcer le refresh complet pour éviter les problèmes de cache
+        // After login, middleware will redirect to onboarding if not completed
         window.location.href = '/dashboard'
       }
     } catch (error) {

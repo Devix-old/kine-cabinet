@@ -41,8 +41,9 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
+          cabinetType: 'KINESITHERAPIE', // Default type, will be updated in onboarding
           trialDays: 7, // 7 jours d'essai gratuit
-          maxPatients: 50 // Limite de 50 patients pendant l'essai
+          maxPatients: 3 // Limite de 3 patients pendant l'essai
         })
       })
 
@@ -56,15 +57,15 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
         redirect: false,
-        callbackUrl: '/dashboard'
+        callbackUrl: '/onboarding'
       })
 
       if (result?.error) {
         throw new Error('Compte créé, mais la connexion a échoué. Veuillez vous connecter manuellement.')
       }
 
-      // 3) Redirect to dashboard with trial info
-      window.location.href = '/dashboard?trial=started'
+      // 3) Redirect to onboarding (middleware enforces if user navigates elsewhere)
+      window.location.href = '/onboarding'
     } catch (err) {
       setError(err.message)
     } finally {
@@ -89,13 +90,13 @@ export default function RegisterPage() {
         {/* Header */}
         <div className="text-center">
           <div className="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-            <User className="h-8 w-8 text-white" />
+            <span className="text-2xl">🏥</span>
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Commencer maintenant
+            Créez votre compte
           </h2>
           <p className="text-gray-600">
-            Créez votre compte et commencez votre essai gratuit de 7 jours
+            Commencez votre essai gratuit de 7 jours
           </p>
         </div>
 
@@ -107,7 +108,7 @@ export default function RegisterPage() {
           </div>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• Accès complet à toutes les fonctionnalités</li>
-            <li>• Jusqu'à 50 patients</li>
+            <li>• Jusqu'à 3 patients</li>
             <li>• Aucune carte de crédit requise</li>
             <li>• Annulez à tout moment</li>
           </ul>

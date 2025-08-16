@@ -1,6 +1,6 @@
 'use client'
 
-import Hero from '@/components/SaaS/Hero'
+import CabinetHero from '@/components/Dynamic/CabinetHero'
 import Footer from '@/components/SaaS/Footer'
 import Link from 'next/link'
 import Features from '@/components/SaaS/Features'
@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <div className="bg-white">
       <main>
-        <Hero />
+        <CabinetHero />
 
         {/* Sections composed components */}
         <Features />
@@ -26,7 +26,7 @@ export default function HomePage() {
                 Prêt à transformer votre cabinet ?
               </h2>
               <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100">
-                Rejoignez des centaines de kinésithérapeutes qui font confiance à KineCabinet 
+                Rejoignez des centaines de professionnels de santé qui font confiance à notre solution 
                 pour gérer leur cabinet plus efficacement.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6">

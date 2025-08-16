@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/Layout/DashboardLayout'
 import Modal from '@/components/UI/Modal'
 import PatientForm from '@/components/Patients/PatientForm'
-import { Plus, Search, Filter, Edit, Trash2, Eye, Download } from 'lucide-react'
+import { Plus, Search, Filter, Edit, Trash2, Eye, Download, AlertTriangle } from 'lucide-react'
 import { useToastContext } from '@/contexts/ToastContext'
+import { useCabinetConfig } from '@/hooks/useCabinetConfig'
 
 export default function PatientsPage() {
   const router = useRouter()
   const { success, error: showError } = useToastContext()
+  const { config } = useCabinetConfig()
   
   // States
   const [patients, setPatients] = useState([])
@@ -21,6 +23,7 @@ export default function PatientsPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingPatient, setEditingPatient] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [cabinetInfo, setCabinetInfo] = useState(null)
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -84,6 +87,16 @@ export default function PatientsPage() {
         newThisMonth: statsResponse.newThisMonth,
         appointmentsThisWeek: statsResponse.appointmentsThisWeek
       })
+
+      // Load cabinet info for patient limits
+      try {
+        const cabinetResponse = await get('/api/cabinet')
+        if (cabinetResponse.cabinet) {
+          setCabinetInfo(cabinetResponse.cabinet)
+        }
+      } catch (cabinetError) {
+        console.error('Error loading cabinet info:', cabinetError)
+      }
       
     } catch (error) {
       console.error('❌ Error loading data:', error)
@@ -266,6 +279,59 @@ export default function PatientsPage() {
           <div className="text-xs sm:text-sm text-gray-600">RDV cette semaine</div>
         </div>
       </div>
+
+      {/* Patient Limit Warning */}
+      {cabinetInfo && (
+        <div className="mb-6">
+          {(() => {
+            const currentCount = stats.total
+            const maxPatients = cabinetInfo.maxPatients || 3
+            const isNearLimit = currentCount >= (maxPatients * 0.8)
+            const isAtLimit = currentCount >= maxPatients
+            
+            if (isAtLimit) {
+              return (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <div>
+                      <p className="font-semibold text-red-800">
+                        Limite de patients atteinte ({currentCount}/{maxPatients})
+                      </p>
+                      <p className="text-sm text-red-700">
+                        {cabinetInfo.isTrialActive 
+                          ? 'Passez à un plan payant pour ajouter plus de patients'
+                          : 'Contactez-nous pour augmenter votre limite'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+            
+            if (isNearLimit) {
+              return (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                    <div>
+                      <p className="font-semibold text-yellow-800">
+                        Limite de patients approche ({currentCount}/{maxPatients})
+                      </p>
+                      <p className="text-sm text-yellow-700">
+                        Vous approchez de la limite de votre plan actuel
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+            
+            return null
+          })()}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">
