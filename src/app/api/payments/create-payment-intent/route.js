@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { createPaymentIntent, getCurrencyForCountry } from '@/lib/stripe'
+import { createPaymentIntent, getCurrencyForCountry } from '@/lib/stripe-client'
 import { withCabinetIsolation } from '@/middleware/cabinetIsolation'
 
 export const POST = withCabinetIsolation(async (request, context) => {

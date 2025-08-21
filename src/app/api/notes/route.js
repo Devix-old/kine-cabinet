@@ -139,10 +139,11 @@ export async function POST(request) {
       )
     }
 
-    // Vérifier que le patient existe si spécifié
+    // Vérifier que le patient existe si spécifié et appartient au même cabinet
     if (patientId) {
       const patient = await prisma.patient.findUnique({
-        where: { id: patientId }
+        where: { id: patientId },
+        select: { id: true, cabinetId: true }
       })
 
       if (!patient) {
@@ -151,18 +152,31 @@ export async function POST(request) {
           { status: 404 }
         )
       }
+      if (session.user.role !== 'SUPER_ADMIN' && patient.cabinetId !== session.user.cabinetId) {
+        return NextResponse.json(
+          { error: 'Accès non autorisé au patient' },
+          { status: 403 }
+        )
+      }
     }
 
-    // Vérifier que le traitement existe si spécifié
+    // Vérifier que le traitement existe si spécifié et appartient au même cabinet
     if (treatmentId) {
       const treatment = await prisma.treatment.findUnique({
-        where: { id: treatmentId }
+        where: { id: treatmentId },
+        select: { id: true, cabinetId: true }
       })
 
       if (!treatment) {
         return NextResponse.json(
           { error: 'Traitement non trouvé' },
           { status: 404 }
+        )
+      }
+      if (session.user.role !== 'SUPER_ADMIN' && treatment.cabinetId !== session.user.cabinetId) {
+        return NextResponse.json(
+          { error: 'Accès non autorisé au traitement' },
+          { status: 403 }
         )
       }
     }

@@ -108,7 +108,7 @@ export const authOptions = {
     signIn: '/auth/login',
     error: '/auth/login'
   },
-  secret: 'f397711554f5050d1eb316d23da2059d4b81fb7914842d0b8570104f8841d3c0',
+  secret: process.env.NEXTAUTH_SECRET,
   // Debug disabled for clean terminal
   debug: false
 } 

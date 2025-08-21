@@ -2,7 +2,7 @@ import Stripe from 'stripe'
 
 // Initialize Stripe with environment variables (SERVER-SIDE ONLY)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: process.env.STRIPE_API_VERSION || '2024-06-20',
   typescript: true,
 })
 
@@ -26,7 +26,7 @@ export const SUBSCRIPTION_PLANS = {
 }
 
 // Re-export client-side functions for server use
-export { getCurrencyForCountry } from './stripe-client'
+export { getCurrencyForCountry } from './stripe'
 
 // Stripe utility functions (SERVER-SIDE ONLY)
 export const createCustomer = async (email, name, metadata = {}) => {

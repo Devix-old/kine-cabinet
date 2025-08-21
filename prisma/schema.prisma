@@ -4,49 +4,45 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://odoo:odoo@localhost:5432/kine_cabinet"
+  url      = env("DATABASE_URL")
 }
 
 model Cabinet {
-  id              String      @id @default(cuid())
-  nom             String      @unique
-  type            CabinetType @default(KINESITHERAPIE)
-  specialites     String[]    @default([])
-  adresse         String?
-  telephone       String?
-  email           String?
-  siret           String?     @unique
-  logo            String?
-  isActive        Boolean     @default(true)
-  onboardingCompleted Boolean  @default(false)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  
-  // Trial settings
-  trialStartDate  DateTime?
-  trialEndDate    DateTime?
-  isTrialActive   Boolean  @default(false)
-  maxPatients     Int      @default(1000) // Limit during trial
-  
-  // Relations
-  users           User[]
-  patients        Patient[]
-  appointments    Appointment[]
-  rooms           Room[]
-  treatments      Treatment[]
-  sessions        Session[]
-  medicalRecords  MedicalRecord[]
-  documents       Document[]
-  notes           Note[]
-  tarifs          Tarif[]
-  invoices        Invoice[]
-  settings        Settings[]
-  workingHours    WorkingHours[]
+  id                   String                 @id @default(cuid())
+  nom                  String                 @unique
+  adresse              String?
+  telephone            String?
+  email                String?
+  siret                String?                @unique
+  logo                 String?
+  isActive             Boolean                @default(true)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  isTrialActive        Boolean                @default(false)
+  maxPatients          Int                    @default(1000)
+  specialites          String[]               @default([])
+  trialEndDate         DateTime?
+  trialStartDate       DateTime?
+  type                 CabinetType            @default(KINESITHERAPIE)
+  onboardingCompleted  Boolean                @default(false)
+  appointments         Appointment[]
+  documents            Document[]
+  invoices             Invoice[]
+  medicalRecords       MedicalRecord[]
+  notes                Note[]
   notificationSettings NotificationSettings[]
-  subscriptions   Subscription[]
-  payments        Payment[]
-  usageRecords    UsageRecord[]
-  paymentMethods  PaymentMethod[]
+  patients             Patient[]
+  paymentMethods       PaymentMethod[]
+  payments             Payment[]
+  rooms                Room[]
+  sessions             Session[]
+  settings             Settings[]
+  subscriptions        Subscription[]
+  tarifs               Tarif[]
+  treatments           Treatment[]
+  usageRecords         UsageRecord[]
+  users                User[]
+  workingHours         WorkingHours[]
 
   @@map("cabinets")
 }
@@ -61,20 +57,16 @@ model User {
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
   lastLogin             DateTime?
-  stripeCustomerId      String?               @unique
-  
-  // Multi-tenant (null pour SUPER_ADMIN)
   cabinetId             String?
-  cabinet               Cabinet?              @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
+  stripeCustomerId      String?               @unique
   appointmentsCreated   Appointment[]         @relation("AppointmentCreator")
   appointmentsAssigned  Appointment[]         @relation("AppointmentKine")
   medicalRecordsCreated MedicalRecord[]       @relation("MedicalRecordCreator")
   notesCreated          Note[]                @relation("NoteCreator")
   notificationSettings  NotificationSettings?
-  treatmentsCreated     Treatment[]           @relation("TreatmentCreator")
   paymentMethods        PaymentMethod[]
+  treatmentsCreated     Treatment[]           @relation("TreatmentCreator")
+  cabinet               Cabinet?              @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
 
   @@unique([email, cabinetId])
   @@map("users")
@@ -101,18 +93,14 @@ model Patient {
   isActive        Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  
-  // Multi-tenant
   cabinetId       String
-  cabinet         Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   appointments    Appointment[]
   documents       Document[]
+  invoices        Invoice[]
   medicalRecords  MedicalRecord[]
   notes           Note[]
+  cabinet         Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
   treatments      Treatment[]
-  invoices        Invoice[]
 
   @@unique([numeroDossier, cabinetId])
   @@map("patients")
@@ -133,19 +121,15 @@ model Appointment {
   createdById String
   salleId     String?
   tarifId     String?
-  
-  // Multi-tenant
   cabinetId   String
   cabinet     Cabinet           @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   createdBy   User              @relation("AppointmentCreator", fields: [createdById], references: [id])
   kine        User?             @relation("AppointmentKine", fields: [kineId], references: [id])
   patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
   salle       Room?             @relation(fields: [salleId], references: [id])
   tarif       Tarif?            @relation(fields: [tarifId], references: [id])
-  sessions    Session[]
   invoice     Invoice?
+  sessions    Session[]
 
   @@map("appointments")
 }
@@ -158,13 +142,9 @@ model Room {
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  
-  // Multi-tenant
   cabinetId    String
-  cabinet      Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   appointments Appointment[]
+  cabinet      Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
 
   @@unique([nom, cabinetId])
   @@map("rooms")
@@ -183,14 +163,10 @@ model Treatment {
   updatedAt   DateTime        @updatedAt
   patientId   String
   createdById String
-  
-  // Multi-tenant
   cabinetId   String
-  cabinet     Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   notes       Note[]
   sessions    Session[]
+  cabinet     Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
   createdBy   User            @relation("TreatmentCreator", fields: [createdById], references: [id])
   patient     Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
@@ -211,13 +187,9 @@ model Session {
   updatedAt     DateTime     @updatedAt
   treatmentId   String
   appointmentId String?
-  
-  // Multi-tenant
   cabinetId     String
-  cabinet       Cabinet      @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  cabinet       Cabinet      @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
   treatment     Treatment    @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
@@ -234,13 +206,9 @@ model MedicalRecord {
   updatedAt   DateTime          @updatedAt
   patientId   String
   createdById String
-  
-  // Multi-tenant
   cabinetId   String
-  cabinet     Cabinet           @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   documents   Document[]
+  cabinet     Cabinet           @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
   createdBy   User              @relation("MedicalRecordCreator", fields: [createdById], references: [id])
   patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
@@ -258,12 +226,8 @@ model Document {
   updatedAt       DateTime       @updatedAt
   patientId       String?
   medicalRecordId String?
-  
-  // Multi-tenant
   cabinetId       String
   cabinet         Cabinet        @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
   patient         Patient?       @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
@@ -281,12 +245,8 @@ model Note {
   patientId   String?
   treatmentId String?
   createdById String
-  
-  // Multi-tenant
   cabinetId   String
   cabinet     Cabinet    @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   createdBy   User       @relation("NoteCreator", fields: [createdById], references: [id])
   patient     Patient?   @relation(fields: [patientId], references: [id], onDelete: Cascade)
   treatment   Treatment? @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
@@ -303,13 +263,9 @@ model Tarif {
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  
-  // Multi-tenant
   cabinetId    String
-  cabinet      Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   appointments Appointment[]
+  cabinet      Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
 
   @@unique([nom, cabinetId])
   @@map("tarifs")
@@ -336,8 +292,6 @@ model Settings {
   category    String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-
-  // Multi-tenant
   cabinetId   String
   cabinet     Cabinet     @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
 
@@ -355,8 +309,6 @@ model WorkingHours {
   breakEndTime   String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
-  // Multi-tenant
   cabinetId      String
   cabinet        Cabinet  @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
 
@@ -375,15 +327,129 @@ model NotificationSettings {
   monthlyReports       Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
-  
-  // Multi-tenant
   cabinetId            String
   cabinet              Cabinet  @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_settings")
+}
+
+model Test {
+  id          String   @id @default(cuid())
+  nom         String
+  description String
+  statut      String   @default("ACTIF")
+  valeur      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tests")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  numero        String
+  montant       Float
+  statut        InvoiceStatus @default(EN_ATTENTE)
+  dateEmission  DateTime      @default(now())
+  dateEcheance  DateTime
+  datePaiement  DateTime?
+  modePaiement  String?
+  notes         String?
+  appointmentId String        @unique
+  patientId     String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  cabinetId     String
+  appointment   Appointment   @relation(fields: [appointmentId], references: [id])
+  cabinet       Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  payments      Payment[]
+
+  @@unique([numero, cabinetId])
+  @@map("invoices")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  stripeSubscriptionId String?            @unique
+  stripeCustomerId     String?
+  planId               String
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  canceledAt           DateTime?
+  trialStart           DateTime?
+  trialEnd             DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  cabinetId            String
+  payments             Payment[]
+  cabinet              Cabinet            @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  usageRecords         UsageRecord[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id                    String            @id @default(cuid())
+  stripePaymentIntentId String?           @unique
+  stripeChargeId        String?
+  amount                Float
+  currency              String            @default("EUR")
+  status                PaymentStatus     @default(PENDING)
+  paymentMethod         PaymentMethodType @default(CARD)
+  paymentMethodType     String?
+  description           String?
+  metadata              Json?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  cabinetId             String
+  subscriptionId        String?
+  invoiceId             String?
+  cabinet               Cabinet           @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  invoice               Invoice?          @relation(fields: [invoiceId], references: [id])
+  subscription          Subscription?     @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payments")
+}
+
+model PaymentMethod {
+  id                    String                @id @default(cuid())
+  stripePaymentMethodId String?               @unique
+  type                  PaymentMethodTypeEnum @default(CARD)
+  cardBrand             String?
+  cardLast4             String?
+  cardExpMonth          Int?
+  cardExpYear           Int?
+  billingDetails        Json?
+  isDefault             Boolean               @default(false)
+  isActive              Boolean               @default(true)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  cabinetId             String
+  userId                String
+  cabinet               Cabinet               @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payment_methods")
+}
+
+model UsageRecord {
+  id                  String       @id @default(cuid())
+  stripeUsageRecordId String?      @unique
+  quantity            Int
+  timestamp           DateTime     @default(now())
+  action              String       @default("increment")
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  cabinetId           String
+  subscriptionId      String
+  cabinet             Cabinet      @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  subscription        Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("usage_records")
 }
 
 enum UserRole {
@@ -478,146 +544,6 @@ enum CabinetType {
   LABORATOIRE
   PHARMACIE
   AUTRE
-}
-
-// Modèle de test pour comprendre les connexions Prisma
-model Test {
-  id          String   @id @default(cuid())
-  nom         String
-  description String
-  statut      String   @default("ACTIF")
-  valeur      Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("tests")
-}
-
-model Invoice {
-  id            String        @id @default(cuid())
-  numero        String
-  montant       Float
-  statut        InvoiceStatus @default(EN_ATTENTE)
-  dateEmission  DateTime      @default(now())
-  dateEcheance  DateTime
-  datePaiement  DateTime?
-  modePaiement  String?
-  notes         String?
-  appointmentId String        @unique
-  patientId     String
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  
-  // Multi-tenant
-  cabinetId     String
-  cabinet       Cabinet       @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
-  appointment   Appointment   @relation(fields: [appointmentId], references: [id])
-  patient       Patient       @relation(fields: [patientId], references: [id])
-  payments      Payment[]
-
-  @@unique([numero, cabinetId])
-  @@map("invoices")
-}
-
-// New models for payment integration
-model Subscription {
-  id                    String              @id @default(cuid())
-  stripeSubscriptionId  String?             @unique
-  stripeCustomerId      String?
-  planId                String
-  status                SubscriptionStatus  @default(ACTIVE)
-  currentPeriodStart    DateTime?
-  currentPeriodEnd      DateTime?
-  cancelAtPeriodEnd     Boolean             @default(false)
-  canceledAt            DateTime?
-  trialStart            DateTime?
-  trialEnd              DateTime?
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  
-  // Multi-tenant
-  cabinetId             String
-  cabinet               Cabinet             @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
-  payments              Payment[]
-  usageRecords          UsageRecord[]
-
-  @@map("subscriptions")
-}
-
-model Payment {
-  id                    String          @id @default(cuid())
-  stripePaymentIntentId String?         @unique
-  stripeChargeId        String?
-  amount                Float
-  currency              String          @default("EUR")
-  status                PaymentStatus   @default(PENDING)
-  paymentMethod         PaymentMethodType   @default(CARD)
-  paymentMethodType     String?
-  description           String?
-  metadata              Json?
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
-  
-  // Multi-tenant
-  cabinetId             String
-  cabinet               Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
-  subscriptionId        String?
-  subscription          Subscription?   @relation(fields: [subscriptionId], references: [id])
-  invoiceId             String?
-  invoice               Invoice?        @relation(fields: [invoiceId], references: [id])
-
-  @@map("payments")
-}
-
-model PaymentMethod {
-  id                    String              @id @default(cuid())
-  stripePaymentMethodId String?             @unique
-  type                  PaymentMethodTypeEnum   @default(CARD)
-  cardBrand             String?
-  cardLast4             String?
-  cardExpMonth          Int?
-  cardExpYear           Int?
-  billingDetails        Json?
-  isDefault             Boolean             @default(false)
-  isActive              Boolean             @default(true)
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  
-  // Multi-tenant
-  cabinetId             String
-  cabinet               Cabinet             @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
-  userId                String
-  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("payment_methods")
-}
-
-model UsageRecord {
-  id                    String   @id @default(cuid())
-  stripeUsageRecordId   String?  @unique
-  quantity              Int
-  timestamp             DateTime @default(now())
-  action                String   @default("increment")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
-  // Multi-tenant
-  cabinetId             String
-  cabinet               Cabinet  @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  
-  // Relations
-  subscriptionId        String
-  subscription          Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-
-  @@map("usage_records")
 }
 
 enum InvoiceStatus {

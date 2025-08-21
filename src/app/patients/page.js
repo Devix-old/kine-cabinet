@@ -30,6 +30,8 @@ export default function PatientsPage() {
     newThisMonth: 0,
     appointmentsThisWeek: 0
   })
+  
+
 
   // Form data
   const [formData, setFormData] = useState({
@@ -60,7 +62,9 @@ export default function PatientsPage() {
     })
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const errorData = await response.json().catch(() => ({}))
+      const errorMessage = errorData.error || `HTTP error! status: ${response.status}`
+      throw new Error(errorMessage)
     }
     
     return response.json()
@@ -71,31 +75,29 @@ export default function PatientsPage() {
   const put = (url, data) => apiCall(url, { method: 'PUT', body: JSON.stringify(data) })
   const del = (url) => apiCall(url, { method: 'DELETE' })
 
-  // Load data from database
+  // Load data from database - OPTIMIZED with Promise.all
   const loadData = async () => {
     try {
       setLoading(true)
       
-      const response = await get(`/api/patients?limit=100&_t=${Date.now()}`)
-      setPatients(response.patients || [])
+      // Paralléliser les appels API pour réduire le temps de chargement
+      const [patientsRes, statsRes, cabinetRes] = await Promise.all([
+        get(`/api/patients?limit=100&_t=${Date.now()}`),
+        get(`/api/patients/stats?_t=${Date.now()}`),
+        get('/api/cabinet').catch(() => null) // Ignore les erreurs pour cabinet
+      ])
       
-      // Load stats from API
-      const statsResponse = await get(`/api/patients/stats?_t=${Date.now()}`)
+      setPatients(patientsRes.patients || [])
+      
       setStats({
-        total: statsResponse.total,
-        active: statsResponse.active,
-        newThisMonth: statsResponse.newThisMonth,
-        appointmentsThisWeek: statsResponse.appointmentsThisWeek
+        total: statsRes.total,
+        active: statsRes.active,
+        newThisMonth: statsRes.newThisMonth,
+        appointmentsThisWeek: statsRes.appointmentsThisWeek
       })
 
-      // Load cabinet info for patient limits
-      try {
-        const cabinetResponse = await get('/api/cabinet')
-        if (cabinetResponse.cabinet) {
-          setCabinetInfo(cabinetResponse.cabinet)
-        }
-      } catch (cabinetError) {
-        console.error('Error loading cabinet info:', cabinetError)
+      if (cabinetRes?.cabinet) {
+        setCabinetInfo(cabinetRes.cabinet)
       }
       
     } catch (error) {
@@ -110,8 +112,6 @@ export default function PatientsPage() {
   useEffect(() => {
     loadData()
   }, [])
-
-
 
   // Reset form
   const resetForm = () => {
@@ -134,67 +134,107 @@ export default function PatientsPage() {
     })
   }
 
-  // Create patient
+  // Create patient - OPTIMISTIC UPDATE
   const handleCreatePatient = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
     
     try {
-      await post('/api/patients', formData)
+      const newPatient = await post('/api/patients', formData)
+      
+      // Vérification de sécurité pour éviter les erreurs
+      if (!newPatient || !newPatient.id) {
+        throw new Error('Réponse invalide de l\'API')
+      }
+      
+      // Mise à jour optimiste - ajouter le patient immédiatement
+      setPatients(prev => [newPatient, ...prev])
+      
+      // Mise à jour optimiste des stats
+      setStats(prev => ({
+        ...prev,
+        total: prev.total + 1,
+        newThisMonth: prev.newThisMonth + 1
+      }))
       
       success('Patient créé avec succès')
       setShowAddModal(false)
       resetForm()
       
-      // Small delay to ensure database transaction is committed
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // Reload both patients and stats
-      await loadData()
-      
     } catch (err) {
       console.error('❌ Patient creation error:', err)
-      showError('Erreur lors de la création du patient')
+      // Afficher le message d'erreur spécifique de l'API
+      showError(err.message || 'Erreur lors de la création du patient')
+      
+      // En cas d'erreur, recharger les données pour s'assurer de la cohérence
+      await loadData()
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Update patient
+  // Update patient - OPTIMISTIC UPDATE
   const handleUpdatePatient = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
     
     try {
-      await put(`/api/patients/${editingPatient.id}`, formData)
+      const updatedPatient = await put(`/api/patients/${editingPatient.id}`, formData)
+      
+      // Vérification de sécurité pour éviter les erreurs
+      if (!updatedPatient || !updatedPatient.id) {
+        throw new Error('Réponse invalide de l\'API')
+      }
+      
+      // Mise à jour optimiste - remplacer le patient dans la liste
+      setPatients(prev => prev.map(p => 
+        p.id === editingPatient.id ? updatedPatient : p
+      ))
+      
       success('Patient modifié avec succès')
       setShowEditModal(false)
       setEditingPatient(null)
       resetForm()
       
-      await loadData() // Simple reload from database
-      
     } catch (err) {
       showError('Erreur lors de la modification du patient')
       console.error('Patient update error:', err)
+      
+      // En cas d'erreur, recharger les données pour s'assurer de la cohérence
+      await loadData()
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Delete patient
+  // Delete patient - OPTIMISTIC UPDATE
   const handleDeletePatient = async (patientId) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce patient ?')) return
     
+    // Sauvegarder l'état actuel pour rollback en cas d'erreur
+    const previousPatients = [...patients]
+    const previousStats = { ...stats }
+    
     try {
+      // Mise à jour optimiste - supprimer immédiatement de la liste
+      setPatients(prev => prev.filter(p => p.id !== patientId))
+      
+      // Mise à jour optimiste des stats
+      setStats(prev => ({
+        ...prev,
+        total: prev.total - 1
+      }))
+      
       await del(`/api/patients/${patientId}`)
       success('Patient supprimé avec succès')
-      
-      await loadData() // Simple reload from database
       
     } catch (err) {
       showError('Erreur lors de la suppression du patient')
       console.error('Patient deletion error:', err)
+      
+      // Rollback en cas d'erreur
+      setPatients(previousPatients)
+      setStats(previousStats)
     }
   }
 
@@ -223,10 +263,15 @@ export default function PatientsPage() {
 
   // Filter patients
   const filteredPatients = patients.filter(patient => {
+    // Vérification de sécurité pour éviter les erreurs avec des données invalides
+    if (!patient || typeof patient !== 'object') {
+      return false
+    }
+    
     const matchesSearch = !searchTerm || 
-      patient.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.numeroDossier?.toLowerCase().includes(searchTerm.toLowerCase())
+      (patient.nom && patient.nom.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (patient.prenom && patient.prenom.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (patient.numeroDossier && patient.numeroDossier.toLowerCase().includes(searchTerm.toLowerCase()))
     
     const matchesStatus = selectedStatus === 'all' || 
       (selectedStatus === 'active' && patient.isActive) ||
@@ -240,6 +285,8 @@ export default function PatientsPage() {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
+
+
 
   return (
     <DashboardLayout>
@@ -280,58 +327,7 @@ export default function PatientsPage() {
         </div>
       </div>
 
-      {/* Patient Limit Warning */}
-      {cabinetInfo && (
-        <div className="mb-6">
-          {(() => {
-            const currentCount = stats.total
-            const maxPatients = cabinetInfo.maxPatients || 3
-            const isNearLimit = currentCount >= (maxPatients * 0.8)
-            const isAtLimit = currentCount >= maxPatients
-            
-            if (isAtLimit) {
-              return (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-center space-x-3">
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
-                    <div>
-                      <p className="font-semibold text-red-800">
-                        Limite de patients atteinte ({currentCount}/{maxPatients})
-                      </p>
-                      <p className="text-sm text-red-700">
-                        {cabinetInfo.isTrialActive 
-                          ? 'Passez à un plan payant pour ajouter plus de patients'
-                          : 'Contactez-nous pour augmenter votre limite'
-                        }
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )
-            }
-            
-            if (isNearLimit) {
-              return (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center space-x-3">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                    <div>
-                      <p className="font-semibold text-yellow-800">
-                        Limite de patients approche ({currentCount}/{maxPatients})
-                      </p>
-                      <p className="text-sm text-yellow-700">
-                        Vous approchez de la limite de votre plan actuel
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )
-            }
-            
-            return null
-          })()}
-        </div>
-      )}
+
 
       {/* Filters */}
       <div className="bg-white p-3 sm:p-4 rounded-lg shadow mb-6">

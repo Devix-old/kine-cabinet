@@ -138,15 +138,22 @@ export async function POST(request) {
       )
     }
 
-    // Vérifier que le patient existe
+    // Vérifier que le patient existe et appartient au même cabinet (sauf SUPER_ADMIN)
     const patient = await prisma.patient.findUnique({
-      where: { id: patientId }
+      where: { id: patientId },
+      select: { id: true, cabinetId: true }
     })
 
     if (!patient) {
       return NextResponse.json(
         { error: 'Patient non trouvé' },
         { status: 404 }
+      )
+    }
+    if (session.user.role !== 'SUPER_ADMIN' && patient.cabinetId !== session.user.cabinetId) {
+      return NextResponse.json(
+        { error: 'Accès non autorisé au patient' },
+        { status: 403 }
       )
     }
 

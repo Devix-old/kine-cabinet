@@ -14,15 +14,20 @@ export async function GET(request) {
       )
     }
 
+    // Tenant isolation: SUPER_ADMIN can access all settings, others are scoped to their cabinet
+    const cabinetId = session.user.role === 'SUPER_ADMIN' ? undefined : session.user.cabinetId
+
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
     const key = searchParams.get('key')
 
     // Si une clé spécifique est demandée
     if (key) {
-      const setting = await prisma.settings.findUnique({
-        where: { key }
-      })
+      const where = { key }
+      if (cabinetId !== undefined) {
+        where.cabinetId = cabinetId
+      }
+      const setting = await prisma.settings.findFirst({ where })
       
       return NextResponse.json({ 
         setting: setting ? {
@@ -32,8 +37,14 @@ export async function GET(request) {
       })
     }
 
-    // Filtrer par catégorie si spécifiée
-    const where = category ? { category } : {}
+    // Filtrer par catégorie si spécifiée et par cabinet
+    const where = {}
+    if (cabinetId !== undefined) {
+      where.cabinetId = cabinetId
+    }
+    if (category) {
+      where.category = category
+    }
 
     const settings = await prisma.settings.findMany({
       where,
@@ -77,6 +88,9 @@ export async function POST(request) {
       )
     }
 
+    // Tenant isolation: SUPER_ADMIN can create global settings, others create cabinet-specific settings
+    const cabinetId = session.user.role === 'SUPER_ADMIN' ? 'GLOBAL' : session.user.cabinetId
+
     const body = await request.json()
     const { settings } = body
 
@@ -103,19 +117,24 @@ export async function POST(request) {
       const stringValue = stringifySettingValue(value, type)
 
       return prisma.settings.upsert({
-        where: { key },
+        where: { 
+          key,
+          cabinetId
+        },
         update: {
           value: stringValue,
           type,
           description,
-          category
+          category,
+          cabinetId
         },
         create: {
           key,
           value: stringValue,
           type,
           description,
-          category: category || 'general'
+          category: category || 'general',
+          cabinetId
         }
       })
     })
@@ -147,6 +166,9 @@ export async function PUT(request) {
       )
     }
 
+    // Tenant isolation: SUPER_ADMIN can update global settings, others update cabinet-specific settings
+    const cabinetId = session.user.role === 'SUPER_ADMIN' ? 'GLOBAL' : session.user.cabinetId
+
     const body = await request.json()
     const { key, value, type = 'STRING', description, category } = body
 
@@ -160,19 +182,24 @@ export async function PUT(request) {
     const stringValue = stringifySettingValue(value, type)
 
     const setting = await prisma.settings.upsert({
-      where: { key },
+      where: { 
+        key,
+        cabinetId
+      },
       update: {
         value: stringValue,
         type,
         ...(description && { description }),
-        ...(category && { category })
+        ...(category && { category }),
+        cabinetId
       },
       create: {
         key,
         value: stringValue,
         type,
         description,
-        category: category || 'general'
+        category: category || 'general',
+        cabinetId
       }
     })
 

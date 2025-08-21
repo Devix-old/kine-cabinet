@@ -8,6 +8,17 @@ export default function TrialBanner({ cabinet, onClose }) {
   const [isVisible, setIsVisible] = useState(true)
   const [daysLeft, setDaysLeft] = useState(0)
   const [patientsCount, setPatientsCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Vérifier si l'annonce a été fermée dans cette session
+  useEffect(() => {
+    const sessionStorageKey = `trial_closed_${cabinet?.id || 'default'}`
+    const isClosed = sessionStorage.getItem(sessionStorageKey)
+    
+    if (isClosed === 'true') {
+      setIsVisible(false)
+    }
+  }, [cabinet])
 
   useEffect(() => {
     if (cabinet?.trialEndDate) {
@@ -30,6 +41,8 @@ export default function TrialBanner({ cabinet, onClose }) {
         }
       } catch (error) {
         console.error('Error fetching patients count:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -38,17 +51,24 @@ export default function TrialBanner({ cabinet, onClose }) {
 
   const handleClose = () => {
     setIsVisible(false)
+    
+    // Sauvegarder la fermeture dans sessionStorage (disparaît à la déconnexion)
+    const sessionStorageKey = `trial_closed_${cabinet?.id || 'default'}`
+    sessionStorage.setItem(sessionStorageKey, 'true')
+    
     onClose?.()
   }
 
-  if (!isVisible || !cabinet?.isTrialActive) {
+  if (!isVisible || !cabinet?.isTrialActive || isLoading) {
     return null
   }
 
-  const isExpiringSoon = daysLeft <= 3
   const isExpired = daysLeft <= 0
+  const isExpiringSoon = daysLeft <= 3
+  const isAtPatientLimit = patientsCount >= cabinet.maxPatients
   const isNearPatientLimit = patientsCount >= (cabinet.maxPatients * 0.8)
 
+  // Priorité des annonces : Expiré > Limite atteinte > Expiration proche > Limite approche > Essai normal
   if (isExpired) {
     return (
       <div className="bg-red-600 text-white p-4">
@@ -66,6 +86,40 @@ export default function TrialBanner({ cabinet, onClose }) {
           >
             Choisir un plan
           </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (isAtPatientLimit) {
+    return (
+      <div className="bg-blue-600 text-white p-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Users className="h-5 w-5" />
+            <div>
+              <p className="font-semibold">
+                Limite de patients atteinte ({patientsCount}/{cabinet.maxPatients})
+              </p>
+              <p className="text-sm opacity-90">
+                Passez à un plan supérieur pour ajouter plus de patients
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/billing"
+              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Voir les plans
+            </Link>
+            <button
+              onClick={handleClose}
+              className="text-white hover:text-gray-200 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -113,10 +167,10 @@ export default function TrialBanner({ cabinet, onClose }) {
             <Users className="h-5 w-5" />
             <div>
               <p className="font-semibold">
-                Limite de patients atteinte ({patientsCount}/{cabinet.maxPatients})
+                Limite de patients approche ({patientsCount}/{cabinet.maxPatients})
               </p>
               <p className="text-sm opacity-90">
-                Passez à un plan supérieur pour ajouter plus de patients
+                Vous approchez de la limite de votre plan actuel
               </p>
             </div>
           </div>
@@ -139,7 +193,7 @@ export default function TrialBanner({ cabinet, onClose }) {
     )
   }
 
-  // Default trial banner
+  // Default trial banner (priorité la plus basse)
   return (
     <div className="bg-green-600 text-white p-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">

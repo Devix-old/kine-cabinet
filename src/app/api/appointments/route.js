@@ -155,9 +155,10 @@ export async function POST(request) {
       )
     }
 
-    // Vérifier que le patient existe
+    // Vérifier que le patient existe et appartient au même cabinet (sauf SUPER_ADMIN)
     const patient = await prisma.patient.findUnique({
-      where: { id: body.patientId }
+      where: { id: body.patientId },
+      select: { id: true, cabinetId: true }
     })
 
     if (!patient) {
@@ -173,6 +174,13 @@ export async function POST(request) {
       return NextResponse.json(
         { error: 'Non authentifié' },
         { status: 401 }
+      )
+    }
+    // Tenant isolation check now that session is available
+    if (session.user.role !== 'SUPER_ADMIN' && patient.cabinetId !== session.user.cabinetId) {
+      return NextResponse.json(
+        { error: 'Accès non autorisé au patient' },
+        { status: 403 }
       )
     }
     

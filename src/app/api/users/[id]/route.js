@@ -8,8 +8,11 @@ import { authOptions } from '@/lib/auth'
 export async function GET(request, { params }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    if (!session) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
     const { id } = params
@@ -25,6 +28,7 @@ export async function GET(request, { params }) {
         lastLogin: true,
         createdAt: true,
         updatedAt: true,
+        cabinetId: true,
         _count: {
           select: {
             appointmentsCreated: true,
@@ -44,6 +48,14 @@ export async function GET(request, { params }) {
       )
     }
 
+    // Tenant isolation: only SUPER_ADMIN can access cross-tenant resources
+    if (session.user.role !== 'SUPER_ADMIN' && user.cabinetId !== session.user.cabinetId) {
+      return NextResponse.json(
+        { error: 'Accès non autorisé' },
+        { status: 403 }
+      )
+    }
+
     return NextResponse.json({ user })
 
   } catch (error) {
@@ -59,17 +71,34 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   try {
     const { id } = params
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
+    }
+
     const body = await request.json()
     
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findUnique({
-      where: { id }
+      where: { id },
+      select: { id: true, email: true, role: true, isActive: true, cabinetId: true }
     })
 
     if (!existingUser) {
       return NextResponse.json(
         { error: 'Utilisateur non trouvé' },
         { status: 404 }
+      )
+    }
+
+    // Tenant isolation: only SUPER_ADMIN can update cross-tenant users
+    if (session.user.role !== 'SUPER_ADMIN' && existingUser.cabinetId !== session.user.cabinetId) {
+      return NextResponse.json(
+        { error: 'Accès non autorisé' },
+        { status: 403 }
       )
     }
 
@@ -86,7 +115,9 @@ export async function PUT(request, { params }) {
       const emailExists = await prisma.user.findFirst({
         where: { 
           email: body.email,
-          id: { not: id }
+          id: { not: id },
+          // Ensure uniqueness check is within the same tenant
+          cabinetId: existingUser.cabinetId
         }
       })
 
@@ -147,21 +178,33 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    if (!session) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
     }
 
     const { id } = params
 
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findUnique({
-      where: { id }
+      where: { id },
+      select: { id: true, email: true, cabinetId: true }
     })
 
     if (!existingUser) {
       return NextResponse.json(
         { error: 'Utilisateur non trouvé' },
         { status: 404 }
+      )
+    }
+
+    // Tenant isolation: only SUPER_ADMIN can delete cross-tenant users
+    if (session.user.role !== 'SUPER_ADMIN' && existingUser.cabinetId !== session.user.cabinetId) {
+      return NextResponse.json(
+        { error: 'Accès non autorisé' },
+        { status: 403 }
       )
     }
 
