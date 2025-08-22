@@ -17,14 +17,19 @@ import {
   Loader2,
   DollarSign,
   CheckCircle,
-  XCircle
+  XCircle,
+  Building2
 } from 'lucide-react'
+import { getAvailableCabinetTypes } from '@/lib/cabinet-configs'
+import { useCabinetConfig } from '@/hooks/useCabinetConfig'
 
 export default function SettingsPage() {
+  const { config, cabinetType, refreshCabinetConfig } = useCabinetConfig()
   const [activeTab, setActiveTab] = useState('general')
   const [showUserModal, setShowUserModal] = useState(false)
   const [showRoomModal, setShowRoomModal] = useState(false)
   const [showTariffModal, setShowTariffModal] = useState(false)
+  const [selectedCabinetType, setSelectedCabinetType] = useState(cabinetType)
   
   // États pour l'édition
   const [editingUser, setEditingUser] = useState(null)
@@ -78,6 +83,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'general', name: 'Général', icon: Settings },
+    { id: 'cabinet', name: 'Cabinet', icon: Building2 },
     { id: 'users', name: 'Utilisateurs', icon: Users },
     { id: 'rooms', name: 'Salles', icon: MapPin },
     { id: 'tariffs', name: 'Tarifs', icon: DollarSign },
@@ -87,6 +93,11 @@ export default function SettingsPage() {
   useEffect(() => {
     loadAllData(true) // Force refresh au montage pour éviter le cache
   }, [])
+
+  // Mettre à jour selectedCabinetType quand cabinetType change
+  useEffect(() => {
+    setSelectedCabinetType(cabinetType)
+  }, [cabinetType])
 
   // Handle ESC key to close modals
   useEffect(() => {
@@ -412,6 +423,35 @@ export default function SettingsPage() {
     return labels[day] || day
   }
 
+  const handleUpdateCabinetType = async () => {
+    if (!selectedCabinetType || selectedCabinetType === cabinetType) return
+    
+    try {
+      setSaving(true)
+      const response = await fetch('/api/cabinet/update-type', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cabinetType: selectedCabinetType
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour du type de cabinet')
+      }
+
+      success('Type de cabinet mis à jour avec succès')
+      refreshCabinetConfig()
+    } catch (error) {
+      console.error('Error updating cabinet type:', error)
+      showError('Erreur lors de la mise à jour du type de cabinet')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   if (loading) {
     return (
       <ProtectedRoute requiredRole="ADMIN">
@@ -533,6 +573,79 @@ export default function SettingsPage() {
                         )}
                         Sauvegarder
                       </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'cabinet' && (
+                <div className="space-y-4 sm:space-y-6">
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Type de cabinet</h2>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                          <CheckCircle className="h-5 w-5 text-blue-400" />
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-blue-800">
+                            Type actuel : {config?.name || 'Non défini'}
+                          </h3>
+                          <div className="mt-2 text-sm text-blue-700">
+                            <p>Votre cabinet est configuré comme <strong>{config?.name}</strong>.</p>
+                            <p className="mt-1">Changer le type de cabinet modifiera les types de rendez-vous et traitements disponibles.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">Changer le type de cabinet</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {getAvailableCabinetTypes().map((cabinetType) => (
+                            <div
+                              key={cabinetType.value}
+                              className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                                selectedCabinetType === cabinetType.value
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                              onClick={() => setSelectedCabinetType(cabinetType.value)}
+                            >
+                              {selectedCabinetType === cabinetType.value && (
+                                <div className="absolute top-2 right-2">
+                                  <CheckCircle className="h-5 w-5 text-blue-600" />
+                                </div>
+                              )}
+                              <div className="flex items-center space-x-3">
+                                <div className="text-2xl">{cabinetType.icon}</div>
+                                <div>
+                                  <h3 className="font-medium text-gray-900">{cabinetType.name}</h3>
+                                  <p className="text-sm text-gray-600">{cabinetType.description}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {selectedCabinetType && selectedCabinetType !== cabinetType && (
+                        <div className="mt-6">
+                          <button
+                            onClick={handleUpdateCabinetType}
+                            disabled={saving}
+                            className="btn-primary flex items-center justify-center w-full sm:w-auto"
+                          >
+                            {saving ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                              <Save className="h-4 w-4 mr-2" />
+                            )}
+                            Mettre à jour le type de cabinet
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
