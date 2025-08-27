@@ -1,21 +1,21 @@
 'use client'
 
-import CabinetHero from '@/components/Dynamic/CabinetHero'
+import Hero from '@/components/SaaS/Hero'
 import Footer from '@/components/SaaS/Footer'
 import Link from 'next/link'
 import Features from '@/components/SaaS/Features'
-import Pricing from '@/components/SaaS/Pricing'
+import Plans from '@/components/SaaS/Plans'
 import Testimonials from '@/components/SaaS/Testimonials'
 
 export default function HomePage() {
   return (
     <div className="bg-white">
       <main>
-        <CabinetHero />
+        <Hero />
 
         {/* Sections composed components */}
         <Features />
-        <Pricing />
+                       <Plans />
         <Testimonials />
 
         {/* CTA Section */}

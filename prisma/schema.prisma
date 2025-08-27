@@ -18,11 +18,7 @@ model Cabinet {
   isActive             Boolean                @default(true)
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
-  isTrialActive        Boolean                @default(false)
-  maxPatients          Int                    @default(1000)
   specialites          String[]               @default([])
-  trialEndDate         DateTime?
-  trialStartDate       DateTime?
   type                 CabinetType            @default(KINESITHERAPIE)
   onboardingCompleted  Boolean                @default(false)
   appointments         Appointment[]
@@ -370,12 +366,31 @@ model Invoice {
   @@map("invoices")
 }
 
+model Plan {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  description String?
+  price       Float
+  currency    String   @default("EUR")
+  interval    String   @default("month")
+  maxPatients Int
+  features    String[]
+  isActive    Boolean  @default(true)
+  isTrial     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
 model Subscription {
   id                   String             @id @default(cuid())
   stripeSubscriptionId String?            @unique
   stripeCustomerId     String?
   planId               String
-  status               SubscriptionStatus @default(ACTIVE)
+  status               SubscriptionStatus @default(TRIALING)
   currentPeriodStart   DateTime?
   currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean            @default(false)
@@ -385,6 +400,7 @@ model Subscription {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   cabinetId            String
+  plan                 Plan               @relation(fields: [planId], references: [id])
   payments             Payment[]
   cabinet              Cabinet            @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
   usageRecords         UsageRecord[]

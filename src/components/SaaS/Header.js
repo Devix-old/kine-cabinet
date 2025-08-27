@@ -16,7 +16,7 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   const userInitials = useMemo(() => {
     const name = session?.user?.name || ''
@@ -84,7 +84,12 @@ export default function Header() {
         </div>
         
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4 relative">
-          {!session?.user ? (
+          {status === 'loading' ? (
+            <>
+              <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-32 h-8 bg-gray-200 rounded animate-pulse"></div>
+            </>
+          ) : !session?.user ? (
             <>
               <a
                 href="/auth/login"
@@ -96,7 +101,7 @@ export default function Header() {
                 href="/auth/register"
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all duration-300"
               >
-                Commencer l’essai gratuit
+                Commencer l'essai gratuit
               </a>
             </>
           ) : (
@@ -161,7 +166,12 @@ export default function Header() {
                 </a>
               ))}
               <div className="pt-6 space-y-3">
-                {!session?.user ? (
+                {status === 'loading' ? (
+                  <>
+                    <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                  </>
+                ) : !session?.user ? (
                   <>
                     <a
                       href="/auth/login"

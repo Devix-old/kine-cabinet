@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { SubscriptionService } from '@/lib/subscription-service'
 
 // POST /api/public/register - Self-serve registration with trial
 export async function POST(request) {
@@ -50,7 +51,16 @@ export async function POST(request) {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create cabinet and admin in a transaction with trial settings
+    // Get trial plan
+    const trialPlan = await prisma.plan.findFirst({
+      where: { name: 'trial' }
+    })
+
+    if (!trialPlan) {
+      throw new Error('Trial plan not found')
+    }
+
+    // Create cabinet and admin in a transaction
     const result = await prisma.$transaction(async (tx) => {
       const cabinet = await tx.cabinet.create({
         data: {
@@ -63,11 +73,6 @@ export async function POST(request) {
           siret: null,
           isActive: true,
           onboardingCompleted: false,
-          // Trial settings
-          trialStartDate: new Date(),
-          trialEndDate: new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000), // +7 days
-          isTrialActive: true,
-          maxPatients: maxPatients, // Limit to 3 patients during trial
         },
       })
 
@@ -83,7 +88,10 @@ export async function POST(request) {
         select: { id: true, name: true, email: true, role: true, cabinetId: true },
       })
 
-      return { cabinet, admin }
+      // Create trial subscription using the service
+      const subscription = await SubscriptionService.registerCabinetWithTrial(cabinet.id, trialPlan.id, tx)
+
+      return { cabinet, admin, subscription }
     })
 
     return NextResponse.json(
@@ -93,14 +101,12 @@ export async function POST(request) {
           id: result.cabinet.id, 
           nom: result.cabinet.nom,
           type: result.cabinet.type,
-          trialEndDate: result.cabinet.trialEndDate,
-          maxPatients: result.cabinet.maxPatients
         },
         admin: result.admin,
-        trial: {
-          days: trialDays,
-          endDate: result.cabinet.trialEndDate,
-          maxPatients: maxPatients
+        subscription: {
+          status: result.subscription.status,
+          trialEnd: result.subscription.trialEnd,
+          maxPatients: result.subscription.plan.maxPatients
         }
       },
       { status: 201 }

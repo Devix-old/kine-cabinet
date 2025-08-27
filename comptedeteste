@@ -5,5 +5,11 @@ Secrétaire : secretaire@cabinet.com / secretaire123
 
 stripe listen --forward-to localhost:3000/api/payments/webhook
 
-# Reset database:
+# 1. Reset the database to match the current schema
 npx prisma migrate reset --force
+
+# 2. Generate the Prisma client
+npx prisma generate
+
+# 3. Seed the plans (if you have the seed script)
+node scripts/seed-plans.js

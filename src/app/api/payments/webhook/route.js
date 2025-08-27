@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
+import { SubscriptionService } from '@/lib/subscription-service'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: process.env.STRIPE_API_VERSION || '2024-06-20',
@@ -160,149 +161,61 @@ async function handleInvoicePaymentFailed(invoice) {
 }
 
 async function handleSubscriptionCreated(subscription) {
-
   try {
-    // Upsert subscription record (create if missing)
+    console.log('🔄 Handling subscription created:', subscription.id)
+    
+    // Get plan ID from price nickname or metadata
     const planIdFromPrice = Array.isArray(subscription.items?.data) && subscription.items.data[0]?.price?.nickname
       ? subscription.items.data[0].price.nickname.toLowerCase()
       : (subscription.metadata?.planId || 'unknown')
 
-    const stripeCustomerId = subscription.customer?.toString?.() || null
-    let cabinetId = subscription.metadata?.cabinetId || null
-    if (!cabinetId && stripeCustomerId) {
-      const owner = await prisma.user.findFirst({
-        where: { stripeCustomerId },
-        select: { cabinetId: true }
-      })
-      cabinetId = owner?.cabinetId || null
+    // Find the plan in our database
+    const plan = await prisma.plan.findFirst({
+      where: { name: planIdFromPrice }
+    })
+
+    if (!plan) {
+      console.error('❌ Plan not found for:', planIdFromPrice)
+      return
     }
 
-    if (cabinetId) {
-      await prisma.subscription.upsert({
-        where: { stripeSubscriptionId: subscription.id },
-        create: {
-          stripeSubscriptionId: subscription.id,
-          stripeCustomerId,
-          planId: planIdFromPrice,
-          status: subscription.status.toUpperCase(),
-          currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
-          currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-          cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-          trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-          cabinetId
-        },
-        update: {
-          planId: planIdFromPrice,
-          status: subscription.status.toUpperCase(),
-          currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
-          currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-          cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-          trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-          updatedAt: new Date()
-        }
-      })
-    } else {
-      // Fallback: update only if exists
-      await prisma.subscription.updateMany({
-        where: { stripeSubscriptionId: subscription.id },
-        data: {
-          planId: planIdFromPrice,
-          status: subscription.status.toUpperCase(),
-          currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
-          currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-          cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-          trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-          updatedAt: new Date()
-        }
-      })
-    }
-
-    // Update cabinet status - end trial and activate subscription
-    if (subscription.metadata?.cabinetId) {
-      await prisma.cabinet.updateMany({
-        where: { id: subscription.metadata.cabinetId },
-        data: {
-          isTrialActive: false,
-          trialEndDate: new Date(), // End trial immediately
-          maxPatients: subscription.metadata.planId === 'starter' ? 100 : 
-                      subscription.metadata.planId === 'professional' ? 1000 : 
-                      10000, // Unlimited for enterprise
-          updatedAt: new Date()
-        }
-      })
-
-      // Cabinet updated - trial ended, subscription activated
-    } else {
-      // No cabinetId in subscription metadata
-    }
-
-    // Subscription created and cabinet updated
+    // Use the subscription service to update from Stripe
+    await SubscriptionService.updateFromStripe(subscription, plan.id)
+    
+    console.log('✅ Subscription created successfully')
   } catch (error) {
-    console.error('❌ Error updating subscription/cabinet:', error)
+    console.error('❌ Error handling subscription created:', error)
     throw error
   }
 }
 
 async function handleSubscriptionUpdated(subscription) {
-  // Upsert subscription record to ensure existence and update
-  const planIdFromPrice = Array.isArray(subscription.items?.data) && subscription.items.data[0]?.price?.nickname
-    ? subscription.items.data[0].price.nickname.toLowerCase()
-    : (subscription.metadata?.planId || 'unknown')
+  try {
+    console.log('🔄 Handling subscription updated:', subscription.id)
+    
+    // Get plan ID from price nickname or metadata
+    const planIdFromPrice = Array.isArray(subscription.items?.data) && subscription.items.data[0]?.price?.nickname
+      ? subscription.items.data[0].price.nickname.toLowerCase()
+      : (subscription.metadata?.planId || 'unknown')
 
-  const stripeCustomerId = subscription.customer?.toString?.() || null
-  let cabinetId = subscription.metadata?.cabinetId || null
-  if (!cabinetId && stripeCustomerId) {
-    const owner = await prisma.user.findFirst({
-      where: { stripeCustomerId },
-      select: { cabinetId: true }
+    // Find the plan in our database
+    const plan = await prisma.plan.findFirst({
+      where: { name: planIdFromPrice }
     })
-    cabinetId = owner?.cabinetId || null
+
+    if (!plan) {
+      console.error('❌ Plan not found for:', planIdFromPrice)
+      return
+    }
+
+    // Use the subscription service to update from Stripe
+    await SubscriptionService.updateFromStripe(subscription, plan.id)
+    
+    console.log('✅ Subscription updated successfully')
+  } catch (error) {
+    console.error('❌ Error handling subscription updated:', error)
+    throw error
   }
-
-  if (cabinetId) {
-    await prisma.subscription.upsert({
-      where: { stripeSubscriptionId: subscription.id },
-      create: {
-        stripeSubscriptionId: subscription.id,
-        stripeCustomerId,
-        planId: planIdFromPrice,
-        status: subscription.status.toUpperCase(),
-        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
-        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        trialStart: subscription.trial_start ? new Date(subscription.trial_start * 1000) : null,
-        trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-        cabinetId
-      },
-      update: {
-        planId: planIdFromPrice,
-        status: subscription.status.toUpperCase(),
-        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
-        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
-        updatedAt: new Date()
-      }
-    })
-  } else {
-    await prisma.subscription.updateMany({
-      where: { stripeSubscriptionId: subscription.id },
-      data: {
-        planId: planIdFromPrice,
-        status: subscription.status.toUpperCase(),
-        currentPeriodStart: subscription.current_period_start ? new Date(subscription.current_period_start * 1000) : null,
-        currentPeriodEnd: subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
-        updatedAt: new Date()
-      }
-    })
-  }
-
-  // Subscription updated
 }
 
 async function handleSubscriptionDeleted(subscription) {
@@ -337,9 +250,10 @@ async function handleSetupIntentSucceeded(setupIntent) {
 }
 
 async function handleCheckoutSessionCompleted(checkoutSession) {
-
   try {
-    // If this is a subscription checkout, persist subscription and update cabinet
+    console.log('🔄 Handling checkout session completed:', checkoutSession.id)
+    
+    // If this is a subscription checkout, update subscription
     if (checkoutSession.mode === 'subscription' && checkoutSession.metadata?.cabinetId) {
       const subscriptionId = checkoutSession.subscription?.toString?.()
       if (subscriptionId) {
@@ -352,49 +266,22 @@ async function handleCheckoutSessionCompleted(checkoutSession) {
           ? sub.items.data[0].price.nickname.toLowerCase()
           : (checkoutSession.metadata?.planId || 'unknown')
 
-        await prisma.subscription.upsert({
-          where: { stripeSubscriptionId: sub.id },
-          create: {
-            stripeSubscriptionId: sub.id,
-            stripeCustomerId: sub.customer?.toString?.() || null,
-            planId: planIdFromPrice,
-            status: sub.status.toUpperCase(),
-            currentPeriodStart: sub.current_period_start ? new Date(sub.current_period_start * 1000) : null,
-            currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
-            cancelAtPeriodEnd: sub.cancel_at_period_end,
-            trialStart: sub.trial_start ? new Date(sub.trial_start * 1000) : null,
-            trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-            cabinetId: checkoutSession.metadata.cabinetId,
-          },
-          update: {
-            planId: planIdFromPrice,
-            status: sub.status.toUpperCase(),
-            currentPeriodStart: sub.current_period_start ? new Date(sub.current_period_start * 1000) : null,
-            currentPeriodEnd: sub.current_period_end ? new Date(sub.current_period_end * 1000) : null,
-            cancelAtPeriodEnd: sub.cancel_at_period_end,
-            trialStart: sub.trial_start ? new Date(sub.trial_start * 1000) : null,
-            trialEnd: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-            updatedAt: new Date()
-          }
+        // Find the plan in our database
+        const plan = await prisma.plan.findFirst({
+          where: { name: planIdFromPrice }
         })
-      }
 
-      await prisma.cabinet.updateMany({
-        where: { id: checkoutSession.metadata.cabinetId },
-        data: {
-          isTrialActive: false,
-          trialEndDate: new Date(),
-          maxPatients: checkoutSession.metadata.planId === 'starter' ? 100 : 
-                      checkoutSession.metadata.planId === 'professional' ? 1000 : 
-                      10000,
-          updatedAt: new Date()
+        if (plan) {
+          // Use the subscription service to update from Stripe
+          await SubscriptionService.updateFromStripe(sub, plan.id)
+          console.log('✅ Subscription updated from checkout session')
+        } else {
+          console.error('❌ Plan not found for:', planIdFromPrice)
         }
-      })
-
-      // Cabinet updated from checkout session
+      }
     }
 
-    // Checkout session completed
+    console.log('✅ Checkout session completed successfully')
   } catch (error) {
     console.error('❌ Error processing checkout session:', error)
     throw error

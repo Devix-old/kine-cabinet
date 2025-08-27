@@ -7,16 +7,11 @@ import {
   User, 
   Lock, 
   CreditCard, 
-  Calendar, 
-  Crown, 
-  Clock, 
-  Users,
   Settings,
-  ArrowRight,
-  Check,
-  AlertTriangle
+  ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
+import SubscriptionInfo from '@/components/SubscriptionInfo'
 
 export default function ComptePage() {
   const { data: session, update } = useSession()
@@ -118,35 +113,7 @@ export default function ComptePage() {
     }
   }
 
-  const getSubscriptionStatus = () => {
-    if (!cabinetInfo) return null
 
-    if (cabinetInfo.isTrialActive) {
-      const daysLeft = Math.ceil((new Date(cabinetInfo.trialEndDate) - new Date()) / (1000 * 60 * 60 * 24))
-      return {
-        type: 'trial',
-        title: 'Essai gratuit actif',
-        description: `${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''}`,
-        limit: `${cabinetInfo.maxPatients} patients maximum`,
-        icon: Clock,
-        color: 'blue'
-      }
-    } else {
-      const sub = cabinetInfo.currentSubscription || null
-      const planLabel = sub?.planId ? sub.planId.charAt(0).toUpperCase() + sub.planId.slice(1) : 'Plan actif'
-      const period = sub?.currentPeriodStart && sub?.currentPeriodEnd
-        ? `Du ${new Date(sub.currentPeriodStart).toLocaleDateString()} au ${new Date(sub.currentPeriodEnd).toLocaleDateString()}`
-        : 'Période en cours'
-      return {
-        type: 'active',
-        title: `Abonnement actif${sub?.planId ? ` · ${planLabel}` : ''}`,
-        description: period,
-        limit: 'Accès complet à toutes les fonctionnalités',
-        icon: Crown,
-        color: 'green'
-      }
-    }
-  }
 
   const tabs = [
     { id: 'profile', label: 'Profil', icon: User },
@@ -161,8 +128,6 @@ export default function ComptePage() {
       </div>
     )
   }
-
-  const subscriptionStatus = getSubscriptionStatus()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -321,24 +286,10 @@ export default function ComptePage() {
                 <div className="p-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Gestion de l'abonnement</h2>
                   
-                  {subscriptionStatus && (
-                    <div className={`bg-${subscriptionStatus.color}-50 border border-${subscriptionStatus.color}-200 rounded-lg p-6 mb-6`}>
-                      <div className="flex items-start space-x-4">
-                        <subscriptionStatus.icon className={`w-8 h-8 text-${subscriptionStatus.color}-600 mt-1`} />
-                        <div className="flex-1">
-                          <h3 className={`text-${subscriptionStatus.color}-900 font-semibold text-lg`}>
-                            {subscriptionStatus.title}
-                          </h3>
-                          <p className={`text-${subscriptionStatus.color}-700 mt-1`}>
-                            {subscriptionStatus.description}
-                          </p>
-                          <p className={`text-${subscriptionStatus.color}-600 text-sm mt-2`}>
-                            {subscriptionStatus.limit}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  {/* Subscription Information Component */}
+                  <div className="mb-6">
+                    <SubscriptionInfo />
+                  </div>
 
                   <div className="space-y-4">
                     <Link
@@ -369,20 +320,6 @@ export default function ComptePage() {
                       <ArrowRight className="w-5 h-5 text-gray-400" />
                     </Link>
                   </div>
-
-                  {cabinetInfo?.isTrialActive && (
-                    <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-start space-x-3">
-                        <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                        <div>
-                          <h3 className="text-yellow-900 font-medium">Essai gratuit en cours</h3>
-                          <p className="text-yellow-700 text-sm mt-1">
-                            Votre essai gratuit se termine bientôt. Choisissez un plan pour continuer à utiliser toutes les fonctionnalités.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </div>

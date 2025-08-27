@@ -17,9 +17,9 @@ const Pricing = () => {
     return plan.price;
   };
 
-  const getPeriod = () => (isYearly ? 'year' : 'month');
+  const getPeriod = () => (isYearly ? 'an' : 'mois');
 
-  const getButtonLink = (plan) => (plan.cta === 'Contact Sales' ? '/contact' : '/auth/register');
+  const getButtonLink = (plan) => (plan.cta === 'Contacter les ventes' ? '/contact' : '/auth/register');
 
   return (
     <section id="pricing" className="py-20 bg-gray-50">
@@ -33,7 +33,7 @@ const Pricing = () => {
             transition={{ duration: 0.6 }}
             className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
           >
-            Simple, transparent pricing
+            Tarification simple et transparente
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -42,7 +42,7 @@ const Pricing = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl text-gray-600 max-w-3xl mx-auto mb-8"
           >
-            Choose the plan that fits your clinic size and needs. All plans include a 14-day free trial.
+            Choisissez le plan qui correspond à la taille et aux besoins de votre cabinet. Tous les plans incluent un essai gratuit de 7 jours.
           </motion.p>
 
           {/* Billing Toggle */}
@@ -53,7 +53,7 @@ const Pricing = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex items-center justify-center space-x-4"
           >
-            <span className={`text-sm font-medium ${!isYearly ? 'text-gray-900' : 'text-gray-500'}`}>Monthly</span>
+            <span className={`text-sm font-medium ${!isYearly ? 'text-gray-900' : 'text-gray-500'}`}>Mensuel</span>
             <button
               onClick={() => setIsYearly(!isYearly)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
@@ -67,7 +67,7 @@ const Pricing = () => {
               />
             </button>
             <span className={`text-sm font-medium ${isYearly ? 'text-gray-900' : 'text-gray-500'}`}>
-              Yearly <span className="ml-1 text-xs text-green-600">Save 20%</span>
+              Annuel <span className="ml-1 text-xs text-green-600">Économisez 20%</span>
             </span>
           </motion.div>
         </div>
@@ -95,7 +95,7 @@ const Pricing = () => {
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center">
-                    <Star className="w-4 h-4 mr-1" /> Most Popular
+                    <Star className="w-4 h-4 mr-1" /> Le plus populaire
                   </div>
                 </div>
               )}
@@ -108,7 +108,7 @@ const Pricing = () => {
                   <span className="text-gray-500 ml-2">/{getPeriod()}</span>
                 </div>
                 {isYearly && (
-                  <p className="text-sm text-green-600 font-medium">Save ${plan.price * 2} per year</p>
+                  <p className="text-sm text-green-600 font-medium">Économisez ${plan.price * 2} par an</p>
                 )}
               </div>
 
@@ -140,9 +140,9 @@ const Pricing = () => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="text-center mt-16"
         >
-          <p className="text-gray-600 mb-4">Need a custom plan for multiple locations?</p>
+          <p className="text-gray-600 mb-4">Besoin d'un plan personnalisé pour plusieurs cabinets ?</p>
           <Link href="/contact">
-            <Button variant="ghost" size="sm">Contact Sales Team</Button>
+            <Button variant="ghost" size="sm">Contacter l'équipe commerciale</Button>
           </Link>
         </motion.div>
       </div>

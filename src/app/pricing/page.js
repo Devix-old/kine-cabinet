@@ -2,21 +2,25 @@
 
 import Header from '@/components/SaaS/Header'
 import Footer from '@/components/SaaS/Footer'
-import SubscriptionForm from '@/components/Payment/SubscriptionForm'
 import { motion } from 'framer-motion'
-import { Check, Star, Crown, Clock, Users } from 'lucide-react'
+import { Check, Star, Crown, Clock, Users, BarChart3, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
+import { loadStripe } from '@stripe/stripe-js'
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 const plans = [
   {
+    id: 'starter',
     name: 'Starter',
-    price: '29',
-    period: 'mois',
+    price: 29,
+    currency: 'EUR',
+    interval: 'mois',
     description: 'Parfait pour les cabinets débutants',
     features: [
-      'Jusqu\'à 100 patients',
+      'Jusqu\'à 80 patients',
       'Gestion des rendez-vous',
       'Dossiers médicaux basiques',
       'Support email',
@@ -24,16 +28,17 @@ const plans = [
       'Interface mobile'
     ],
     popular: false,
-    cta: 'Essai gratuit 7 jours',
-    href: '/auth/register?plan=starter'
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID
   },
   {
+    id: 'professional',
     name: 'Professional',
-    price: '59',
-    period: 'mois',
+    price: 59,
+    currency: 'EUR',
+    interval: 'mois',
     description: 'Recommandé pour la plupart des cabinets',
     features: [
-      'Patients illimités',
+      'Jusqu\'à 200 patients',
       'Gestion avancée des RDV',
       'Dossiers médicaux complets',
       'Facturation automatisée',
@@ -43,29 +48,35 @@ const plans = [
       'Formation personnalisée'
     ],
     popular: true,
-    cta: 'Essai gratuit 7 jours',
-    href: '/auth/register?plan=professional'
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_PRICE_ID
   },
   {
+    id: 'enterprise',
     name: 'Enterprise',
-    price: '99',
-    period: 'mois',
+    price: 99,
+    currency: 'EUR',
+    interval: 'mois',
     description: 'Pour les grandes structures',
     features: [
+      'Patients illimités',
       'Tout du plan Professional',
       'Multi-cabinets',
       'Gestion des équipes',
       'Support dédié 24/7',
       'Intégrations avancées',
       'Formation sur site',
-      'SLA garanti',
-      'Personnalisation complète'
+      'SLA garanti'
     ],
     popular: false,
-    cta: 'Contacter les ventes',
-    href: '/contact'
+    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_PRICE_ID
   }
 ]
+
+const planIcons = {
+  starter: Users,
+  professional: BarChart3,
+  enterprise: Building2
+}
 
 const faqs = [
   {
@@ -98,6 +109,8 @@ export default function PricingPage() {
   const { data: session, status } = useSession()
   const [cabinetInfo, setCabinetInfo] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [planLoading, setPlanLoading] = useState(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (session?.user) {
@@ -121,6 +134,71 @@ export default function PricingPage() {
     }
   }
 
+  const handlePlanSelection = async (planId) => {
+    if (!session?.user) {
+      // For unauthenticated users, redirect to registration with plan
+      window.location.href = `/auth/register?plan=${planId}`
+      return
+    }
+
+    // For authenticated users, create Stripe checkout session
+    setPlanLoading(planId)
+    setError('')
+
+    try {
+      const stripe = await stripePromise
+      if (!stripe) {
+        throw new Error('Stripe failed to load')
+      }
+
+      // Create checkout session
+      const response = await fetch('/api/payments/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId,
+          successUrl: `${window.location.origin}/dashboard/subscription-success?plan=${planId}`,
+          cancelUrl: `${window.location.origin}/pricing`,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de la création de la session')
+      }
+
+      // Redirect to Stripe Checkout
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: data.sessionId,
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setPlanLoading(null)
+    }
+  }
+
+  const getButtonText = (planId) => {
+    if (status === 'loading') return 'Chargement...'
+    if (!session?.user) return 'Commencer l\'essai gratuit'
+    if (planLoading === planId) return 'Redirection...'
+    return 'Choisir ce plan'
+  }
+
+  const getButtonAction = (planId) => {
+    if (!session?.user) {
+      return () => window.location.href = `/auth/register?plan=${planId}`
+    }
+    return () => handlePlanSelection(planId)
+  }
+
   const getStatusBadge = () => {
     if (!cabinetInfo) return null
 
@@ -138,14 +216,11 @@ export default function PricingPage() {
               </p>
             </div>
           </div>
-          <div className="mt-3">
-            <Link 
-              href="/billing"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Choisir un plan
-            </Link>
-          </div>
+                     <div className="mt-3">
+             <p className="text-blue-700 text-sm">
+               Votre essai gratuit est actif. Vous pouvez choisir un plan à tout moment.
+             </p>
+           </div>
         </div>
       )
     } else {
@@ -212,65 +287,76 @@ export default function PricingPage() {
           </section>
         )}
 
+        {/* Error Message */}
+        {error && (
+          <section className="py-4 bg-red-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-center">
+                {error}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Pricing Plans */}
         <section className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-3 gap-8">
-              {plans.map((plan, index) => (
-                <motion.div
-                  key={plan.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className={`relative bg-white rounded-2xl shadow-lg border-2 p-8 ${
-                    plan.popular ? 'border-blue-500 scale-105' : 'border-gray-200'
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center">
-                        <Star className="w-4 h-4 mr-1" />
-                        Recommandé
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="text-center mb-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                    <p className="text-gray-600 mb-6">{plan.description}</p>
-                    
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-gray-900">€{plan.price}</span>
-                      <span className="text-gray-600">/{plan.period}</span>
-                    </div>
-
-                    {session?.user ? (
-                      <Link
-                        href="/billing"
-                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
-                      >
-                        Gérer l'abonnement
-                      </Link>
-                    ) : (
-                      <Link
-                        href={plan.href}
-                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
-                      >
-                        {plan.cta}
-                      </Link>
+              {plans.map((plan, index) => {
+                const IconComponent = planIcons[plan.id]
+                return (
+                  <motion.div
+                    key={plan.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    className={`relative bg-white rounded-2xl shadow-lg border-2 p-8 ${
+                      plan.popular ? 'border-blue-500 scale-105' : 'border-gray-200'
+                    }`}
+                  >
+                    {plan.popular && (
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center">
+                          <Star className="w-4 h-4 mr-1" />
+                          Recommandé
+                        </span>
+                      </div>
                     )}
-                  </div>
 
-                  <ul className="space-y-4">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start">
-                        <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              ))}
+                    <div className="text-center mb-8">
+                      <div className="flex justify-center mb-4">
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <IconComponent className="w-6 h-6 text-blue-600" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                      <p className="text-gray-600 mb-4">{plan.description}</p>
+                      
+                      <div className="mb-6">
+                        <span className="text-4xl font-bold text-gray-900">{plan.price}€</span>
+                        <span className="text-gray-600">/{plan.interval}</span>
+                      </div>
+
+                      <button
+                        onClick={getButtonAction(plan.id)}
+                        disabled={planLoading === plan.id || status === 'loading'}
+                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {getButtonText(plan.id)}
+                      </button>
+                    </div>
+
+                    <ul className="space-y-4">
+                      {plan.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-start">
+                          <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                )
+              })}
             </div>
           </div>
         </section>

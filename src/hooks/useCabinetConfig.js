@@ -30,6 +30,9 @@ export function CabinetConfigProvider({ children }) {
           console.error('Error fetching cabinet type:', error)
           setCabinetType('KINESITHERAPIE') // Fallback only on error
         }
+      } else {
+        // If no session, set default cabinet type and don't try to fetch
+        setCabinetType('KINESITHERAPIE')
       }
       setIsLoading(false)
     }
