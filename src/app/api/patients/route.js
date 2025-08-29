@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { generateNumeroDossier } from '@/lib/utils'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { SubscriptionService } from '@/lib/subscription-service'
 
 // GET /api/patients - Récupérer tous les patients
 export async function GET(request) {
@@ -263,30 +264,24 @@ export async function POST(request) {
 
     // Check patient limit for the cabinet
     if (session.user.role !== 'SUPER_ADMIN') {
-      // Get user with cabinet info (same as cabinet API)
-      const user = await prisma.user.findFirst({
-        where: { email: session.user.email },
-        include: { 
-          cabinet: {
-            select: {
-              id: true,
-              maxPatients: true,
-              isTrialActive: true
-            }
-          }
-        }
-      })
-
-      if (user?.cabinet) {
+      // Get subscription status to check patient limits
+      const subscriptionStatus = await SubscriptionService.checkSubscriptionStatus(session.user.cabinetId)
+      
+      if (subscriptionStatus.hasSubscription) {
         const currentPatientCount = await prisma.patient.count({
           where: { cabinetId: session.user.cabinetId }
         })
 
-        if (currentPatientCount >= user.cabinet.maxPatients) {
+        const maxPatients = subscriptionStatus.maxPatients
+        
+        if (currentPatientCount >= maxPatients) {
+          const isTrial = subscriptionStatus.isTrial
+          const errorMessage = isTrial 
+            ? `Limite de patients atteinte (${currentPatientCount}/${maxPatients}). Passez à un plan payant pour ajouter plus de patients.`
+            : `Limite de patients atteinte (${currentPatientCount}/${maxPatients}). Contactez-nous pour augmenter votre limite.`
+          
           return NextResponse.json(
-            { 
-              error: `Limite de patients atteinte (${currentPatientCount}/${user.cabinet.maxPatients}). ${user.cabinet.isTrialActive ? 'Passez à un plan payant pour ajouter plus de patients.' : 'Contactez-nous pour augmenter votre limite.'}` 
-            },
+            { error: errorMessage },
             { status: 403 }
           )
         }

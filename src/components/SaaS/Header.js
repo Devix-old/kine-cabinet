@@ -52,7 +52,7 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <a href="/" className="-m-1.5 p-1.5 group">
             <div className="flex items-center">
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+              <div className="w-9 h-9 bg-gradient-to-br from-[#4CB5B5] to-[#3DA4A4] rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
                 <span className="text-white font-bold text-lg">K</span>
               </div>
               <span className="ml-2 text-xl font-bold text-gray-900">KineCabinet</span>
@@ -76,7 +76,7 @@ export default function Header() {
             <a
               key={item.name}
               href={item.href}
-              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              className="text-sm font-medium text-[#2F4A5C] hover:text-[#4CB5B5] transition-colors"
             >
               {item.name}
             </a>
@@ -93,13 +93,13 @@ export default function Header() {
             <>
               <a
                 href="/auth/login"
-                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-3 py-2"
+                className="text-sm font-medium text-[#2F4A5C] hover:text-[#4CB5B5] transition-colors px-3 py-2"
               >
                 Se connecter
               </a>
               <a
                 href="/auth/register"
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all duration-300"
+                className="rounded-lg bg-[#4CB5B5] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3DA4A4] transition-all duration-300"
               >
                 Commencer l'essai gratuit
               </a>
@@ -112,7 +112,7 @@ export default function Header() {
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
               >
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-[#4CB5B5] text-white flex items-center justify-center">
                   <span className="text-sm font-semibold">{userInitials}</span>
                 </div>
                 <ChevronDown className="h-4 w-4 text-gray-600" />
@@ -139,7 +139,7 @@ export default function Header() {
             <div className="flex items-center justify-between">
               <a href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[#4CB5B5] rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold">K</span>
                   </div>
                   <span className="ml-2 text-xl font-bold text-gray-900">KineCabinet</span>
@@ -182,7 +182,7 @@ export default function Header() {
                     </a>
                     <a
                       href="/auth/register"
-                      className="block rounded-lg bg-blue-600 px-3 py-3 text-center text-base font-semibold text-white"
+                      className="block rounded-lg bg-[#4CB5B5] px-3 py-3 text-center text-base font-semibold text-white"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Commencer

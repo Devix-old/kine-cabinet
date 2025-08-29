@@ -6,7 +6,9 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-test-data": "node scripts/run-test-data-generation.js",
+    "clean-test-data": "node scripts/clean-test-data.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.6",
@@ -30,6 +32,7 @@
     "zod": "^4.0.10"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "prisma": "^6.12.0",

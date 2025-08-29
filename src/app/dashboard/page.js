@@ -150,26 +150,7 @@ export default function DashboardPage() {
     ]
   }, [stats, loading, config])
 
-  const handleQuickAction = (action) => {
-    switch (action) {
-      case 'newPatient':
-        router.push('/patients/nouveau')
-        break
-      case 'newAppointment':
-        router.push('/rendez-vous/nouveau')
-        break
-      case 'viewPatients':
-        router.push('/patients')
-        break
-      case 'viewAppointments':
-        router.push('/rendez-vous')
-        break
-      default:
-        break
-    }
-  }
-
-  // Show loading state while authentication is loading
+  
   if (authLoading) {
     return (
       <DashboardLayout>
@@ -233,53 +214,6 @@ export default function DashboardPage() {
               </div>
             )
           })}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button
-              onClick={() => handleQuickAction('newPatient')}
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-            >
-              <Plus className="h-5 w-5 text-blue-600 mr-3" />
-              <div className="text-left">
-                <p className="font-medium text-gray-900">Nouveau patient</p>
-                <p className="text-sm text-gray-600">Ajouter un patient</p>
-              </div>
-            </button>
-            <button
-              onClick={() => handleQuickAction('newAppointment')}
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-            >
-              <Calendar className="h-5 w-5 text-blue-600 mr-3" />
-              <div className="text-left">
-                <p className="font-medium text-gray-900">Nouveau RDV</p>
-                <p className="text-sm text-gray-600">Planifier un rendez-vous</p>
-              </div>
-            </button>
-            <button
-              onClick={() => handleQuickAction('viewPatients')}
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-            >
-              <Users className="h-5 w-5 text-blue-600 mr-3" />
-              <div className="text-left">
-                <p className="font-medium text-gray-900">Voir patients</p>
-                <p className="text-sm text-gray-600">Liste des patients</p>
-              </div>
-            </button>
-            <button
-              onClick={() => handleQuickAction('viewAppointments')}
-              className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-            >
-              <Clock className="h-5 w-5 text-blue-600 mr-3" />
-              <div className="text-left">
-                <p className="font-medium text-gray-900">Voir RDV</p>
-                <p className="text-sm text-gray-600">Calendrier</p>
-              </div>
-            </button>
-          </div>
         </div>
 
         {/* Recent Activity */}
