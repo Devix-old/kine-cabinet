@@ -1,4 +1,4 @@
-nimport { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 // GET /api/test - Récupérer tous les tests

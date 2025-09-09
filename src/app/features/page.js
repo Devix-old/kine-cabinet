@@ -147,30 +147,39 @@ export default function FeaturesPage() {
       
       <main>
         {/* Hero Section */}
-        <section className="relative isolate overflow-hidden bg-white pt-14">
-          <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+        <section className="relative bg-gradient-to-br from-[#FBFBFB] to-[#E6F1F7] py-20 overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-[#4CB5B5]/10 to-[#7BC6B5]/8 rounded-full blur-xl animate-pulse" style={{ animationDuration: '4s' }} />
+            <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-[#4CB5B5]/8 to-[#DCEEF5]/12 rounded-full blur-lg animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+            <div className="absolute bottom-32 left-20 w-40 h-40 bg-gradient-to-br from-[#DCEEF5]/6 to-[#4CB5B5]/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '2s' }} />
+          </div>
+          
+          <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 relative z-10">
             <div className="mx-auto max-w-2xl lg:text-center">
-              <motion.h1
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="text-base font-semibold leading-7 text-blue-600"
+                className="inline-block px-4 py-2 bg-[#DCEEF5]/30 border border-[#4CB5B5]/20 text-[#2F4A5C] text-sm font-medium rounded-full mb-6"
               >
+                <span className="w-2 h-2 bg-[#4CB5B5] rounded-full mr-2 inline-block"></span>
                 Fonctionnalités
+              </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#2F4A5C] via-[#4CB5B5] to-[#2F4A5C] bg-clip-text text-transparent mb-6"
+                style={{ backgroundSize: "200% 200%" }}
+              >
+                Tout ce dont vous avez besoin pour votre cabinet
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
-              >
-                Tout ce dont vous avez besoin pour votre cabinet
-              </motion.p>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="mt-6 text-lg leading-8 text-gray-600"
+                className="text-xl text-[#3A5166] max-w-3xl mx-auto leading-relaxed"
               >
                 Une suite complète d'outils conçus spécifiquement pour les kinésithérapeutes, 
                 pour simplifier votre quotidien et améliorer les soins de vos patients.
@@ -348,8 +357,14 @@ export default function FeaturesPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-blue-600">
-          <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
+        <section className="bg-gradient-to-r from-[#4CB5B5] to-[#3DA4A4] relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl animate-pulse" style={{ animationDuration: '4s' }} />
+            <div className="absolute bottom-10 right-10 w-16 h-16 bg-white/10 rounded-full blur-lg animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+          </div>
+          
+          <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8 relative z-10">
             <div className="mx-auto max-w-2xl text-center">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
@@ -365,7 +380,7 @@ export default function FeaturesPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100"
+                className="mx-auto mt-6 max-w-xl text-lg leading-8 text-white/90"
               >
                 Commencez votre essai gratuit de 14 jours et explorez toutes les fonctionnalités de KineCabinet.
               </motion.p>
@@ -378,13 +393,13 @@ export default function FeaturesPage() {
               >
                 <a
                   href="/auth/register"
-                  className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-blue-600 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors"
+                  className="rounded-xl bg-white px-8 py-4 text-sm font-semibold text-[#4CB5B5] shadow-lg hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all duration-300 hover:shadow-xl"
                 >
                   Commencer gratuitement
                 </a>
                 <a
                   href="/contact"
-                  className="text-sm font-semibold leading-6 text-white hover:text-blue-100 transition-colors"
+                  className="text-sm font-semibold leading-6 text-white hover:text-white/80 transition-colors"
                 >
                   Demander une démo <span aria-hidden="true">→</span>
                 </a>

@@ -117,6 +117,7 @@ export async function PUT(request, { params }) {
         antecedents: body.antecedents,
         allergies: body.allergies,
         notesGenerales: body.notesGenerales,
+        cin: body.cin,
         isActive: body.isActive
       }
     })

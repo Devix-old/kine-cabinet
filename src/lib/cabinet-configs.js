@@ -19,7 +19,7 @@ export const CABINET_CONFIGS = {
       title: "Gérez votre cabinet de kinésithérapie",
       subtitle: "en toute simplicité",
       description: "Optimisez la gestion de vos patients et rendez-vous avec notre solution intuitive dédiée aux kinésithérapeutes.",
-      cta: "Essai gratuit 14 jours"
+      cta: "Essai gratuit 7 jours"
     },
     modules: {
       patients: { enabled: true, required: true },
@@ -78,7 +78,7 @@ export const CABINET_CONFIGS = {
       title: "Gérez votre cabinet dentaire",
       subtitle: "en toute simplicité",
       description: "Solution complète pour la gestion de votre cabinet dentaire et le suivi de vos patients.",
-      cta: "Essai gratuit 14 jours"
+      cta: "Essai gratuit 7 jours"
     },
     modules: {
       patients: { enabled: true, required: true },
@@ -138,7 +138,7 @@ export const CABINET_CONFIGS = {
       title: "Gérez votre cabinet médical",
       subtitle: "en toute simplicité",
       description: "Solution complète pour la gestion de votre cabinet de médecine générale.",
-      cta: "Essai gratuit 14 jours"
+      cta: "Essai gratuit 7 jours"
     },
     modules: {
       patients: { enabled: true, required: true },
@@ -190,7 +190,7 @@ export const CABINET_CONFIGS = {
       title: "Gérez votre cabinet de cardiologie",
       subtitle: "en toute simplicité",
       description: "Solution complète pour la gestion de votre cabinet de cardiologie.",
-      cta: "Essai gratuit 14 jours"
+      cta: "Essai gratuit 7 jours"
     },
     modules: {
       patients: { enabled: true, required: true },

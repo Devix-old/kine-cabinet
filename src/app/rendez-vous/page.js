@@ -794,7 +794,7 @@ export default function AppointmentsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{practitionerLabel}</label>
               <select
-                {...register('kineId', { required: practitionerError })}
+                {...register('kineId')}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="">{practitionerPlaceholder}</option>
@@ -975,7 +975,7 @@ export default function AppointmentsPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{practitionerLabel}</label>
               <select
-                {...register('kineId', { required: practitionerError })}
+                {...register('kineId')}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               >
                 <option value="">{practitionerPlaceholder}</option>

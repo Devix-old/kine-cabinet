@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "generate-test-data": "node scripts/run-test-data-generation.js",
-    "clean-test-data": "node scripts/clean-test-data.js"
+    "clean-test-data": "node scripts/clean-test-data.js",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate deploy"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.6",
@@ -34,6 +37,7 @@
   "devDependencies": {
     "@faker-js/faker": "^10.0.0",
     "autoprefixer": "^10.4.21",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.5.6",
     "prisma": "^6.12.0",
     "tailwindcss": "^3.4.17"

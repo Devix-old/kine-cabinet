@@ -158,7 +158,7 @@ export class SubscriptionService {
             status = 'ACTIVE'
             daysLeft = Math.ceil((subscription.currentPeriodEnd - now) / (1000 * 60 * 60 * 24))
           } else {
-            status = 'EXPIRED'
+            status = 'CANCELED'
             isExpired = true
           }
         } else {
@@ -166,13 +166,13 @@ export class SubscriptionService {
         }
       } else {
         // If no trial end date, assume expired
-        status = 'EXPIRED'
+        status = 'CANCELED'
         isExpired = true
       }
     } else if (subscription.status === 'ACTIVE') {
       if (subscription.currentPeriodEnd) {
         if (subscription.currentPeriodEnd <= now) {
-          status = 'EXPIRED'
+          status = 'CANCELED'
           isExpired = true
         } else {
           daysLeft = Math.ceil((subscription.currentPeriodEnd - now) / (1000 * 60 * 60 * 24))
@@ -184,14 +184,14 @@ export class SubscriptionService {
           const planDurationDays = subscription.plan?.durationDays || 30
           const calculatedEndDate = new Date(subscription.currentPeriodStart.getTime() + (planDurationDays * 24 * 60 * 60 * 1000))
           if (calculatedEndDate <= now) {
-            status = 'EXPIRED'
+            status = 'CANCELED'
             isExpired = true
           } else {
             daysLeft = Math.ceil((calculatedEndDate - now) / (1000 * 60 * 60 * 24))
           }
         } else {
           // If no period dates at all, assume expired
-          status = 'EXPIRED'
+          status = 'CANCELED'
           isExpired = true
         }
       }
@@ -354,7 +354,7 @@ export class SubscriptionService {
       displayStatus = 'ACTIVE'
       statusMessage = 'Votre abonnement est actif'
     } else if (statusInfo.isExpired) {
-      displayStatus = 'EXPIRED'
+      displayStatus = 'CANCELED'
       statusMessage = 'Votre abonnement a expiré'
     }
 

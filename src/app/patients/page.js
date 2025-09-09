@@ -49,7 +49,8 @@ export default function PatientsPage() {
     medecinTraitant: '',
     antecedents: '',
     allergies: '',
-    notesGenerales: ''
+    notesGenerales: '',
+    cin: ''
   })
 
   // Simple API functions without cache
@@ -130,7 +131,8 @@ export default function PatientsPage() {
       medecinTraitant: '',
       antecedents: '',
       allergies: '',
-      notesGenerales: ''
+      notesGenerales: '',
+      cin: ''
     })
   }
 
@@ -256,7 +258,8 @@ export default function PatientsPage() {
       medecinTraitant: patient.medecinTraitant || '',
       antecedents: patient.antecedents || '',
       allergies: patient.allergies || '',
-      notesGenerales: patient.notesGenerales || ''
+      notesGenerales: patient.notesGenerales || '',
+      cin: patient.cin || ''
     })
     setShowEditModal(true)
   }
@@ -271,7 +274,8 @@ export default function PatientsPage() {
     const matchesSearch = !searchTerm || 
       (patient.nom && patient.nom.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (patient.prenom && patient.prenom.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (patient.numeroDossier && patient.numeroDossier.toLowerCase().includes(searchTerm.toLowerCase()))
+      (patient.numeroDossier && patient.numeroDossier.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (patient.cin && patient.cin.toLowerCase().includes(searchTerm.toLowerCase()))
     
     const matchesStatus = selectedStatus === 'all' || 
       (selectedStatus === 'active' && patient.isActive) ||
@@ -388,12 +392,15 @@ export default function PatientsPage() {
                   {filteredPatients.map((patient) => (
                     <tr key={patient.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
+                        <div 
+                          className="cursor-pointer hover:text-blue-600 transition-colors"
+                          onClick={() => router.push(`/patients/${patient.id}`)}
+                        >
                           <div className="text-sm font-medium text-gray-900">
                             {patient.prenom} {patient.nom}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {patient.numeroDossier}
+                            {patient.cin || patient.numeroDossier}
                           </div>
                         </div>
                       </td>
@@ -437,12 +444,15 @@ export default function PatientsPage() {
               {filteredPatients.map((patient) => (
                 <div key={patient.id} className="p-4 border-b border-gray-200 hover:bg-gray-50">
                   <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
+                    <div 
+                      className="flex-1 cursor-pointer hover:text-blue-600 transition-colors"
+                      onClick={() => router.push(`/patients/${patient.id}`)}
+                    >
                       <h3 className="text-sm font-medium text-gray-900">
                         {patient.prenom} {patient.nom}
                       </h3>
                       <p className="text-xs text-gray-500 mt-1">
-                        Dossier: {patient.numeroDossier}
+                        {patient.cin ? `CIN: ${patient.cin}` : `Dossier: ${patient.numeroDossier}`}
                       </p>
                     </div>
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

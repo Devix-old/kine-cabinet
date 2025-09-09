@@ -86,6 +86,7 @@ model Patient {
   antecedents     String?
   allergies       String?
   notesGenerales  String?
+  cin             String?         // Carte d'identité nationale
   isActive        Boolean         @default(true)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt

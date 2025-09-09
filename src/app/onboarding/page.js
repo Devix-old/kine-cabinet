@@ -712,13 +712,25 @@ function TarifsStep({ moduleKey, services = [], value, onChange }) {
                                             placeholder="0"
                                             value={existing?.montant ?? ''}
                                             onChange={(e) => {
-                                                const normalized = e.target.value.replace(',', '.')
+                                                const inputValue = e.target.value
+                                                
+                                                // Allow empty input for deletion
+                                                if (inputValue === '') {
+                                                    const next = value.filter(v => v.nom !== label)
+                                                    onChange(next)
+                                                    return
+                                                }
+                                                
+                                                const normalized = inputValue.replace(',', '.')
                                                 const amt = parseFloat(normalized)
-                                                if (Number.isNaN(amt) || amt < 0) return
-                                                const next = value.some(v => v.nom === label)
-                                                    ? value.map(v => v.nom === label ? { ...v, montant: amt } : v)
-                                                    : [...value, { id: Date.now() + Math.random(), nom: label, montant: amt }]
-                                                onChange(next)
+                                                
+                                                // Only proceed if it's a valid number
+                                                if (!Number.isNaN(amt) && amt >= 0) {
+                                                    const next = value.some(v => v.nom === label)
+                                                        ? value.map(v => v.nom === label ? { ...v, montant: amt } : v)
+                                                        : [...value, { id: Date.now() + Math.random(), nom: label, montant: amt }]
+                                                    onChange(next)
+                                                }
                                             }}
                                             className="w-28 px-3 py-1 border border-slate-200 rounded-lg outline-none focus:outline-none focus:ring-0 focus:border-slate-200 text-right"
                                         />

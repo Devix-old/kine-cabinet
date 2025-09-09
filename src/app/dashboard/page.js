@@ -7,6 +7,7 @@ import { useApi } from '@/hooks/useApi'
 import { useAuth } from '@/hooks/useAuth'
 import { useCabinetConfig } from '@/hooks/useCabinetConfig'
 import { formatDate, calculateAge } from '@/lib/utils'
+import TrialReminder from '@/components/Trial/TrialReminder'
 import { 
   Calendar, 
   Users, 
@@ -130,13 +131,13 @@ export default function DashboardPage() {
         color: 'bg-green-500' 
       },
       { 
-        title: `${config.terminology?.appointment || 'Rendez-vous'}s aujourd'hui`, 
+        title: `${config.terminology?.appointment || 'Rendez-vous'} aujourd'hui`, 
         value: loading ? '...' : stats.appointmentsToday.toString(), 
         icon: Calendar, 
         color: 'bg-blue-500' 
       },
       { 
-        title: `${config.terminology?.appointment || 'Rendez-vous'}s cette semaine`, 
+        title: `${config.terminology?.appointment || 'Rendez-vous'} cette semaine`, 
         value: loading ? '...' : stats.appointmentsThisWeek.toString(), 
         icon: Clock, 
         color: 'bg-purple-500' 
@@ -256,6 +257,7 @@ export default function DashboardPage() {
                     <div className="text-right">
                       <p className="text-sm text-gray-600">
                         {(() => {
+                          if (!patient.dateCreation) return 'Date inconnue'
                           const formattedDate = formatDate(patient.dateCreation, 'dd/MM/yyyy')
                           return formattedDate || 'Date inconnue'
                         })()}
@@ -334,6 +336,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      
+      {/* Trial Reminder - Only shows on dashboard for trial users */}
+      <TrialReminder />
     </DashboardLayout>
   )
 } 

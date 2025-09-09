@@ -171,12 +171,18 @@ export default function ProfessionalHero() {
           }
           
           .hero-image-scale {
-            transform: scale(2.0);
+            transform: scale(2.5);
           }
           
           @media (min-width: 640px) {
             .hero-image-scale {
-              transform: scale(2.2);
+              transform: scale(2.8);
+            }
+          }
+          
+          @media (min-width: 1024px) {
+            .hero-image-scale {
+              transform: scale(3.0);
             }
           }
          
@@ -335,7 +341,7 @@ export default function ProfessionalHero() {
                        href="/auth/register"
                        className="group inline-flex items-center justify-center px-5 sm:px-6 py-3 rounded-lg bg-[#4CB5B5] text-white font-semibold hover:bg-[#3DA4A4] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
                      >
-                       Essai gratuit 14 jours
+                       Essai gratuit 7 jours
                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                      </a>
                      <a
@@ -372,7 +378,7 @@ export default function ProfessionalHero() {
             <div className={`relative self-center mt-8 lg:mt-0 transform transition-all duration-1000 delay-300 ${
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
             }`}>
-              <div className="relative max-w-md sm:max-w-lg mx-auto lg:max-w-none">
+              <div className="relative max-w-lg sm:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto lg:max-w-none">
                                  {/* Hero Image with Advanced Transparency Masking */}
                  <div className="relative hero-image-mask hero-image-bg-removal">
                                        <img 
@@ -380,7 +386,7 @@ export default function ProfessionalHero() {
                       alt="Cabinet de kinésithérapie - Interface de gestion" 
                       className="hero-image-enhanced hero-image-clean hero-image-scale w-full h-auto rounded-xl sm:rounded-2xl relative z-10 animate-float"
                       style={{ 
-                        transform: 'scale(2.0)',
+                        transform: 'scale(2.5)',
                         transformOrigin: 'center center'
                       }}
                       loading="lazy"

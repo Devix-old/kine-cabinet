@@ -323,6 +323,7 @@ export async function POST(request) {
         antecedents: body.antecedents,
         allergies: body.allergies,
         notesGenerales: body.notesGenerales,
+        cin: body.cin,
         cabinetId: session.user.cabinetId // Assigner au cabinet de l'utilisateur
       }
     })

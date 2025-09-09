@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { Menu, X, ChevronDown } from 'lucide-react'
+import EniripsaLogo from './EniripsaLogo'
 
 const navigation = [
   { name: 'Accueil', href: '/' },
@@ -51,12 +52,7 @@ export default function Header() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8" aria-label="Global">
         <div className="flex lg:flex-1">
           <a href="/" className="-m-1.5 p-1.5 group">
-            <div className="flex items-center">
-              <div className="w-9 h-9 bg-gradient-to-br from-[#4CB5B5] to-[#3DA4A4] rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
-                <span className="text-white font-bold text-lg">K</span>
-              </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">KineCabinet</span>
-            </div>
+            <EniripsaLogo className="w-auto h-12" showText={true} />
           </a>
         </div>
         
@@ -138,12 +134,7 @@ export default function Header() {
           <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm shadow-xl">
             <div className="flex items-center justify-between">
               <a href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-[#4CB5B5] rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold">K</span>
-                  </div>
-                  <span className="ml-2 text-xl font-bold text-gray-900">KineCabinet</span>
-                </div>
+                <EniripsaLogo className="w-auto h-10" showText={true} />
               </a>
               <button
                 type="button"

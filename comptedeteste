@@ -13,3 +13,6 @@ npx prisma generate
 
 # 3. Seed the plans (if you have the seed script)
 node scripts/seed-plans.js
+
+#database password
+yKqhXhXTr7AQL7tP

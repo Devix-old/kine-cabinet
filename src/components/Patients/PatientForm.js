@@ -27,14 +27,15 @@ export default function PatientForm({
       title: 'Informations personnelles',
       icon: User,
       fields: [
-        { name: 'nom', label: 'Nom *', type: 'text', required: true, colSpan: 1 },
         { name: 'prenom', label: 'Prénom *', type: 'text', required: true, colSpan: 1 },
+        { name: 'nom', label: 'Nom *', type: 'text', required: true, colSpan: 1 },
         { name: 'dateNaissance', label: 'Date de naissance *', type: 'date', required: true, colSpan: 1 },
         { name: 'sexe', label: 'Sexe', type: 'select', options: [
           { value: 'AUTRE', label: 'Autre' },
           { value: 'HOMME', label: 'Homme' },
           { value: 'FEMME', label: 'Femme' }
-        ], colSpan: 1 }
+        ], colSpan: 1 },
+        { name: 'cin', label: 'CIN (Carte d\'identité nationale)', type: 'text', colSpan: 2 }
       ]
     },
     {

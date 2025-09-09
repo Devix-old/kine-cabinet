@@ -12,6 +12,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import SubscriptionInfo from '@/components/SubscriptionInfo'
+import Header from '@/components/SaaS/Header'
+import Footer from '@/components/SaaS/Footer'
 
 export default function ComptePage() {
   const { data: session, update } = useSession()
@@ -130,13 +132,33 @@ export default function ComptePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Mon Compte</h1>
-          <p className="text-gray-600 mt-2">Gérez vos informations personnelles et votre abonnement</p>
+    <div className="bg-white">
+      <Header />
+      
+      <main className="min-h-screen bg-gradient-to-br from-[#FBFBFB] to-[#E6F1F7] relative overflow-hidden pt-20">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-[#4CB5B5]/10 to-[#7BC6B5]/8 rounded-full blur-xl animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-[#4CB5B5]/8 to-[#DCEEF5]/12 rounded-full blur-lg animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+          <div className="absolute bottom-32 left-20 w-40 h-40 bg-gradient-to-br from-[#DCEEF5]/6 to-[#4CB5B5]/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '2s' }} />
         </div>
+        
+        <div className="relative z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            {/* Header */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="mb-12 text-center"
+            >
+              <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-[#2F4A5C] via-[#4CB5B5] to-[#2F4A5C] bg-clip-text text-transparent mb-4">
+                Mon Compte
+              </h1>
+              <p className="text-xl text-[#3A5166] max-w-2xl mx-auto">
+                Gérez vos informations personnelles et votre abonnement
+              </p>
+            </motion.div>
 
         {/* Message */}
         {message.text && (
@@ -153,179 +175,202 @@ export default function ComptePage() {
           </motion.div>
         )}
 
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <nav className="space-y-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-blue-50 border border-blue-200 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{tab.label}</span>
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-
-          {/* Content */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              {/* Profile Tab */}
-              {activeTab === 'profile' && (
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Informations du profil</h2>
-                  
-                  <form onSubmit={handleProfileUpdate} className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Nom complet
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            <div className="grid lg:grid-cols-4 gap-8">
+              {/* Sidebar */}
+              <div className="lg:col-span-1">
+                <nav className="space-y-2">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon
+                    return (
+                      <motion.button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-300 ${
+                          activeTab === tab.id
+                            ? 'bg-gradient-to-r from-[#4CB5B5] to-[#3DA4A4] text-white shadow-lg shadow-[#4CB5B5]/30'
+                            : 'text-[#3A5166] hover:bg-white/60 hover:shadow-md border border-transparent hover:border-[#4CB5B5]/20'
+                        }`}
                       >
-                        Mettre à jour
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
+                        <Icon className="w-5 h-5" />
+                        <span className="font-medium">{tab.label}</span>
+                      </motion.button>
+                    )
+                  })}
+                </nav>
+              </div>
 
-              {/* Password Tab */}
-              {activeTab === 'password' && (
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Changer le mot de passe</h2>
-                  
-                  <form onSubmit={handlePasswordUpdate} className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Mot de passe actuel
-                      </label>
-                      <input
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Nouveau mot de passe
-                      </label>
-                      <input
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Confirmer le nouveau mot de passe
-                      </label>
-                      <input
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                    </div>
-
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                      >
-                        Changer le mot de passe
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
-
-              {/* Subscription Tab */}
-              {activeTab === 'subscription' && (
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Gestion de l'abonnement</h2>
-                  
-                  {/* Subscription Information Component */}
-                  <div className="mb-6">
-                    <SubscriptionInfo />
-                  </div>
-
-                  <div className="space-y-4">
-                    <Link
-                      href="/billing"
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <CreditCard className="w-5 h-5 text-gray-600" />
+              {/* Content */}
+              <div className="lg:col-span-3">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-[#DCEEF5]"
+                >
+                  {/* Profile Tab */}
+                  {activeTab === 'profile' && (
+                    <div className="p-8">
+                      <h2 className="text-2xl font-bold text-[#2F4A5C] mb-8">Informations du profil</h2>
+                      
+                      <form onSubmit={handleProfileUpdate} className="space-y-6">
                         <div>
-                          <h3 className="font-medium text-gray-900">Gérer l'abonnement</h3>
-                          <p className="text-sm text-gray-600">Changer de plan ou annuler</p>
+                          <label className="block text-sm font-medium text-[#3A5166] mb-3">
+                            Nom complet
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            required
+                          />
                         </div>
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-gray-400" />
-                    </Link>
 
-                    <Link
-                      href="/pricing"
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Settings className="w-5 h-5 text-gray-600" />
                         <div>
-                          <h3 className="font-medium text-gray-900">Voir tous les plans</h3>
-                          <p className="text-sm text-gray-600">Comparer les fonctionnalités</p>
+                          <label className="block text-sm font-medium text-[#3A5166] mb-3">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            required
+                          />
                         </div>
+
+                        <div className="flex justify-end">
+                          <motion.button
+                            type="submit"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="bg-gradient-to-r from-[#4CB5B5] to-[#3DA4A4] text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-[#4CB5B5]/30 transition-all duration-300"
+                          >
+                            Mettre à jour
+                          </motion.button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  {/* Password Tab */}
+                  {activeTab === 'password' && (
+                    <div className="p-8">
+                      <h2 className="text-2xl font-bold text-[#2F4A5C] mb-8">Changer le mot de passe</h2>
+                      
+                      <form onSubmit={handlePasswordUpdate} className="space-y-6">
+                        <div>
+                          <label className="block text-sm font-medium text-[#3A5166] mb-3">
+                            Mot de passe actuel
+                          </label>
+                          <input
+                            type="password"
+                            value={passwordData.currentPassword}
+                            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3A5166] mb-3">
+                            Nouveau mot de passe
+                          </label>
+                          <input
+                            type="password"
+                            value={passwordData.newPassword}
+                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3A5166] mb-3">
+                            Confirmer le nouveau mot de passe
+                          </label>
+                          <input
+                            type="password"
+                            value={passwordData.confirmPassword}
+                            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            required
+                          />
+                        </div>
+
+                        <div className="flex justify-end">
+                          <motion.button
+                            type="submit"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="bg-gradient-to-r from-[#4CB5B5] to-[#3DA4A4] text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-[#4CB5B5]/30 transition-all duration-300"
+                          >
+                            Changer le mot de passe
+                          </motion.button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  {/* Subscription Tab */}
+                  {activeTab === 'subscription' && (
+                    <div className="p-8">
+                      <h2 className="text-2xl font-bold text-[#2F4A5C] mb-8">Gestion de l'abonnement</h2>
+                      
+                      {/* Subscription Information Component */}
+                      <div className="mb-8">
+                        <SubscriptionInfo />
                       </div>
-                      <ArrowRight className="w-5 h-5 text-gray-400" />
-                    </Link>
-                  </div>
-                </div>
-              )}
+
+                      <div className="space-y-4">
+                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                          <Link
+                            href="/billing"
+                            className="flex items-center justify-between p-6 bg-gradient-to-r from-[#DCEEF5]/30 to-[#7BC6B5]/20 rounded-xl hover:from-[#4CB5B5]/20 hover:to-[#3DA4A4]/20 transition-all duration-300 border border-[#DCEEF5] hover:border-[#4CB5B5]/30"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 bg-gradient-to-br from-[#4CB5B5] to-[#3DA4A4] rounded-lg flex items-center justify-center">
+                                <CreditCard className="w-6 h-6 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-[#2F4A5C]">Gérer l'abonnement</h3>
+                                <p className="text-sm text-[#3A5166]">Changer de plan ou annuler</p>
+                              </div>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-[#4CB5B5]" />
+                          </Link>
+                        </motion.div>
+
+                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                          <Link
+                            href="/pricing"
+                            className="flex items-center justify-between p-6 bg-gradient-to-r from-[#DCEEF5]/30 to-[#7BC6B5]/20 rounded-xl hover:from-[#4CB5B5]/20 hover:to-[#3DA4A4]/20 transition-all duration-300 border border-[#DCEEF5] hover:border-[#4CB5B5]/30"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 bg-gradient-to-br from-[#4CB5B5] to-[#3DA4A4] rounded-lg flex items-center justify-center">
+                                <Settings className="w-6 h-6 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-[#2F4A5C]">Voir tous les plans</h3>
+                                <p className="text-sm text-[#3A5166]">Comparer les fonctionnalités</p>
+                              </div>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-[#4CB5B5]" />
+                          </Link>
+                        </motion.div>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+      
+      <Footer />
     </div>
   )
 }

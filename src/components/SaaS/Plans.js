@@ -147,28 +147,48 @@ export default function Plans() {
   }
 
   return (
-    <section id="plans" className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="plans" className="py-24 bg-gradient-to-br from-[#FBFBFB] via-[#F8FBFD] to-[#E6F1F7] relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-[#4CB5B5]/10 to-[#7BC6B5]/8 rounded-full blur-xl animate-pulse" style={{ animationDuration: '4s' }} />
+        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-[#4CB5B5]/8 to-[#DCEEF5]/12 rounded-full blur-lg animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+        <div className="absolute bottom-32 left-20 w-40 h-40 bg-gradient-to-br from-[#DCEEF5]/6 to-[#4CB5B5]/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '2s' }} />
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <motion.h2
+        <div className="text-center mb-20">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
+            className="inline-block px-4 py-2 bg-[#DCEEF5]/30 border border-[#4CB5B5]/20 text-[#2F4A5C] text-sm font-medium rounded-full mb-6"
+          >
+            <span className="w-2 h-2 bg-[#4CB5B5] rounded-full mr-2 inline-block"></span>
+            Tarification Transparente
+          </motion.div>
+          
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#2F4A5C] via-[#4CB5B5] to-[#2F4A5C] bg-clip-text text-transparent mb-6"
+            style={{ backgroundSize: "200% 200%" }}
           >
             Plans et Tarifs
           </motion.h2>
+          
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl text-gray-600 max-w-3xl mx-auto mb-8"
+            className="text-xl text-[#3A5166] max-w-3xl mx-auto leading-relaxed"
           >
             Choisissez le plan qui correspond le mieux à vos besoins. 
-            Tous nos plans incluent un essai gratuit de 7 jours.
+            <span className="text-[#4CB5B5] font-semibold">Tous nos plans incluent un essai gratuit de 7 jours.</span>
           </motion.p>
         </div>
 
@@ -189,7 +209,7 @@ export default function Plans() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto"
         >
           {plans.map((plan, index) => {
             const IconComponent = planIcons[plan.id]
@@ -200,57 +220,94 @@ export default function Plans() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-                className={`relative p-8 bg-white rounded-2xl border-2 transition-all duration-300 hover:shadow-xl ${
-                  plan.popular ? 'border-blue-500 shadow-lg scale-105' : 'border-gray-200 hover:border-blue-300'
+                whileHover={{ y: -8, scale: 1.02 }}
+                className={`relative p-8 bg-white/80 backdrop-blur-sm rounded-3xl border transition-all duration-500 hover:shadow-2xl ${
+                  plan.popular 
+                    ? 'border-[#4CB5B5] shadow-xl shadow-[#4CB5B5]/20 scale-105' 
+                    : 'border-[#DCEEF5] hover:border-[#4CB5B5]/50 hover:shadow-lg'
                 }`}
               >
                 {/* Popular Badge */}
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center">
-                      <Star className="w-4 h-4 mr-1" />
+                  <motion.div 
+                    className="absolute -top-4 left-1/2 transform -translate-x-1/2"
+                    initial={{ scale: 0 }}
+                    whileInView={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  >
+                    <div className="bg-gradient-to-r from-[#4CB5B5] to-[#3DA4A4] text-white px-6 py-2 rounded-full text-sm font-medium flex items-center shadow-lg">
+                      <Star className="w-4 h-4 mr-2" />
                       Le plus populaire
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Plan Header */}
                 <div className="text-center mb-8">
-                  <div className="flex justify-center mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-blue-600" />
+                  <motion.div 
+                    className="flex justify-center mb-6"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+                      plan.popular 
+                        ? 'bg-gradient-to-br from-[#4CB5B5] to-[#3DA4A4]' 
+                        : 'bg-gradient-to-br from-[#DCEEF5] to-[#7BC6B5]'
+                    } shadow-lg`}>
+                      <IconComponent className="w-8 h-8 text-white" />
                     </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <p className="text-gray-600 mb-4">{plan.description}</p>
-                  <div className="mb-4">
-                    <span className="text-4xl font-bold text-gray-900">{plan.price}€</span>
-                    <span className="text-gray-500 ml-2">/{plan.interval}</span>
+                  </motion.div>
+                  
+                  <h3 className={`text-2xl font-bold mb-3 ${
+                    plan.popular ? 'text-[#2F4A5C]' : 'text-gray-900'
+                  }`}>
+                    {plan.name}
+                  </h3>
+                  
+                  <p className="text-[#3A5166] mb-6 leading-relaxed">{plan.description}</p>
+                  
+                  <div className="mb-6">
+                    <span className={`text-5xl font-bold ${
+                      plan.popular ? 'text-[#4CB5B5]' : 'text-gray-900'
+                    }`}>
+                      {plan.price}€
+                    </span>
+                    <span className="text-[#3A5166] ml-2 text-lg">/{plan.interval}</span>
                   </div>
                 </div>
 
                 {/* Features */}
                 <ul className="space-y-4 mb-8">
                   {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start">
-                      <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 text-sm">{feature}</span>
-                    </li>
+                    <motion.li 
+                      key={featureIndex} 
+                      className="flex items-start"
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: featureIndex * 0.1 }}
+                    >
+                      <div className="w-5 h-5 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="text-[#3A5166] text-sm leading-relaxed">{feature}</span>
+                    </motion.li>
                   ))}
                 </ul>
 
                 {/* CTA Button */}
-                <button
+                <motion.button
                   onClick={getButtonAction(plan.id)}
                   disabled={loading === plan.id || status === 'loading'}
-                  className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all duration-300 ${
                     plan.popular
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-[#4CB5B5] to-[#3DA4A4] text-white hover:shadow-lg hover:shadow-[#4CB5B5]/30'
+                      : 'bg-gradient-to-r from-[#DCEEF5] to-[#7BC6B5] text-[#2F4A5C] hover:shadow-lg hover:shadow-[#4CB5B5]/20'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {getButtonText(plan.id)}
-                </button>
+                </motion.button>
               </motion.div>
             )
           })}
@@ -262,14 +319,26 @@ export default function Plans() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-center mt-16"
+          className="text-center mt-20"
         >
-          <p className="text-gray-600 mb-4">Besoin d'un plan personnalisé pour plusieurs cabinets ?</p>
-          <Link href="/contact">
-            <button className="text-blue-600 hover:text-blue-700 font-medium">
-              Contacter l'équipe commerciale
-            </button>
-          </Link>
+          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-[#DCEEF5] max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-[#2F4A5C] mb-4">
+              Besoin d'un plan personnalisé ?
+            </h3>
+            <p className="text-[#3A5166] mb-6 leading-relaxed">
+              Pour plusieurs cabinets ou des besoins spécifiques, notre équipe commerciale 
+              vous accompagne dans la création d'une solution sur mesure.
+            </p>
+            <Link href="/contact">
+              <motion.button 
+                className="bg-gradient-to-r from-[#4CB5B5] to-[#3DA4A4] text-white px-8 py-3 rounded-2xl font-semibold hover:shadow-lg hover:shadow-[#4CB5B5]/30 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Contacter l'équipe commerciale
+              </motion.button>
+            </Link>
+          </div>
         </motion.div>
       </div>
     </section>
