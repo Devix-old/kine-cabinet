@@ -223,7 +223,7 @@ export default function ComptePage() {
                             type="text"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50 text-[#2F4A5C] placeholder-[#3A5166]"
                             required
                           />
                         </div>
@@ -236,7 +236,7 @@ export default function ComptePage() {
                             type="email"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50 text-[#2F4A5C] placeholder-[#3A5166]"
                             required
                           />
                         </div>
@@ -269,7 +269,7 @@ export default function ComptePage() {
                             type="password"
                             value={passwordData.currentPassword}
                             onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50 text-[#2F4A5C] placeholder-[#3A5166]"
                             required
                           />
                         </div>
@@ -282,7 +282,7 @@ export default function ComptePage() {
                             type="password"
                             value={passwordData.newPassword}
                             onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50 text-[#2F4A5C] placeholder-[#3A5166]"
                             required
                           />
                         </div>
@@ -295,7 +295,7 @@ export default function ComptePage() {
                             type="password"
                             value={passwordData.confirmPassword}
                             onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50"
+                            className="w-full px-4 py-3 border border-[#DCEEF5] rounded-xl focus:ring-2 focus:ring-[#4CB5B5] focus:border-[#4CB5B5] transition-all duration-300 bg-white/50 text-[#2F4A5C] placeholder-[#3A5166]"
                             required
                           />
                         </div>

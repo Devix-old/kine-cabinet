@@ -237,7 +237,7 @@ export default function ContactPage() {
                           required
                           value={formData.firstName}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-gray-900 placeholder-gray-500"
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-[#2F4A5C] placeholder-[#3A5166]"
                           placeholder="Votre prénom"
                         />
                       </div>
@@ -253,7 +253,7 @@ export default function ContactPage() {
                           required
                           value={formData.lastName}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-gray-900 placeholder-gray-500"
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-[#2F4A5C] placeholder-[#3A5166]"
                           placeholder="Votre nom"
                         />
                       </div>
@@ -271,7 +271,7 @@ export default function ContactPage() {
                           required
                           value={formData.email}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-gray-900 placeholder-gray-500"
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-[#2F4A5C] placeholder-[#3A5166]"
                           placeholder="votre.email@exemple.com"
                         />
                       </div>
@@ -286,7 +286,7 @@ export default function ContactPage() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-gray-900 placeholder-gray-500"
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-[#2F4A5C] placeholder-[#3A5166]"
                           placeholder="+33 1 23 45 67 89"
                         />
                       </div>
@@ -317,7 +317,7 @@ export default function ContactPage() {
                         required
                         value={formData.subject}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-gray-900 bg-white"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-[#2F4A5C] bg-white"
                       >
                         <option value="">Sélectionnez un sujet</option>
                         <option value="demo">Demande de démo</option>
@@ -339,7 +339,7 @@ export default function ContactPage() {
                         required
                         value={formData.message}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-gray-900 placeholder-gray-500 resize-none"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-0 transition-colors duration-300 text-[#2F4A5C] placeholder-[#3A5166] resize-none"
                         placeholder="Décrivez votre projet ou votre question en détail..."
                       />
                     </div>

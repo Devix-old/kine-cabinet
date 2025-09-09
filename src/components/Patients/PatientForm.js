@@ -65,7 +65,7 @@ export default function PatientForm({
   ]
 
   const renderField = (field) => {
-    const commonClasses = "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white hover:bg-gray-50"
+    const commonClasses = "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white hover:bg-gray-50 text-[#2F4A5C] placeholder-[#3A5166]"
     
     if (field.type === 'textarea') {
       return (

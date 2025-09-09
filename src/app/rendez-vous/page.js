@@ -690,7 +690,7 @@ export default function AppointmentsPage() {
               <input
                 type="date"
                 {...register('date', { required: 'Date requise' })}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               />
               {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
             </div>
@@ -699,7 +699,7 @@ export default function AppointmentsPage() {
               <input
                 type="time"
                 {...register('time', { required: 'Heure requise' })}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               />
               {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>}
             </div>
@@ -726,7 +726,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Salle</label>
               <select
                 {...register('salleId')}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 <option value="">Sélectionner une salle</option>
                 {rooms.map(room => (
@@ -740,7 +740,7 @@ export default function AppointmentsPage() {
                 type="number"
                 {...register('duree', { min: 15, max: 180 })}
                 defaultValue={30}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               />
             </div>
           </div>
@@ -750,7 +750,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
               <select
                 {...register('type')}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 {appointmentTypes.map(type => (
                   <option key={type.value} value={type.value}>{type.label}</option>
@@ -761,7 +761,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
               <select
                 {...register('statut')}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 {appointmentStatuses.map(status => (
                   <option key={status.value} value={status.value}>{status.label}</option>
@@ -795,7 +795,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">{practitionerLabel}</label>
               <select
                 {...register('kineId')}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 <option value="">{practitionerPlaceholder}</option>
                 {kines.map(kine => (
@@ -810,7 +810,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Tarif</label>
               <select
                 {...register('tarifId', { required: 'Tarif requis' })}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 <option value="">Sélectionner un tarif</option>
                 {tarifs.map(tarif => (
@@ -872,7 +872,7 @@ export default function AppointmentsPage() {
               <input
                 type="date"
                 {...register('date', { required: 'Date requise' })}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               />
               {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
             </div>
@@ -881,7 +881,7 @@ export default function AppointmentsPage() {
               <input
                 type="time"
                 {...register('time', { required: 'Heure requise' })}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               />
               {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>}
             </div>
@@ -908,7 +908,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Salle</label>
               <select
                 {...register('salleId')}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 <option value="">Sélectionner une salle</option>
                 {rooms.map(room => (
@@ -921,7 +921,7 @@ export default function AppointmentsPage() {
               <input
                 type="number"
                 {...register('duree', { min: 15, max: 180 })}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               />
             </div>
           </div>
@@ -931,7 +931,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
               <select
                 {...register('type')}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 {appointmentTypes.map(type => (
                   <option key={type.value} value={type.value}>{type.label}</option>
@@ -942,7 +942,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
               <select
                 {...register('statut')}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 {appointmentStatuses.map(status => (
                   <option key={status.value} value={status.value}>{status.label}</option>
@@ -976,7 +976,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">{practitionerLabel}</label>
               <select
                 {...register('kineId')}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 <option value="">{practitionerPlaceholder}</option>
                 {kines.map(kine => (
@@ -991,7 +991,7 @@ export default function AppointmentsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Tarif</label>
               <select
                 {...register('tarifId', { required: 'Tarif requis' })}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base text-[#2F4A5C] placeholder-[#3A5166]"
               >
                 <option value="">Sélectionner un tarif</option>
                 {tarifs.map(tarif => (

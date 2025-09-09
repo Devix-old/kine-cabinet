@@ -403,7 +403,7 @@ function NameStep({ moduleKey, value, onChange }) {
                         value={value} 
                         onChange={(e) => onChange(e.target.value)} 
                         placeholder={`Ex: ${moduleCfg.namePlaceholder}`} 
-                        className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+                        className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-[#2F4A5C] placeholder-[#3A5166]" 
                         maxLength={80} 
                     />
                 </div>
@@ -432,7 +432,7 @@ function RoomsStep({ moduleKey, value, onChange }) {
                     value={name} 
                     onChange={(e) => setName(e.target.value)} 
                     placeholder={moduleCfg.roomPlaceholder} 
-                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-[#2F4A5C] placeholder-[#3A5166]" 
                 />
                 <button 
                     type="submit" 
@@ -474,7 +474,7 @@ function RoomsStep({ moduleKey, value, onChange }) {
                                                 const capacity = parseInt(e.target.value) || 1;
                                                 onChange(value.map(r => r.id === room.id ? { ...r, capacite: capacity } : r));
                                             }}
-                                            className="w-16 px-2 py-1 border border-slate-200 rounded-lg outline-none focus:outline-none focus:ring-0 focus:border-slate-200 text-center"
+                                            className="w-16 px-2 py-1 border border-slate-200 rounded-lg outline-none focus:outline-none focus:ring-0 focus:border-slate-200 text-center text-[#2F4A5C]"
                                         />
                                         <button
                                             onClick={() => onChange(value.filter(r => r.id !== room.id))}
@@ -577,7 +577,7 @@ function ServicesStep({ moduleKey, value, onChange }) {
                     value={serviceName} 
                     onChange={(e) => setServiceName(e.target.value)} 
                     placeholder="Ajouter un service" 
-                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-[#2F4A5C] placeholder-[#3A5166]" 
                 />
                 <button 
                     type="submit" 
@@ -648,7 +648,7 @@ function ServicesStep({ moduleKey, value, onChange }) {
                             <input 
                                 value={editName} 
                                 onChange={(e) => setEditName(e.target.value)} 
-                                className="w-full px-3 py-2 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" 
+                                className="w-full px-3 py-2 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-[#2F4A5C] placeholder-[#3A5166]" 
                                 placeholder="Nom du service" 
                             />
                             <div className="mt-4 flex justify-end gap-2">
@@ -732,7 +732,7 @@ function TarifsStep({ moduleKey, services = [], value, onChange }) {
                                                     onChange(next)
                                                 }
                                             }}
-                                            className="w-28 px-3 py-1 border border-slate-200 rounded-lg outline-none focus:outline-none focus:ring-0 focus:border-slate-200 text-right"
+                                            className="w-28 px-3 py-1 border border-slate-200 rounded-lg outline-none focus:outline-none focus:ring-0 focus:border-slate-200 text-right text-[#2F4A5C]"
                                         />
 									</div>
 			</div>
@@ -793,8 +793,8 @@ function HoursStep({ value, onChange }) {
 								</label>
 							</div>
 							<div className="grid grid-cols-2 gap-2">
-								<input type="time" value={hours?.[key]?.startTime || ''} onChange={(e) => updateField(key, 'startTime', e.target.value)} className="px-3 py-2 rounded-lg border-2 border-slate-200" />
-								<input type="time" value={hours?.[key]?.endTime || ''} onChange={(e) => updateField(key, 'endTime', e.target.value)} className="px-3 py-2 rounded-lg border-2 border-slate-200" />
+								<input type="time" value={hours?.[key]?.startTime || ''} onChange={(e) => updateField(key, 'startTime', e.target.value)} className="px-3 py-2 rounded-lg border-2 border-slate-200 text-[#2F4A5C]" />
+								<input type="time" value={hours?.[key]?.endTime || ''} onChange={(e) => updateField(key, 'endTime', e.target.value)} className="px-3 py-2 rounded-lg border-2 border-slate-200 text-[#2F4A5C]" />
 							</div>
 		</div>
 					))}
@@ -823,13 +823,13 @@ function UsersStep({ value, onChange }) {
 		<motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
 			<StepHeader title="Invitez votre équipe" subtitle="Ajoutez vos collaborateurs (optionnel)." />
 			<motion.form variants={itemVariants} onSubmit={add} className="grid grid-cols-1 sm:grid-cols-4 gap-2">
-				<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@cabinet.com" type="email" className="px-3 py-2 border-2 border-slate-200 rounded-lg" />
-				<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom" className="px-3 py-2 border-2 border-slate-200 rounded-lg" />
-				<select value={role} onChange={(e) => setRole(e.target.value)} className="px-3 py-2 border-2 border-slate-200 rounded-lg">
+				<input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@cabinet.com" type="email" className="px-3 py-2 border-2 border-slate-200 rounded-lg text-[#2F4A5C] placeholder-[#3A5166]" />
+				<input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom" className="px-3 py-2 border-2 border-slate-200 rounded-lg text-[#2F4A5C] placeholder-[#3A5166]" />
+				<select value={role} onChange={(e) => setRole(e.target.value)} className="px-3 py-2 border-2 border-slate-200 rounded-lg text-[#2F4A5C]">
 					<option value="KINE">Kiné</option>
 					<option value="SECRETAIRE">Secrétaire</option>
 				</select>
-				<input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" type="password" className="px-3 py-2 border-2 border-slate-200 rounded-lg" />
+				<input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" type="password" className="px-3 py-2 border-2 border-slate-200 rounded-lg text-[#2F4A5C] placeholder-[#3A5166]" />
 				<div className="sm:col-span-4">
 					<button type="submit" className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg inline-flex items-center gap-2 hover:bg-blue-700 transition"><PlusCircle size={16}/> Ajouter</button>
 			</div>
@@ -871,7 +871,7 @@ function NotificationsStep({ value, onChange }) {
 			</label>
 				<div className="flex items-center gap-3">
 					<span className="text-slate-700">Heure du rappel:</span>
-					<select value={reminderTime} onChange={(e) => setReminderTime(parseInt(e.target.value))} className="px-3 py-2 border-2 border-slate-200 rounded-lg">
+					<select value={reminderTime} onChange={(e) => setReminderTime(parseInt(e.target.value))} className="px-3 py-2 border-2 border-slate-200 rounded-lg text-[#2F4A5C]">
 						<option value={1}>1h avant</option>
 						<option value={3}>3h avant</option>
 						<option value={6}>6h avant</option>

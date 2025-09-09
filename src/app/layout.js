@@ -1,4 +1,5 @@
 import './globals.css'
+import '../styles/inputs.css'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { Providers } from './providers'
 import { CabinetConfigProvider } from '@/hooks/useCabinetConfig'
