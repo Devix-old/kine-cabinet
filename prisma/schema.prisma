@@ -39,6 +39,8 @@ model Cabinet {
   usageRecords         UsageRecord[]
   users                User[]
   workingHours         WorkingHours[]
+  examensComplementaires ExamenComplementaire[]
+  prescriptions        Prescription[]
 
   @@map("cabinets")
 }
@@ -69,35 +71,44 @@ model User {
 }
 
 model Patient {
-  id              String          @id @default(cuid())
-  numeroDossier   String
-  nom             String
-  prenom          String
-  dateNaissance   DateTime
-  sexe            Sexe
-  telephone       String?
-  email           String?
-  adresse         String?
-  ville           String?
-  codePostal      String?
-  pays            String          @default("France")
-  profession      String?
-  medecinTraitant String?
-  antecedents     String?
-  allergies       String?
-  notesGenerales  String?
-  cin             String?         // Carte d'identité nationale
-  isActive        Boolean         @default(true)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  cabinetId       String
-  appointments    Appointment[]
-  documents       Document[]
-  invoices        Invoice[]
-  medicalRecords  MedicalRecord[]
-  notes           Note[]
-  cabinet         Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  treatments      Treatment[]
+  id                    String          @id @default(cuid())
+  numeroDossier         String
+  nom                   String
+  prenom                String
+  dateNaissance         DateTime
+  sexe                  Sexe
+  telephone             String?
+  email                 String?
+  adresse               String?
+  ville                 String?
+  codePostal            String?
+  pays                  String          @default("France")
+  profession            String?
+  medecinTraitant       String?
+  antecedents           String?
+  allergies             String?
+  notesGenerales        String?
+  cin                   String?         // Carte d'identité nationale
+  personneContact       String?         // Personne à contacter en cas d'urgence
+  telephoneUrgence      String?         // Téléphone d'urgence
+  numeroSecuriteSociale String?         // Numéro de sécurité sociale
+  assurance             String?         // Assurance
+  mutuelle              String?         // Mutuelle
+  habitudesVie          String?         // Habitudes de vie (tabac, alcool, sport, etc.)
+  antecedentsFamiliaux  String?         // Antécédents familiaux
+  isActive              Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  cabinetId             String
+  appointments          Appointment[]
+  documents             Document[]
+  invoices              Invoice[]
+  medicalRecords        MedicalRecord[]
+  notes                 Note[]
+  cabinet               Cabinet         @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  treatments            Treatment[]
+  examensComplementaires ExamenComplementaire[]
+  prescriptions         Prescription[]
 
   @@unique([numeroDossier, cabinetId])
   @@map("patients")
@@ -193,21 +204,39 @@ model Session {
 }
 
 model MedicalRecord {
-  id          String            @id @default(cuid())
-  titre       String
-  description String?
-  date        DateTime          @default(now())
-  type        MedicalRecordType
-  contenu     String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  patientId   String
-  createdById String
-  cabinetId   String
-  documents   Document[]
-  cabinet     Cabinet           @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
-  createdBy   User              @relation("MedicalRecordCreator", fields: [createdById], references: [id])
-  patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  id                      String            @id @default(cuid())
+  titre                   String
+  description             String?
+  date                    DateTime          @default(now())
+  type                    MedicalRecordType
+  contenu                 String?
+  motifConsultation       String?           // Motif de consultation
+  typeConsultation        String?           // Type de consultation (urgence, suivi, routine)
+  diagnostic              String?           // Diagnostic
+  hypotheseClinique       String?           // Hypothèse clinique
+  examenPhysique          String?           // Examen physique
+  observations            String?           // Observations du médecin
+  resultatsLaboratoire    String?           // Résultats de laboratoire
+  traitementsPrescrits    String?           // Traitements prescrits
+  planSuivi               String?           // Plan de suivi
+  notesLibres             String?           // Notes libres du praticien
+  poids                   Decimal?          // Poids (kg)
+  taille                  Decimal?          // Taille (cm)
+  tensionArterielle       String?           // Tension artérielle
+  imc                     Decimal?          // IMC
+  medecinResponsable      String?           // Médecin responsable
+  dateCreation            DateTime          @default(now())
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  patientId               String
+  createdById             String
+  cabinetId               String
+  documents               Document[]
+  examensComplementaires  ExamenComplementaire[]
+  prescriptions           Prescription[]
+  cabinet                 Cabinet           @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  createdBy               User              @relation("MedicalRecordCreator", fields: [createdById], references: [id])
+  patient                 Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   @@map("medical_records")
 }
@@ -229,6 +258,45 @@ model Document {
   patient         Patient?       @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   @@map("documents")
+}
+
+model ExamenComplementaire {
+  id              String         @id @default(cuid())
+  nom             String
+  type            String         // Type d'examen (prise de sang, imagerie, etc.)
+  resultat        String?
+  date            DateTime
+  fichierUrl      String?        // URL du fichier joint
+  notes           String?
+  medicalRecordId String?
+  patientId       String
+  cabinetId       String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  patient         Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  cabinet         Cabinet        @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+
+  @@map("examens_complementaires")
+}
+
+model Prescription {
+  id              String         @id @default(cuid())
+  nomMedicament   String
+  posologie       String
+  duree           String?
+  instructions    String?
+  type            String         @default("MEDICAMENT") // MEDICAMENT, KINE, REPOS, REGIME, etc.
+  medicalRecordId String?
+  patientId       String
+  cabinetId       String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  patient         Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  cabinet         Cabinet        @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+
+  @@map("prescriptions")
 }
 
 model Note {

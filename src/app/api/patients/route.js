@@ -256,8 +256,14 @@ export async function POST(request) {
 
     // Vérifier que l'utilisateur a un cabinetId (sauf pour SUPER_ADMIN)
     if (session.user.role !== 'SUPER_ADMIN' && !session.user.cabinetId) {
+      console.error('❌ User without cabinetId:', { 
+        userId: session.user.id, 
+        email: session.user.email, 
+        role: session.user.role,
+        cabinetId: session.user.cabinetId 
+      })
       return NextResponse.json(
-        { error: 'Utilisateur non associé à un cabinet' },
+        { error: 'Utilisateur non associé à un cabinet. Veuillez compléter l\'onboarding.' },
         { status: 400 }
       )
     }

@@ -18,8 +18,8 @@ export default function PatientsPage() {
   const [patients, setPatients] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState('active')
+  // Removed showAddModal state - now using dedicated page
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingPatient, setEditingPatient] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -136,43 +136,9 @@ export default function PatientsPage() {
     })
   }
 
-  // Create patient - OPTIMISTIC UPDATE
-  const handleCreatePatient = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
-    try {
-      const newPatient = await post('/api/patients', formData)
-      
-      // Vérification de sécurité pour éviter les erreurs
-      if (!newPatient || !newPatient.id) {
-        throw new Error('Réponse invalide de l\'API')
-      }
-      
-      // Mise à jour optimiste - ajouter le patient immédiatement
-      setPatients(prev => [newPatient, ...prev])
-      
-      // Mise à jour optimiste des stats
-      setStats(prev => ({
-        ...prev,
-        total: prev.total + 1,
-        newThisMonth: prev.newThisMonth + 1
-      }))
-      
-      success('Patient créé avec succès')
-      setShowAddModal(false)
-      resetForm()
-      
-    } catch (err) {
-      console.error('❌ Patient creation error:', err)
-      // Afficher le message d'erreur spécifique de l'API
-      showError(err.message || 'Erreur lors de la création du patient')
-      
-      // En cas d'erreur, recharger les données pour s'assurer de la cohérence
-      await loadData()
-    } finally {
-      setIsSubmitting(false)
-    }
+  // Navigate to new patient page
+  const handleCreatePatient = () => {
+    router.push('/patients/nouveau')
   }
 
   // Update patient - OPTIMISTIC UPDATE
@@ -302,7 +268,7 @@ export default function PatientsPage() {
           <p className="text-sm sm:text-base text-gray-600">Gérez vos patients</p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={handleCreatePatient}
           className="btn-primary flex items-center justify-center w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -502,28 +468,7 @@ export default function PatientsPage() {
         )}
       </div>
 
-      {/* Add Patient Modal */}
-      <Modal
-        isOpen={showAddModal}
-        onClose={() => {
-          setShowAddModal(false)
-          resetForm()
-        }}
-        title="Nouveau patient"
-        size="lg"
-      >
-        <PatientForm
-          formData={formData}
-          onSubmit={handleCreatePatient}
-          onCancel={() => {
-            setShowAddModal(false)
-            resetForm()
-          }}
-          onInputChange={handleInputChange}
-          isLoading={isSubmitting}
-          mode="create"
-        />
-      </Modal>
+      {/* Add Patient Modal - Removed, now using dedicated page */}
 
       {/* Edit Patient Modal */}
       <Modal

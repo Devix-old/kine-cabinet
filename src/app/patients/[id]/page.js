@@ -35,33 +35,7 @@ export default function PatientDetailPage() {
   const [patient, setPatient] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('info')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [createType, setCreateType] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  
-  // Form data for creating new items
-  const [formData, setFormData] = useState({
-    // Medical Record
-    titre: '',
-    description: '',
-    type: 'CONSULTATION',
-    contenu: '',
-    date: new Date().toISOString().split('T')[0],
-    
-    // Treatment
-    nom: '',
-    description: '',
-    objectifs: '',
-    duree: '',
-    dateDebut: new Date().toISOString().split('T')[0],
-    dateFin: '',
-    
-    // Note
-    titre: '',
-    contenu: '',
-    type: 'GENERALE',
-    isPrivee: false
-  })
+  // Removed modal-related states - now using dedicated pages
 
   // API functions
   const apiCall = async (url, options = {}) => {
@@ -105,98 +79,23 @@ export default function PatientDetailPage() {
     }
   }, [params.id])
 
-  // Reset form
-  const resetForm = () => {
-    setFormData({
-      titre: '',
-      description: '',
-      type: 'CONSULTATION',
-      contenu: '',
-      date: new Date().toISOString().split('T')[0],
-      nom: '',
-      objectifs: '',
-      duree: '',
-      dateDebut: new Date().toISOString().split('T')[0],
-      dateFin: '',
-      isPrivee: false
-    })
-  }
+  // Removed modal-related functions - now using dedicated pages
 
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
-    }))
-  }
-
-  // Create new item
-  const handleCreate = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
-    try {
-      let endpoint = ''
-      let data = { ...formData, patientId: params.id }
-      
-      switch (createType) {
-        case 'medical-record':
-          endpoint = '/api/medical-records'
-          data = {
-            titre: formData.titre,
-            description: formData.description,
-            type: formData.type,
-            contenu: formData.contenu,
-            date: formData.date,
-            patientId: params.id
-          }
-          break
-        case 'treatment':
-          endpoint = '/api/treatments'
-          data = {
-            nom: formData.nom,
-            description: formData.description,
-            objectifs: formData.objectifs,
-            duree: formData.duree ? parseInt(formData.duree) : null,
-            dateDebut: formData.dateDebut,
-            dateFin: formData.dateFin || null,
-            patientId: params.id
-          }
-          break
-        case 'note':
-          endpoint = '/api/notes'
-          data = {
-            titre: formData.titre,
-            contenu: formData.contenu,
-            type: formData.type,
-            isPrivee: formData.isPrivee,
-            patientId: params.id
-          }
-          break
-        default:
-          throw new Error('Type de création invalide')
-      }
-      
-      await post(endpoint, data)
-      success(`${createType === 'medical-record' ? 'Dossier médical' : createType === 'treatment' ? 'Traitement' : 'Note'} créé avec succès`)
-      setShowCreateModal(false)
-      resetForm()
-      loadPatientData() // Reload patient data
-      
-    } catch (err) {
-      console.error('❌ Creation error:', err)
-      showError(err.message || 'Erreur lors de la création')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  // Open create modal
+  // Navigate to create pages
   const openCreateModal = (type) => {
-    setCreateType(type)
-    setShowCreateModal(true)
-    resetForm()
+    switch (type) {
+      case 'medical-record':
+        router.push(`/dossiers/nouveau?patientId=${params.id}`)
+        break
+      case 'treatment':
+        router.push(`/traitements/nouveau?patientId=${params.id}`)
+        break
+      case 'note':
+        router.push(`/notes/nouveau?patientId=${params.id}`)
+        break
+      default:
+        break
+    }
   }
 
   // Calculate age
@@ -437,10 +336,18 @@ export default function PatientDetailPage() {
                         {record.type}
                       </span>
                       <div className="flex space-x-1">
-                        <button className="p-1 text-gray-400 hover:text-blue-600">
+                        <button 
+                          onClick={() => router.push(`/dossiers/${record.id}`)}
+                          className="p-1 text-gray-400 hover:text-blue-600"
+                          title="Voir le dossier"
+                        >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button className="p-1 text-gray-400 hover:text-gray-600">
+                        <button 
+                          onClick={() => router.push(`/dossiers/${record.id}/edit`)}
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                          title="Modifier le dossier"
+                        >
                           <Edit className="h-4 w-4" />
                         </button>
                       </div>
@@ -583,218 +490,7 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        {/* Create Modal */}
-        <Modal
-          isOpen={showCreateModal}
-          onClose={() => {
-            setShowCreateModal(false)
-            resetForm()
-          }}
-          title={`Nouveau ${createType === 'medical-record' ? 'dossier médical' : createType === 'treatment' ? 'traitement' : 'note'}`}
-          size="lg"
-        >
-          <form onSubmit={handleCreate} className="space-y-4">
-            {createType === 'medical-record' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Titre *</label>
-                  <input
-                    type="text"
-                    name="titre"
-                    value={formData.titre}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="CONSULTATION">Consultation</option>
-                    <option value="EXAMEN">Examen</option>
-                    <option value="RAPPORT">Rapport</option>
-                    <option value="AUTRE">Autre</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contenu</label>
-                  <textarea
-                    name="contenu"
-                    value={formData.contenu}
-                    onChange={handleInputChange}
-                    rows={5}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </>
-            )}
-
-            {createType === 'treatment' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom du traitement *</label>
-                  <input
-                    type="text"
-                    name="nom"
-                    value={formData.nom}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Objectifs</label>
-                  <textarea
-                    name="objectifs"
-                    value={formData.objectifs}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Durée (sessions)</label>
-                    <input
-                      type="number"
-                      name="duree"
-                      value={formData.duree}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
-                    <input
-                      type="date"
-                      name="dateDebut"
-                      value={formData.dateDebut}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date de fin (optionnel)</label>
-                  <input
-                    type="date"
-                    name="dateFin"
-                    value={formData.dateFin}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </>
-            )}
-
-            {createType === 'note' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Titre</label>
-                  <input
-                    type="text"
-                    name="titre"
-                    value={formData.titre}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contenu *</label>
-                  <textarea
-                    name="contenu"
-                    value={formData.contenu}
-                    onChange={handleInputChange}
-                    required
-                    rows={5}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                    <select
-                      name="type"
-                      value={formData.type}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="GENERALE">Générale</option>
-                      <option value="MEDICALE">Médicale</option>
-                      <option value="TRAITEMENT">Traitement</option>
-                      <option value="OBSERVATION">Observation</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="isPrivee"
-                      checked={formData.isPrivee}
-                      onChange={handleInputChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label className="ml-2 text-sm text-gray-700">Note privée</label>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowCreateModal(false)
-                  resetForm()
-                }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Création...' : 'Créer'}
-              </button>
-            </div>
-          </form>
-        </Modal>
+        {/* Create Modal - Removed, now using dedicated pages */}
       </div>
     </DashboardLayout>
   )

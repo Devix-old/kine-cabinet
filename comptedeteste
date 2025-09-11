@@ -15,4 +15,4 @@ npx prisma generate
 node scripts/seed-plans.js
 
 #database password
-yKqhXhXTr7AQL7tP
+fO7owIBlM7A6TxWA

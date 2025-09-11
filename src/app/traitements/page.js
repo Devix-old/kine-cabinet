@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/Layout/DashboardLayout'
 import { useApi } from '@/hooks/useApi'
 import { useToastContext } from '@/contexts/ToastContext'
@@ -44,6 +45,7 @@ const treatmentStatuses = [
 ]
 
 export default function TreatmentsPage() {
+  const router = useRouter()
   const { config } = useCabinetConfig()
   const isTreatmentsEnabled = useModuleEnabled('treatments')
   
@@ -303,7 +305,7 @@ export default function TreatmentsPage() {
             </button>
             <button 
               className="btn-primary flex items-center justify-center w-full sm:w-auto"
-              onClick={() => setShowNewTreatmentModal(true)}
+              onClick={() => router.push('/traitements/nouveau')}
             >
               <Plus className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Nouveau traitement</span>
