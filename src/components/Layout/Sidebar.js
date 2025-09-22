@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useCabinetConfig, useEnabledModules } from '@/hooks/useCabinetConfig'
+import StaticEniripsaLogo from '@/components/UI/StaticEniripsaLogo'
 import { 
   Home, 
   Users, 
@@ -145,13 +146,7 @@ export default function Sidebar() {
           {/* Logo */}
           <div className="flex items-center justify-center h-20 px-6 border-b border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 flex items-center justify-center">
-                <img 
-                  src="/logo.png" 
-                  alt="Eniripsa Logo" 
-                  className="w-8 h-8 object-contain"
-                />
-              </div>
+              <StaticEniripsaLogo className="w-12 h-12" showText={false} />
               <div className="text-left">
                 <h1 className="text-lg font-bold text-teal-700 leading-tight">
                   Eniripsa
