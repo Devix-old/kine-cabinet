@@ -1,14 +1,10 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "nextjs",
   "functions": {
     "src/app/api/**/*.js": {
       "maxDuration": 30
     }
   },
   "env": {
-    "NODE_ENV": "production"
+    "PRISMA_DISABLE_PREPARED_STATEMENTS": "true"
   }
 }
