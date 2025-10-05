@@ -7,7 +7,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : [],
   datasources: {
     db: {
-      url: process.env.DATABASE_URL,
+      url: process.env.DATABASE_URL + (process.env.NODE_ENV === 'development' ? '?pgbouncer=true&prepared_statements=false' : ''),
     },
   },
   // Configuration pour éviter les problèmes de prepared statements avec Turbopack
