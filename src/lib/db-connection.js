@@ -47,7 +47,7 @@ function createFreshPrismaClient() {
 /**
  * Get optimized database URL for serverless environments
  */
-function getOptimizedDatabaseUrl() {
+export function getOptimizedDatabaseUrl() {
   const baseUrl = process.env.DATABASE_URL
   if (!baseUrl) throw new Error('DATABASE_URL is not set')
   

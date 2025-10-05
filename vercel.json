@@ -5,6 +5,7 @@
     }
   },
   "env": {
+    "NODE_ENV": "production",
     "PRISMA_DISABLE_PREPARED_STATEMENTS": "true",
     "DATABASE_CONNECTION_LIMIT": "1",
     "DATABASE_POOL_TIMEOUT": "5",
